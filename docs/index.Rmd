@@ -40,6 +40,9 @@ getOption("rstudio.help.showDataPreview")
     
     #3. Flow Data
     q.dat <- "Data/CR_Discharge.xlsx"
+    
+    #4. Age Class Data
+    age.dat <- "Data/CR_AgeClass.xlsx"
 
 ## Define Output Locations
     plot.output <- "Plots/"
@@ -135,8 +138,9 @@ getOption("rstudio.help.showDataPreview")
                                Weeknum = strftime(Date, format = "%V"), #create "Weeknum" column
                                Weeknum = as.numeric(Weeknum),
                                Date    = as.Date(Date),
-                               q.5yr.roll.mean = rollmean(q.daily, k = 455, align = "right", fill=NA), # calculate running 5 yr average flow
-                               q.5y.roll.se = rollapply(q.daily, width = 455, FUN = sd, align = "right", fill = NA)/sqrt(455))  
+                               q.5yr.roll.mean = rollmean(q.daily, k = 455, align = "right", fill=NA), # 5yr running flow
+                               q.5y.roll.se = rollapply(q.daily, width = 455, FUN = sd, 
+                                                        align = "right", fill = NA)/sqrt(455))  # 5yr running SE
               str(flow_data)
     
     q.yearly <- flow_data %>% group_by(Year) %>% 
@@ -166,11 +170,16 @@ getOption("rstudio.help.showDataPreview")
     flow.dat <- left_join(flow.dat, q.m,       by = ("Month"))
     flow.dat <- left_join(flow.dat, q.wk,      by = ("Weeknum"))
     flow.data <- left_join(flow.dat, q.weekly, by = c("Year", "Weeknum"))
+    
+    
+## 5. Add age data
+    age_data <- read_excel(age.dat)
+
 ```
 
 ## The Data
 
-This analysis uses the following publically available data:
+This analysis uses the following publicly available data:
 
 * Annual catch records from the [Tyee Club](https://www.tyeeclub.org/catch-records/>). 
 * Discharge data collected on the Campbell River by the [Water Survey of Canada](https://wateroffice.ec.gc.ca/index_e.html).
@@ -180,33 +189,50 @@ This analysis uses the following publically available data:
 This is certainly an interesting dataset, but it has its limitations. For example, there is no information on effort (# boats per day), age structure of captured Tyees or numbers of undersize Chinook captured in the pool.
 
 For now, I have only looked at data back to 2002, as that is the limit of easily accessible Tyee catch data. 
-  
-```{r TyeeCatches}
-    tyee_plot4 <- ggplot(catch_data) +
-                      geom_bar(aes(x= Year, y = catch_binary, fill = tyee_cycle4), stat = "identity") +
-                      geom_hline(aes(yintercept=catch_yrs.mean.total, color = catch_yrs.mean.total), linetype = "dashed", linewidth = 0.5) +
-                      ylab("# Tyee Salmon") +
-                      guides(fill = "none", #guide_legend(title = "Tyee Cycle"),
-                             color = guide_legend(title = "Mean catches per year", label = FALSE)) + 
-                      scale_x_continuous(breaks = seq(2002,2023,2)) +
-                      scale_y_continuous(breaks = seq(0, 100, 5)) +
-                      theme_bw() +  
-                      theme(legend.position = c(0.78, 0.88),
-                            legend.box.background = element_rect(colour = "black", linewidth = 1.25, fill = NA)) 
-    tyee_plot4
+
+## TyeePlot  
+```{r TyeeCatches, warnings = FALSE, fig.cap="Figure 1. Number of Tyee Salmon captured per year."}
+## Prepare Plot
+    ggplot(catch_data) +
+            geom_bar(aes(x= Year, y = catch_binary, fill = tyee_cycle4), stat = "identity") +
+            geom_hline(aes(yintercept=catch_yrs.mean.total, color = catch_yrs.mean.total), 
+                      linetype = "dashed", linewidth = 0.5) +
+            ylab("# Tyee Salmon") +
+            guides(fill = "none", #guide_legend(title = "Tyee Cycle"),
+                   color = guide_legend(title = "Mean catches per year", label = FALSE)) + 
+            scale_x_continuous(breaks = seq(2002,2023,2)) +
+            scale_y_continuous(breaks = seq(0, 100, 5)) +
+            theme_bw() +  
+            theme(legend.position = c(0.78, 0.88),
+                  legend.box.background = element_rect(colour = "black", linewidth = 1.25, fill = NA)) 
+
 ```
+
+
 
 A quick look at the figure shows:
   1. There appears to be a 4-year cycle of high catches (highlighted with shading). 
     * Publically accessible information on the age structure of Chinook Salmon in the Campbell River is relatively limited. However,               [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf) report that fish returning         to the Campbell River are primarily Age 4 (length from 550-949 mm, mean = 780 mm) and Age 5 (length = 700-949 mm, mean = 846 mm).            Tyees captured in the Tyee pool are typically over XXX mm. More recent information on the age composition of Campbell River Chinook          likely exists, but I haven't found it. 
 
-        ADD TABLE SHOWING SIZE AT AGE DATA
+```{r table prep, include = FALSE}
+age_table <- age_data %>% select(Waterbody, Sex, Age, n, Perc.Total.by.Sex, Perc.Total.by.Stream, bin_range, meanFL, SE)
+
+```
+      
+        
+```{r age table}
+
+knitr::kable(age_table, col.names = c("Waterbody","Sex", "Age", "n", "% of Total <br>(by Sex)", "% of Total <br>(by Stream)", "Size Range <br>(mm)", "Mean Lenght <br>(mm)", "Std. Error"),
+             digits = 2,  align=rep('c', 5),
+             caption = "Table 1. Size at age of Chinook Salmon captured in Campbell River watershed")
+```
 
   2. There has been a consistent decline in the number of Tyee salmon captured per year and there was a major crash in 2014.IF we look at         Figure 2, we can see:
       * There has been a general declining trend in escapement,
       * Periods of increased escapement correspond with periods of increased Tyee catches, but not always (e.g. 2005, 2017 and 2020). Given          the lack of effort data we cannot tease apart whether the lack of catches in some years is due to reduction in pressure. 
       * It is also possible that years with high escapement and low Tyee numbers were due to an increased proportion of smaller fish                 returning to the Campbell. Without annual information on age structure I cannot tease this apart.
-```{r include = FALSE}
+    
+```{r include=FALSE}
 ## Merge escapement data with tyee catch data
 cr_data <- left_join(catch_data, cr_esc, by = "Year")
     
@@ -214,64 +240,71 @@ cr_yearly <- cr_data %>% mutate(Year = as.numeric(Year)) %>%
                          group_by(Year) %>%
                          select(Year, catch_yr.total, catch_yr.mean, Esc_Scaled, Species, tyee_cycle4)
 ```
-        
-```{r tyee vs escapement, echo=FALSE}
-    cr_plot <- ggplot(cr_data) +
-                  geom_bar(aes(x = Year, y = catch_binary, fill = tyee_cycle4), 
-                                stat = "identity") +
-                  geom_line(aes(x = Year, y = Esc_Scaled, linetype = Species), 
-                                color = "lightblue", linewidth = 1.2) +
-                  geom_hline(aes(yintercept = catch_yrs.mean.total, color = catch_yrs.mean.total), 
-                                linetype = "dashed", linewidth = 0.5) +
-                  labs(x = "Year", y = "Number Tyee Captured") + 
-                  guides(fill =  "none", #guide_legend(title = "Tyee Cycle", label = FALSE),
-                         linetype = guide_legend(title = "Escapement", label = FALSE),
-                         color = guide_legend(title = "Mean Tyee Catch", label = FALSE)) +
-                  scale_y_continuous(breaks = seq(0, 100, 5),
-                                      sec.axis = sec_axis(~.*25, name = "Escapement")) +  #scale secondary access by x25
-                  scale_x_continuous(breaks = seq(2002,2022,2)) +            
-                  theme_bw() +
-                  theme(legend.direction = "horizontal",
-                        legend.position = c(0.78, 0.88),
-                        legend.box.background = element_rect(colour = "black", linewidth = 1.25, fill = "white"))
-    cr_plot        
-        
+
+## Tyee Escapement Plot        
+```{r fig_prep}
+
+## Prepare plot
+cr_plot<- ggplot(cr_data) +
+                geom_bar(aes(x = Year, y = catch_binary, fill = tyee_cycle4), 
+                              stat = "identity") +
+                geom_line(aes(x = Year, y = Esc_Scaled, linetype = Species), 
+                              color = "lightblue", linewidth = 1.2) +
+                geom_hline(aes(yintercept = catch_yrs.mean.total, color = catch_yrs.mean.total), 
+                              linetype = "dashed", linewidth = 0.5) +
+                labs(x = "Year", y = "Number Tyee Captured") + 
+                guides(fill =  "none", #guide_legend(title = "Tyee Cycle", label = FALSE),
+                       linetype = guide_legend(title = "Escapement", label = FALSE),
+                       color = guide_legend(title = "Mean Tyee Catch", label = FALSE)) +
+                scale_y_continuous(breaks = seq(0, 100, 5),
+                                    sec.axis = sec_axis(~.*25, name = "Escapement")) +  #scale secondary access by x25
+                scale_x_continuous(breaks = seq(2002,2022,2)) +            
+                theme_bw() +
+                theme(legend.direction = "horizontal",
+                      legend.position = c(0.78, 0.88),
+                      legend.box.background = element_rect(colour = "black", linewidth = 1.25, fill = "white"))
+
 ```
+
+```{r tyee vs escapement, fig.cap = "Figure 2. Trends in Tyee Salmon captures and Campbell River Chinook Salmon escapement", echo=FALSE}
+suppressWarnings(print(cr_plot))   
+```
+
 
 Let's look at flow in the Campbell River to see how environmental conditions may influence catches.
 ```{r data prep catch_flow, include = FALSE}
     flow.catch <- left_join(flow.data, catch_data, by = c("Year","Month","Weeknum","Date"))
     
     
-          ## Reduce to past 5 years only.                          
-          flow.catch.recent <- flow.catch %>%  
-                                    mutate(catch_scaled    = catch_binary * 7, 
-                                           q.daily.scaled  = q.daily/20,
-                                           q.5yr.rm.scaled = q.5yr.roll.mean/20,
-                                           q.5y.rse.scaled = q.5y.roll.se/20,
-                                           date.std = case_when(year(Date) >= 0 ~ 'year<-'(Date, 2021), ## Set all dates to same year
+    ## Reduce to past 5 years only.                          
+    flow.catch.recent <- flow.catch %>%  
+                         mutate(catch_scaled    = catch_binary * 7, 
+                                q.daily.scaled  = q.daily/20,
+                                q.5yr.rm.scaled = q.5yr.roll.mean/20,
+                                q.5y.rse.scaled = q.5y.roll.se/20,
+                                date.std = case_when(year(Date) >= 0 ~ 'year<-'(Date, 2021), ## Set all dates to same year
                                                  TRUE ~ Date)) %>%
-                                                filter(between(date.std, as.Date("2021-07-15"), as.Date("2021-09-15")),
-                                                       Year >2015,
-                                                       PARAM == 1)
+                                filter(between(date.std, as.Date("2021-07-15"), as.Date("2021-09-15")),
+                                               Year >2010,
+                                               PARAM == 1)
 ```
 
-```{r plot flow vs catches, fig.dim = c(8,16)}
-
-    flow.catch.plot <- ggplot(flow.catch.recent) +
-                        geom_bar(aes(x = date.std, y = catch_scaled, fill = PARAM), stat= "identity", color = "Navy") +
-                        geom_line(aes(x = date.std, y = q.daily, linetype = "dashed", color = "Daily")) +
-                        geom_line(aes(x = date.std, y = q.5yr.roll.mean, linetype = "twodashed", color = "5-yr Mean")) +
-                        labs(x = "Date", y = "Discharge") +
-                        scale_x_date(date_breaks = "5 days", date_labels = "%m-%d", minor_breaks = "1 day") +
-                        scale_y_continuous(breaks = seq(0, 75, 10),
-                                           sec.axis = sec_axis(~./7, name = "Number of Fish")) +  #scale secondary access by x25
-                        guides(fill = guide_legend(title = "# Tyee", label = FALSE),
-                               linetype = "none",
-                               color = guide_legend(title = "Discharge (cms)", label = TRUE)) +
-                        facet_grid(Year~.) +
-                        theme_bw() +
-                        theme(legend.position = "bottom")  
-    flow.catch.plot
+```{r plot flow vs catches, fig.dim = c(8,16), warnings = FALSE, message = FALSE}
+## Prepare plot    
+plot <-    ggplot(flow.catch.recent) +
+                 geom_bar(aes(x = date.std, y = catch_scaled, fill = PARAM), stat= "identity", color = "Navy") +
+                 geom_line(aes(x = date.std, y = q.daily, linetype = "dashed", color = "Daily")) +
+                 geom_line(aes(x = date.std, y = q.5yr.roll.mean, linetype = "twodashed", color = "5-yr Mean")) +
+                 labs(x = "Date", y = "Discharge") +
+                 scale_x_date(date_breaks = "5 days", date_labels = "%m-%d", minor_breaks = "1 day") +
+                 scale_y_continuous(breaks = seq(0, 75, 10),
+                                    sec.axis = sec_axis(~./7, name = "Number of Fish")) +  #scale secondary access by x25
+                 guides(fill = guide_legend(title = "# Tyee", label = FALSE),
+                        linetype = "none",
+                        color = guide_legend(title = "Discharge (cms)", label = TRUE)) +
+                 facet_grid(Year~.) +
+                 theme_bw() +
+                 theme(legend.position = "bottom")  
+suppressWarnings(print(plot))
 ```
 
