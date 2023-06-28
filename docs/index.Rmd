@@ -2,10 +2,13 @@
 title: "GitTyee"
 author: "Eric V"
 date: "`r Sys.Date()`"
-output: html_document
+output: 
+  html_document:
+    fig_caption: true
+    code_folding: "show"
 ---
 
-A high-level look at trends in catches of Tyee salmon in the legendary Tyee Pool at Campbell River. All of this data exploration has been for [fun](https://i.giphy.com/media/Cz6TlrRVVyv9S/giphy.webp), to learn some new tools and hopefully give myself a leg up while rowing in coming years (I need all the help I can get - and based on 2022 catches it seems most others do too...). 
+A high-level look at trends in catches of Tyee salmon in Campbell River's legendary Tyee Pool All data exploration is being completed for [fun](https://i.giphy.com/media/Cz6TlrRVVyv9S/giphy.webp) and to learn some new tools. There are far more technical ways of examining this data, but they aren't as fun. All results and interpretation are purely speculative. 
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -28,6 +31,7 @@ getOption("rstudio.help.showDataPreview")
     library(readxl)
     library(downloadthis)
     library(knitr)
+    library(captioner)
 
 ## Define Working Directory ---
 #setwd("C:/Users/evogt/R Analysis/EAV/Tyee/")
@@ -48,6 +52,11 @@ getOption("rstudio.help.showDataPreview")
 ## Define Output Locations
     plot.output <- "Plots/"
     model.output <- "Output/"
+    
+##  
+  fig_nums   <- captioner(prefix = "Figure")  
+  table_nums <- captioner(prefix = "Table")
+    
 ##__________________________####    
 ## Load Data ---- 
 
@@ -182,53 +191,43 @@ getOption("rstudio.help.showDataPreview")
 
 This analysis uses the following publicly available data:
 
-* Annual catch records from the [Tyee Club](https://www.tyeeclub.org/catch-records/>). 
-* Discharge data collected on the Campbell River by the [Water Survey of Canada](https://wateroffice.ec.gc.ca/index_e.html).
-* Annual Chinook Salmon escapement data available in the [DFO NuSEDS database](https://open.canada.ca/data/en/dataset/c48669a3-045b-400d-b730-48aafe8c5ee6).
+1. Annual catch records from the [Tyee Club](https://www.tyeeclub.org/catch-records/>). 
+2. Discharge data collected on the Campbell River by the [Water Survey of Canada](https://wateroffice.ec.gc.ca/index_e.html).
+3. Annual Chinook Salmon escapement data available in the [DFO NuSEDS database](https://open.canada.ca/data/en/dataset/c48669a3-045b-400d-b730-48aafe8c5ee6).
   
 
-This is certainly an interesting dataset, but it has its limitations. For example, there is no information on effort (# boats per day), age structure of captured Tyees or numbers of undersize Chinook captured in the pool.
+This is certainly an interesting dataset, but it has its limitations. For example, there is no information on effort (# boats per day) and biological data is limited (e.g. size, girth and age of tyees or number of undersized fish captured). 
 
 For now, I have only looked at data back to 2002, as that is the limit of easily accessible Tyee catch data. 
 
-## TyeePlot  
-```{r TyeeCatches, warnings = FALSE, fig.cap="Figure 1. Number of Tyee Salmon captured per year."}
+## Tyee Catches per Year  
+```{r plot1_tyeecatch, echo = FALSE}
 ## Prepare Plot
-    ggplot(catch_data) +
-            geom_bar(aes(x= Year, y = catch_binary, fill = tyee_cycle4), stat = "identity") +
-            geom_hline(aes(yintercept=catch_yrs.mean.total, color = catch_yrs.mean.total), 
-                      linetype = "dashed", linewidth = 0.5) +
-            ylab("# Tyee Salmon") +
-            guides(fill = "none", #guide_legend(title = "Tyee Cycle"),
-                   color = guide_legend(title = "Mean catches per year", label = FALSE)) + 
-            scale_x_continuous(breaks = seq(2002,2023,2)) +
-            scale_y_continuous(breaks = seq(0, 100, 5)) +
-            theme_bw() +  
-            theme(legend.position = c(0.78, 0.88),
-                  legend.box.background = element_rect(colour = "black", linewidth = 1.25, fill = NA)) 
-
+plot1 <- ggplot(catch_data) +
+                      geom_bar(aes(x= Year, y = catch_binary, fill = tyee_cycle4), stat = "identity") +
+                      geom_hline(aes(yintercept=catch_yrs.mean.total, color = catch_yrs.mean.total), 
+                                linetype = "dashed", linewidth = 0.5) +
+                      ylab("# Tyee Salmon") +
+                      guides(fill = "none", #guide_legend(title = "Tyee Cycle"),
+                             color = guide_legend(title = "Mean catches per year", label = FALSE)) + 
+                      scale_x_continuous(breaks = seq(2002,2023,2)) +
+                      scale_y_continuous(breaks = seq(0, 100, 5)) +
+                      theme_bw() +  
+                      theme(legend.position = c(0.78, 0.88),
+                            legend.box.background = element_rect(colour = "black", linewidth = 1.25, fill = NA)) 
 ```
 
-
-
-A quick look at the figure shows:
-  1. There appears to be a 4-year cycle of high catches (highlighted with shading). 
-    * Publically accessible information on the age structure of Chinook Salmon in the Campbell River is relatively limited. However,               [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf) report that fish returning         to the Campbell River are primarily Age 4 (length from 550-949 mm, mean = 780 mm) and Age 5 (length = 700-949 mm, mean = 846 mm).            Tyees captured in the Tyee pool are typically over XXX mm. More recent information on the age composition of Campbell River Chinook          likely exists, but I haven't found it. 
-
-```{r table prep, include = FALSE}
-age_table <- age_data %>% select(Waterbody, Sex, Age, n, Perc.Total.by.Sex, Perc.Total.by.Stream, bin_range, meanFL, SE)
-
-
-knitr::kable(age_table, col.names = c("Waterbody","Sex", "Age", "n", "% of Total <br>(by Sex)", "% of Total <br>(by Stream)", "Size Range <br>(mm)", "Mean Lenght <br>(mm)", "Std. Error"),
-             digits = 2,  align=rep('c', 5),
-             caption = "Table 1. Size at age of Chinook Salmon captured in Campbell River watershed")
+```{r tyeecatch.plot, echo=FALSE}
+suppressWarnings(print(plot1)) 
 ```
 
-  2. There has been a consistent decline in the number of Tyee salmon captured per year and there was a major crash in 2014.IF we look at         Figure 2, we can see:
-      * There has been a general declining trend in escapement,
-      * Periods of increased escapement correspond with periods of increased Tyee catches, but not always (e.g. 2005, 2017 and 2020). Given          the lack of effort data we cannot tease apart whether the lack of catches in some years is due to reduction in pressure. 
-      * It is also possible that years with high escapement and low Tyee numbers were due to an increased proportion of smaller fish                 returning to the Campbell. Without annual information on age structure I cannot tease this apart.
-    
+`r fig_nums("plot1", "Number of Tyee Salmon captured per year.")`
+
+
+A quick look at `r fig_nums("plot1", display = "cite")` shows:
+  1. There is a fairly clear 4-year cycle of relatively higher catches (highlighted with shading).
+  2. There has been a consistent decline in the number of Tyee salmon captured per year and that there was a major crash in 2014.
+        
 ```{r include=FALSE}
 ## Merge escapement data with tyee catch data
 cr_data <- left_join(catch_data, cr_esc, by = "Year")
@@ -238,11 +237,11 @@ cr_yearly <- cr_data %>% mutate(Year = as.numeric(Year)) %>%
                          select(Year, catch_yr.total, catch_yr.mean, Esc_Scaled, Species, tyee_cycle4)
 ```
 
-## Tyee Escapement Plot        
-```{r fig_prep}
+## Tyee Catches Relative to Escapement        
+```{r plot2_CR_Esc, echo = FALSE}
 
 ## Prepare plot
-cr_plot<- ggplot(cr_data) +
+plot2 <- ggplot(cr_data) +
                 geom_bar(aes(x = Year, y = catch_binary, fill = tyee_cycle4), 
                               stat = "identity") +
                 geom_line(aes(x = Year, y = Esc_Scaled, linetype = Species), 
@@ -262,35 +261,62 @@ cr_plot<- ggplot(cr_data) +
 
 ```
 
-```{r tyee vs escapement, fig.cap = "Figure 2. Trends in Tyee Salmon captures and Campbell River Chinook Salmon escapement", echo=FALSE}
-suppressWarnings(print(cr_plot))   
+If we look at Escapement trends presented in `r table_nums("plot2", display = "cite")` , we can see:
+      1. There has been a general declining trend in escapement (consistent with regional trends),
+      2. Periods of increased escapement correspond with periods of increased Tyee catches, but not always (e.g. 2005, 2017 and             2020). Given the lack of information on effort (e.g. # of boats fishing per day) we cannot tease apart whether the lack of         catches in some years is due to reduction in pressure. 
+      3. It is also possible that years with high escapement and low Tyee numbers were due to an increased proportion of smaller            fish returning to the Campbell. Without annual information on age structure I cannot tease this apart.
+
+
+
+```{r tyee vs escapement, echo=FALSE}
+suppressWarnings(print(plot2))   
 ```
 
+`r fig_nums("plot2", "Trends in Tyee Salmon captures and Campbell River Chinook Salmon escapement.")`
 
+
+Publicly accessible information on the age structure of Chinook Salmon in the Campbell River is relatively limited. Data           reported by [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf) are          presented in `r table_nums("table1", display = "cite")` and show that most fish returning to the Campbell River are Age 4          (length from 550-949 mm, mean = 780 mm) and Age 5 (length = 700-949 mm, mean = 846 mm).
+
+If additional biological data was available, it would be possible to crudely estimate the number of Tyee salmon returning each year. 
+
+`table_nums("table1", "Size at age of Chinook Salmon captured in Campbell River watershed.")`
+
+```{r table prep, include = FALSE}
+age_table <- age_data %>% select(Waterbody, Sex, Age, n, Perc.Total.by.Sex, Perc.Total.by.Stream, bin_range, meanFL, SE)
+
+
+table1 <- knitr::kable(age_table, col.names = c("Waterbody","Sex", "Age", "n", "% of Total <br>(by Sex)", "% of Total <br>(by Stream)", "Size Range <br>(mm)", "Mean Lenght <br>(mm)", "Std. Error"),
+             digits = 2,  align=rep('c', 5),
+             caption = "Table 1. Size at age of Chinook Salmon captured in Campbell River watershed")
+```
+
+  
 
 ## Influence of river flow on catches
-Let's look at flow in the Campbell River to see how environmental conditions may influence catches.
+Last year there was a lot of speculation that high flows in the Campbell River may have caused fish to move directly into the river rather than staging in the pool. Let's look at flow in the Campbell River to see how 2022 flows compared to previous years. 
+
 ```{r data prep catch_flow, include = FALSE}
     flow.catch <- left_join(flow.data, catch_data, by = c("Year","Month","Weeknum","Date"))
     
     
     ## Reduce to past 5 years only.                          
-    flow.catch.recent <- flow.catch %>%  
-                         mutate(catch_scaled    = catch_binary * 7, 
-                                q.daily.scaled  = q.daily/20,
-                                q.5yr.rm.scaled = q.5yr.roll.mean/20,
-                                q.5y.rse.scaled = q.5y.roll.se/20,
-                                date.std = case_when(year(Date) >= 0 ~ 'year<-'(Date, 2021), ## Set all dates to same year
-                                                 TRUE ~ Date)) %>%
-                                filter(between(date.std, as.Date("2021-07-15"), as.Date("2021-09-15")),
-                                               Year >2010,
+    flow.catch <- flow.catch %>%  
+                  mutate(catch_scaled    = catch_binary * 7, 
+                         q.daily.scaled  = q.daily/20,
+                         q.5yr.rm.scaled = q.5yr.roll.mean/20,
+                         q.5y.rse.scaled = q.5y.roll.se/20,
+                         date.std = case_when(year(Date) >= 0 ~ 'year<-'(Date, 2021),TRUE ~ Date)) ## Set all dates to same year
+                                                
+    
+    flow.catch.2022 <- flow.catch %>% filter(between(date.std, as.Date("2021-07-15"), as.Date("2021-09-15")),
+                                               Year  >= 2019,
                                                PARAM == 1)
-```
+    
+    flow.catch.recent <- flow.catch %>% filter(between(date.std, as.Date("2021-07-15"), as.Date("2021-09-15")),
+                                               Year >2006,
+                                               PARAM == 1)
 
-```{r plot flow vs catches, include = FALSE}
-## Prepare plot    
-library(egg)
-flow.plot <-    ggplot(flow.catch.recent) +
+plot3 <-    ggplot(flow.catch.2022) +
                  geom_bar(aes(x = date.std, y = catch_scaled, fill = PARAM), stat= "identity", color = "Navy") +
                  geom_line(aes(x = date.std, y = q.daily, linetype = "dashed", color = "Daily")) +
                  geom_line(aes(x = date.std, y = q.5yr.roll.mean, linetype = "twodashed", color = "5-yr Mean")) +
@@ -301,15 +327,73 @@ flow.plot <-    ggplot(flow.catch.recent) +
                                     sec.axis = sec_axis(~./7, name = "Number of Fish")) +  #scale secondary access by x25
                  guides(fill = guide_legend(title = "# Tyee", label = FALSE),
                         linetype = "none",
-                        color = guide_legend(title = "Discharge (cms)", label = TRUE)) +
+                        color = guide_legend(title = "Discharge (cms)", label = TRUE),
+                        size = "none") +
+                 facet_grid(Year~.) +
+                 theme_bw() +
+                 theme(legend.position = "bottom") 
+
+plot4 <-    ggplot(flow.catch.recent) +
+                 geom_bar(aes(x = date.std, y = catch_scaled, fill = PARAM), stat= "identity", color = "Navy") +
+                 geom_line(aes(x = date.std, y = q.daily, linetype = "dashed", color = "Daily")) +
+                 geom_line(aes(x = date.std, y = q.5yr.roll.mean, linetype = "twodashed", color = "5-yr Mean")) +
+                 geom_text(aes(x = as.Date("2021-07-20"), y = 10, label = str_c("Total Catch = ",catch_yr.total), size = 8)) +
+                 labs(x = "Date", y = "Discharge (cms)") +
+                 scale_x_date(date_breaks = "5 days", date_labels = "%m-%d", minor_breaks = "1 day") +
+                 scale_y_continuous(breaks = seq(0, 75, 10),
+                                    sec.axis = sec_axis(~./7, name = "Number of Fish")) +  #scale secondary access by x25
+                 guides(fill = guide_legend(title = "# Tyee", label = FALSE),
+                        linetype = "none",
+                        color = guide_legend(title = "Discharge (cms)", label = TRUE),
+                        size = "none") +
                  facet_grid(Year~.) +
                  theme_bw() +
                  theme(legend.position = "bottom")  
 
-flow.plot 
 
 ```
 
-```{r plot_flow,  fig.dim = c(8,20), fig.cap = "Figure 3. Catches of Tyee Salmon relative to flow in the Campebll River.", echo=FALSE}
-suppressWarnings(print(flow.plot))
+
+```{r plot,  echo = FALSE}
+
+suppressWarnings(print(plot3))  
 ```
+
+`r fig_nums("plot3", "Catches of Tyee Salmon since 2016 relative to flow in the Campebll River.")`
+
+
+Well, it's clear that flows in 2022 were higher than past years and higher than mean flows over the past 5-years. But this doesn't mean that is why fewer fish were captured but let's take a closer look at the correlation between flow and capture.
+
+```{r prepare scatter plot, include = FALSE}
+flow.catch.scatter <- flow.catch %>% filter(catch_binary == 1) %>%
+                                     group_by(format(q.daily, digits = 1)) %>%
+                                     mutate(total.catch = sum(catch_binary)) 
+library(scales)
+plot5 <- ggplot(flow.catch.scatter, aes(x=q.daily, y = total.catch)) +
+                      geom_point() +
+                      geom_smooth(method = lm) +
+                      scale_y_continuous(limits= c(0, 35)) +
+                      labs(x = "Discharge (cms)", y = "Number of Tyee Captured") +
+                      theme_bw()
+
+```
+
+```{r, echo=FALSE}
+suppressWarnings(print(plot5))
+```
+
+`r fig_nums("plot5", "Relationship between river flow and fish capture")`
+
+`r fig_nums("plot5", display = "cite")` shows as strong negative relationship between discharge and the number of fish that are captured. Most likely this is a seasonal effect, where late summer flows are typically low.   
+
+
+
+
+Might as well look further back too.
+```{r plot_flow,  fig.dim = c(8,20), echo=FALSE}
+suppressWarnings(print(plot4))
+```
+
+`r fig_nums("plot4", "Catches of Tyee Salmon since 2007 relative to flow in the Campebll River.")`
+
+
