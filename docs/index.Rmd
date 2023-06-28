@@ -5,26 +5,273 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
+A high-level look at trends in catches of Tyee salmon in the legendary Tyee Pool at Campbell River. All of this data exploration has been for [fun](https://i.giphy.com/media/Cz6TlrRVVyv9S/giphy.webp), to learn some new tools and hopefully give myself a leg up in coming years (I need all the help I can get - as do most it seems...). 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+## Prepare Working Environment ----
+## Clear workspace ##
+rm(list = ls())  
+
+## This code is to fix a bug in R 2023.06.0+421 <https://github.com/rstudio/rstudio/issues/13188>
+options(rstudio.help.showDataPreview = FALSE)
+getOption("rstudio.help.showDataPreview")
+
+## Load Packages
+    library(tidyverse)
+    library(tidyr)
+    library(dplyr)
+    library(zoo)
+    library(lubridate)
+    library(reshape2)
+    library(ggplot2)
+    library(readxl)
+    library(downloadthis)
+
+## Define Working Directory ---
+#setwd("C:/Users/evogt/R Analysis/EAV/Tyee/")
+
+## Define Input Files
+    #1. Catch Data
+    catch.dat <- "Data/TyeeCatchData.xlsx"
+    
+    #2. Escapement Data
+    esc.dat <- "Data/Area13Escapement.xlsx"
+    
+    #3. Flow Data
+    q.dat <- "Data/CR_Discharge.xlsx"
+
+## Define Output Locations
+    plot.output <- "Plots/"
+    model.output <- "Output/"
+##__________________________####    
+## Load Data ---- 
+
+##* 1. Prep Blank Date Data ---- 
+    date_seq <- data.frame(Date = seq(ymd('2002-07-01'), ymd('2022-09-30'), by = 'days')) %>%
+                mutate(Month = strftime(Date, format = "%m"),
+                       Month = as.numeric(Month)) %>%
+                filter(between(Month,7,9))
+
+## * 2. Tyee Catch Data ----
+    raw_catch  <- read_excel(catch.dat) # Date, time and size of capture
+
+        ## Format Catch Data Dates ##
+        raw_catch <- raw_catch %>% mutate(Date = as.Date(raw_catch$RawDate),
+                                          catch_binary = 1) %>%
+                                   group_by(Date) %>%
+                                   summarise(catch_binary = sum(catch_binary))
+
+        ## Merge with date_sequence
+        catch_daily <- left_join(date_seq, raw_catch, by = "Date") %>%
+                       mutate(catch_binary = coalesce(catch_binary, 0),  
+                              Year = strftime(Date, format = "%Y"),
+                              Year = as.numeric(Year),
+                              Month = strftime(Date, format = "%m"),
+                              Month = as.numeric(Month),
+                              Weeknum      = strftime(Date, format = "%V"),
+                              Weeknum = as.numeric(Weeknum),
+                              catch_binary = coalesce(catch_binary, 0))  
+      
+        
+        ## Calculate Yearly Catches
+        catch_yearly <- catch_daily %>% 
+                        group_by(Year) %>%
+                        summarize(catch_yr.total = sum(catch_binary),
+                                  catch_yr.mean  = mean(catch_binary)) %>%
+                        ungroup %>%
+                        mutate(catch_yrs.mean.total = mean(catch_yr.total),
+                               catch_yrs.mean.catch = mean(catch_yr.mean),
+                               tyee_cycle4 = as.numeric(rep(1:4, length.out = length(Year))),
+                               tyee_cycle5 = as.numeric(rep(1:5, length.out = length(Year)))) 
+                                          
+        ## Calculate Weekly Catches
+        catch_yrwk <- catch_daily %>% 
+                      group_by(Year, Weeknum) %>%
+                      summarize(catch_yrwk.total = sum(catch_binary)) 
+
+        ## Calculate Weekly Catches
+        catch_wk <- catch_daily %>% 
+                    group_by(Weeknum) %>%
+                    filter(between(Weeknum, 27, 39)) %>%
+                    summarize(catch_wk.total = sum(catch_binary)) %>%
+                    mutate(catch_wk.mean     = catch_wk.total/21) %>%         # 21 years data from 2002 to 2022
+                    ungroup() %>%
+                    mutate(catch_wks.mean = mean(catch_wk.mean))
+        
+         
+        ## Merge Catch Data
+        catch_dat <- left_join(catch_daily, catch_yearly, by = "Year")
+        catch_dat <- left_join(catch_dat, catch_yrwk, by = c("Year", "Weeknum"))
+        catch_data <- left_join(catch_dat, catch_wk, by = "Weeknum")
+
+        colnames(catch_data)                               
+ 
+## * 3. Escapement Data ----
+        ## Load Data      
+        esc_data <- read_excel(esc.dat)
+    
+        ## Prepare dataset for CR Escapement 
+        cr_esc <- esc_data %>% filter(GAZETTED_NAME == "CAMPBELL RIVER",                 # only show data for CR
+                                      ANALYSIS_YR >=2002) %>%                             # data for same time period as tyee catch data    
+                               mutate(Year          =  as.numeric(ANALYSIS_YR),
+                                     Waterbody      =  as.factor(GAZETTED_NAME),
+                                     Esc_Count      =  as.numeric(MAX_ESTIMATE),
+                                     Esc_Scaled     =  as.numeric(MAX_ESTIMATE/25),
+                                     Esc_Mean       =  as.numeric(mean(MAX_ESTIMATE)),
+                                     Esc_MeanScaled =  as.numeric(mean(MAX_ESTIMATE/25)),
+                                     Species        =  as.factor(SPECIES)) %>%
+                               select(Year, Waterbody, Species, Esc_Count, Esc_Scaled, Esc_Mean, Esc_MeanScaled)
+        
+        
+        
+## * 4. Flow Data ----
+    flow_data <- read_excel(q.dat)
+
+    ## Calculate Weekly Flows    
+    flow_data <- flow_data %>% 
+                 filter(between(Month, 7, 9), Year >= 2002) %>% 
+                        mutate(q.daily = as.numeric(Value),
+                               Weeknum = strftime(Date, format = "%V"), #create "Weeknum" column
+                               Weeknum = as.numeric(Weeknum),
+                               Date    = as.Date(Date),
+                               q.5yr.roll.mean = rollmean(q.daily, k = 455, align = "right", fill=NA), # calculate running 5 yr average flow
+                               q.5y.roll.se = rollapply(q.daily, width = 455, FUN = sd, align = "right", fill = NA)/sqrt(455))  
+              str(flow_data)
+    
+    q.yearly <- flow_data %>% group_by(Year) %>% 
+                                 summarize(q.yr.mean   = mean(Value),
+                                           q.yr.se     = sd(Value)/sqrt(n()))
+    
+    q.monthly <- flow_data %>% group_by(Year, Month) %>% 
+                                  summarize(q.yrm    = mean(Value),
+                                            q.yrm.se = sd(Value)/sqrt(n()))
+    
+    q.m       <- flow_data %>% group_by(Month) %>% 
+                                  summarize(q.m    = mean(Value),
+                                            q.m.se = sd(Value)/sqrt(n()))
+      
+    q.weekly <- flow_data %>% group_by(Year, Weeknum) %>% 
+                                 summarize(q.yrwk    = mean(Value),
+                                           q.yrwk.max = max(Value),
+                                           q.yrwk.se = sd(Value)/sqrt(n()))
+    
+    q.wk <-flow_data %>% group_by(Weeknum) %>%
+                                summarize(q.wk    = mean(Value),
+                                          q.wk.se = sd(Value)/sqrt(n()))
+                                
+    ## Merge Flow Datasets
+    flow.dat <- left_join(flow_data, q.yearly, by = "Year")
+    flow.dat <- left_join(flow.dat, q.monthly, by = c("Year","Month"))
+    flow.dat <- left_join(flow.dat, q.m,       by = ("Month"))
+    flow.dat <- left_join(flow.dat, q.wk,      by = ("Weeknum"))
+    flow.data <- left_join(flow.dat, q.weekly, by = c("Year", "Weeknum"))
 ```
 
-## R Markdown
+## The Data
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+This analysis uses the following publically available data:
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+* Annual catch records from the [Tyee Club](https://www.tyeeclub.org/catch-records/>). 
+* Discharge data collected on the Campbell River by the [Water Survey of Canada](https://wateroffice.ec.gc.ca/index_e.html).
+* Annual Chinook Salmon escapement data available in the [DFO NuSEDS database](https://open.canada.ca/data/en/dataset/c48669a3-045b-400d-b730-48aafe8c5ee6).
+  
 
-```{r cars}
-summary(cars)
+This is certainly an interesting dataset, but it has its limitations. For example, there is no information on effort (# boats per day), age structure of captured Tyees or numbers of undersize Chinook captured in the pool.
+
+For now, I have only looked at data back to 2002, as that is the limit of easily accessible Tyee catch data. 
+  
+```{r TyeeCatches}
+    tyee_plot4 <- ggplot(catch_data) +
+                      geom_bar(aes(x= Year, y = catch_binary, fill = tyee_cycle4), stat = "identity") +
+                      geom_hline(aes(yintercept=catch_yrs.mean.total, color = catch_yrs.mean.total), linetype = "dashed", linewidth = 0.5) +
+                      ylab("# Tyee Salmon") +
+                      guides(fill = "none", #guide_legend(title = "Tyee Cycle"),
+                             color = guide_legend(title = "Mean catches per year", label = FALSE)) + 
+                      scale_x_continuous(breaks = seq(2002,2023,2)) +
+                      scale_y_continuous(breaks = seq(0, 100, 5)) +
+                      theme_bw() +  
+                      theme(legend.position = c(0.78, 0.88),
+                            legend.box.background = element_rect(colour = "black", linewidth = 1.25, fill = NA)) 
+    tyee_plot4
 ```
 
-## Including Plots
+A quick look at the figure shows:
+  1. There appears to be a 4-year cycle of high catches (highlighted with shading). 
+    * Publically accessible information on the age structure of Chinook Salmon in the Campbell River is relatively limited. However,               [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf) report that fish returning         to the Campbell River are primarily Age 4 (length from 550-949 mm, mean = 780 mm) and Age 5 (length = 700-949 mm, mean = 846 mm).            Tyees captured in the Tyee pool are typically over XXX mm. More recent information on the age composition of Campbell River Chinook          likely exists, but I haven't found it. 
 
-You can also embed plots, for example:
+        ADD TABLE SHOWING SIZE AT AGE DATA
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+  2. There has been a consistent decline in the number of Tyee salmon captured per year and there was a major crash in 2014.IF we look at         Figure 2, we can see:
+      * There has been a general declining trend in escapement,
+      * Periods of increased escapement correspond with periods of increased Tyee catches, but not always (e.g. 2005, 2017 and 2020). Given          the lack of effort data we cannot tease apart whether the lack of catches in some years is due to reduction in pressure. 
+      * It is also possible that years with high escapement and low Tyee numbers were due to an increased proportion of smaller fish                 returning to the Campbell. Without annual information on age structure I cannot tease this apart.
+```{r include = FALSE}
+## Merge escapement data with tyee catch data
+cr_data <- left_join(catch_data, cr_esc, by = "Year")
+    
+cr_yearly <- cr_data %>% mutate(Year = as.numeric(Year)) %>%
+                         group_by(Year) %>%
+                         select(Year, catch_yr.total, catch_yr.mean, Esc_Scaled, Species, tyee_cycle4)
+```
+        
+```{r tyee vs escapement, echo=FALSE}
+    cr_plot <- ggplot(cr_data) +
+                  geom_bar(aes(x = Year, y = catch_binary, fill = tyee_cycle4), 
+                                stat = "identity") +
+                  geom_line(aes(x = Year, y = Esc_Scaled, linetype = Species), 
+                                color = "lightblue", linewidth = 1.2) +
+                  geom_hline(aes(yintercept = catch_yrs.mean.total, color = catch_yrs.mean.total), 
+                                linetype = "dashed", linewidth = 0.5) +
+                  labs(x = "Year", y = "Number Tyee Captured") + 
+                  guides(fill =  "none", #guide_legend(title = "Tyee Cycle", label = FALSE),
+                         linetype = guide_legend(title = "Escapement", label = FALSE),
+                         color = guide_legend(title = "Mean Tyee Catch", label = FALSE)) +
+                  scale_y_continuous(breaks = seq(0, 100, 5),
+                                      sec.axis = sec_axis(~.*25, name = "Escapement")) +  #scale secondary access by x25
+                  scale_x_continuous(breaks = seq(2002,2022,2)) +            
+                  theme_bw() +
+                  theme(legend.direction = "horizontal",
+                        legend.position = c(0.78, 0.88),
+                        legend.box.background = element_rect(colour = "black", linewidth = 1.25, fill = "white"))
+    cr_plot        
+        
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Let's look at flow in the Campbell River to see how environmental conditions may influence catches.
+```{r data prep catch_flow, include = FALSE}
+    flow.catch <- left_join(flow.data, catch_data, by = c("Year","Month","Weeknum","Date"))
+    
+    
+          ## Reduce to past 5 years only.                          
+          flow.catch.recent <- flow.catch %>%  
+                                    mutate(catch_scaled    = catch_binary * 7, 
+                                           q.daily.scaled  = q.daily/20,
+                                           q.5yr.rm.scaled = q.5yr.roll.mean/20,
+                                           q.5y.rse.scaled = q.5y.roll.se/20,
+                                           date.std = case_when(year(Date) >= 0 ~ 'year<-'(Date, 2021), ## Set all dates to same year
+                                                 TRUE ~ Date)) %>%
+                                                filter(between(date.std, as.Date("2021-07-15"), as.Date("2021-09-15")),
+                                                       Year >2015,
+                                                       PARAM == 1)
+```
+
+```{r plot flow vs catches, fig.dim = c(8,16)}
+
+    flow.catch.plot <- ggplot(flow.catch.recent) +
+                        geom_bar(aes(x = date.std, y = catch_scaled, fill = PARAM), stat= "identity", color = "Navy") +
+                        geom_line(aes(x = date.std, y = q.daily, linetype = "dashed", color = "Daily")) +
+                        geom_line(aes(x = date.std, y = q.5yr.roll.mean, linetype = "twodashed", color = "5-yr Mean")) +
+                        labs(x = "Date", y = "Discharge") +
+                        scale_x_date(date_breaks = "5 days", date_labels = "%m-%d", minor_breaks = "1 day") +
+                        scale_y_continuous(breaks = seq(0, 75, 10),
+                                           sec.axis = sec_axis(~./7, name = "Number of Fish")) +  #scale secondary access by x25
+                        guides(fill = guide_legend(title = "# Tyee", label = FALSE),
+                               linetype = "none",
+                               color = guide_legend(title = "Discharge (cms)", label = TRUE)) +
+                        facet_grid(Year~.) +
+                        theme_bw() +
+                        theme(legend.position = "bottom")  
+    flow.catch.plot
+```
+
