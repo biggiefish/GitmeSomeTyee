@@ -218,10 +218,6 @@ A quick look at the figure shows:
 ```{r table prep, include = FALSE}
 age_table <- age_data %>% select(Waterbody, Sex, Age, n, Perc.Total.by.Sex, Perc.Total.by.Stream, bin_range, meanFL, SE)
 
-```
-      
-        
-```{r age table}
 
 knitr::kable(age_table, col.names = c("Waterbody","Sex", "Age", "n", "% of Total <br>(by Sex)", "% of Total <br>(by Stream)", "Size Range <br>(mm)", "Mean Lenght <br>(mm)", "Std. Error"),
              digits = 2,  align=rep('c', 5),
@@ -271,6 +267,8 @@ suppressWarnings(print(cr_plot))
 ```
 
 
+
+## Influence of river flow on catches
 Let's look at flow in the Campbell River to see how environmental conditions may influence catches.
 ```{r data prep catch_flow, include = FALSE}
     flow.catch <- left_join(flow.data, catch_data, by = c("Year","Month","Weeknum","Date"))
@@ -289,9 +287,9 @@ Let's look at flow in the Campbell River to see how environmental conditions may
                                                PARAM == 1)
 ```
 
-```{r plot flow vs catches, fig.dim = c(8,16), warnings = FALSE, message = FALSE}
+```{r plot flow vs catches, include = FALSE}
 ## Prepare plot    
-plot <-    ggplot(flow.catch.recent) +
+flow.plot <-    ggplot(flow.catch.recent) +
                  geom_bar(aes(x = date.std, y = catch_scaled, fill = PARAM), stat= "identity", color = "Navy") +
                  geom_line(aes(x = date.std, y = q.daily, linetype = "dashed", color = "Daily")) +
                  geom_line(aes(x = date.std, y = q.5yr.roll.mean, linetype = "twodashed", color = "5-yr Mean")) +
@@ -305,6 +303,9 @@ plot <-    ggplot(flow.catch.recent) +
                  facet_grid(Year~.) +
                  theme_bw() +
                  theme(legend.position = "bottom")  
-suppressWarnings(print(plot))
+
 ```
 
+```{r plot_flow,  fig.dim = c(8,20), fig.cap = "Figure 3. Catches of Tyee Salmon relative to flow in the Campebll River.", echo=FALSE}
+suppressWarnings(print(flow.plot))
+```
