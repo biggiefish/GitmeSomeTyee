@@ -262,8 +262,7 @@ cr_plot<- ggplot(cr_data) +
                 scale_x_continuous(breaks = seq(2002,2022,2)) +            
                 theme_bw() +
                 theme(legend.direction = "horizontal",
-                      legend.position = c(0.78, 0.88),
-                      legend.box.background = element_rect(colour = "black", linewidth = 1.25, fill = "white"))
+                      legend.position = "bottom")
 
 ```
 
