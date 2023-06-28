@@ -261,7 +261,7 @@ plot2 <- ggplot(cr_data) +
 
 ```
 
-If we look at Escapement trends presented in `r table_nums("plot2", display = "cite")` , we can see:
+If we look at Escapement trends presented in `r fig_nums("plot2", display = "cite")` , we can see:
       1. There has been a general declining trend in escapement (consistent with regional trends),
       2. Periods of increased escapement correspond with periods of increased Tyee catches, but not always (e.g. 2005, 2017 and             2020). Given the lack of information on effort (e.g. # of boats fishing per day) we cannot tease apart whether the lack of         catches in some years is due to reduction in pressure. 
       3. It is also possible that years with high escapement and low Tyee numbers were due to an increased proportion of smaller            fish returning to the Campbell. Without annual information on age structure I cannot tease this apart.
@@ -279,7 +279,7 @@ Publicly accessible information on the age structure of Chinook Salmon in the Ca
 
 If additional biological data was available, it would be possible to crudely estimate the number of Tyee salmon returning each year. 
 
-`table_nums("table1", "Size at age of Chinook Salmon captured in Campbell River watershed.")`
+
 
 ```{r table1prep, include = FALSE}
 age_table <- age_data %>% select(Waterbody, Sex, Age, n, Perc.Total.by.Sex, Perc.Total.by.Stream, bin_range, meanFL, SE)
@@ -290,7 +290,10 @@ table1 <- knitr::kable(age_table, col.names = c("Waterbody","Sex", "Age", "n", "
              caption = "Table 1. Size at age of Chinook Salmon captured in Campbell River watershed")
 ```
 
-  
+```{r}
+table1
+```
+
 
 ## Influence of river flow on catches
 Last year there was a lot of speculation that high flows in the Campbell River may have caused fish to move directly into the river rather than staging in the pool. Let's look at flow in the Campbell River to see how 2022 flows compared to previous years. 
@@ -411,16 +414,17 @@ suppressWarnings(print(plot5))
 
 `r fig_nums("plot5", "Relationship between river flow and fish capture")`
 
-`r fig_nums("plot5", display = "cite")` shows as strong negative relationship between discharge and the number of fish that are captured. Most likely this is a seasonal effect, where late summer flows are typically low.   
+`r fig_nums("plot5", display = "cite")` shows a strong negative relationship between discharge and the number of fish that are captured. This is what you would expect, that fish will hold in the pool while flows are low and that they will move into the river when flows are higher and they can safely navigate upstream. However, the fishery occurs during the late summer, when flows are typically low and it is possible that the timing of the fishery has contributed to observed trends. 
 
+Scaling the discharge data improved the fit, and still shows a negative relationship between captures and discharge.
 ```{r, echo=FALSE}
 suppressWarnings(print(plot5.1))
 ```
+
 `r fig_nums("plot5", "Relationship between the natural log of discharge and fish capture")`
 
 
-
-Well now we know there is a relationship, lets have a look at some of the older data. 
+Now we know there is a relationship, lets have a look at some of the older data. 
 
 ```{r plot_flow,  fig.dim = c(8,30), echo=FALSE}
 suppressWarnings(print(plot4))
