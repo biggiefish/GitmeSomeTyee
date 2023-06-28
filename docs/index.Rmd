@@ -289,10 +289,12 @@ Let's look at flow in the Campbell River to see how environmental conditions may
 
 ```{r plot flow vs catches, include = FALSE}
 ## Prepare plot    
+library(egg)
 flow.plot <-    ggplot(flow.catch.recent) +
                  geom_bar(aes(x = date.std, y = catch_scaled, fill = PARAM), stat= "identity", color = "Navy") +
                  geom_line(aes(x = date.std, y = q.daily, linetype = "dashed", color = "Daily")) +
                  geom_line(aes(x = date.std, y = q.5yr.roll.mean, linetype = "twodashed", color = "5-yr Mean")) +
+                 geom_text(aes(x = as.Date("2021-07-20"), y = 10, label = str_c("Total Catch = ",catch_yr.total), size = 8)) +
                  labs(x = "Date", y = "Discharge") +
                  scale_x_date(date_breaks = "5 days", date_labels = "%m-%d", minor_breaks = "1 day") +
                  scale_y_continuous(breaks = seq(0, 75, 10),
@@ -303,6 +305,8 @@ flow.plot <-    ggplot(flow.catch.recent) +
                  facet_grid(Year~.) +
                  theme_bw() +
                  theme(legend.position = "bottom")  
+
+flow.plot 
 
 ```
 
