@@ -290,7 +290,7 @@ table1 <- knitr::kable(age_table, col.names = c("Waterbody","Sex", "Age", "n", "
              caption = "Table 1. Size at age of Chinook Salmon captured in Campbell River watershed")
 ```
 
-```{r}
+```{r, echo = FALSE}
 table1
 ```
 
