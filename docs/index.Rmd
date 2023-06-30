@@ -24,7 +24,6 @@ getOption("rstudio.help.showDataPreview")
     library(tidyverse)
     library(tidyr)
     library(dplyr)
-    library(zoo)
     library(lubridate)
     library(reshape2)
     library(ggplot2)
@@ -32,6 +31,7 @@ getOption("rstudio.help.showDataPreview")
     library(downloadthis)
     library(knitr)
     library(captioner)
+    library(zoo)
 
 ## Define Working Directory ---
 #setwd("C:/Users/evogt/R Analysis/EAV/Tyee/")
@@ -44,16 +44,19 @@ getOption("rstudio.help.showDataPreview")
     esc.dat <- "Data/Area13Escapement.xlsx"
     
     #3. Flow Data
-    q.dat <- "Data/CR_Discharge.xlsx"
+    q.dat <- "Data/CR_Discharge_1949-2023.xlsx" 
     
     #4. Age Class Data
     age.dat <- "Data/CR_AgeClass.xlsx"
+    
+    #5. Commercial Catch data
+    comm.catch.dat <- "Data/NPAFC_CommercialCatch_21June2022.xlsx"
 
 ## Define Output Locations
     plot.output <- "Plots/"
     model.output <- "Output/"
     
-##  
+##  Set up captioner package calls. 
   fig_nums   <- captioner(prefix = "Figure")  
   table_nums <- captioner(prefix = "Table")
     
@@ -138,53 +141,72 @@ getOption("rstudio.help.showDataPreview")
         
         
         
-## * 4. Flow Data ----
-    flow_data <- read_excel(q.dat)
+## * 4. Flow Data (Tyee Season) ----
+      ## Daily flow Data from 1949 to 2021
+      flow_data <- read_excel(q.dat) 
+          
+      flow.data.all <- flow_data %>% 
+                              mutate(Season   
+                                        = case_when(
+                                              Month >=1 & Month <= 3 ~ "Winter",
+                                              Month >=4 & Month <= 6 ~ "Spring",
+                                              Month >=7 & Month <= 8 ~ "Summer",
+                                              Month >=9 & Month <= 10 ~ "Fall",
+                                              Month >=11 & Month <= 12 ~ "Winter")) %>%
+                              group_by(Year, Season) %>%
+                              mutate(q.peak.season.yr = max(Value),
+                                     test.data = as.numeric(1))   
 
-    ## Calculate Weekly Flows    
-    flow_data <- flow_data %>% 
-                 filter(between(Month, 7, 9), Year >= 2002) %>% 
-                        mutate(q.daily = as.numeric(Value),
-                               Weeknum = strftime(Date, format = "%V"), #create "Weeknum" column
-                               Weeknum = as.numeric(Weeknum),
-                               Date    = as.Date(Date),
-                               q.5yr.roll.mean = rollmean(q.daily, k = 455, align = "right", fill=NA), # 5yr running flow
-                               q.5y.roll.se = rollapply(q.daily, width = 455, FUN = sd, 
-                                                        align = "right", fill = NA)/sqrt(455))  # 5yr running SE
-              str(flow_data)
-    
-    q.yearly <- flow_data %>% group_by(Year) %>% 
-                                 summarize(q.yr.mean   = mean(Value),
-                                           q.yr.se     = sd(Value)/sqrt(n()))
-    
-    q.monthly <- flow_data %>% group_by(Year, Month) %>% 
-                                  summarize(q.yrm    = mean(Value),
-                                            q.yrm.se = sd(Value)/sqrt(n()))
-    
-    q.m       <- flow_data %>% group_by(Month) %>% 
-                                  summarize(q.m    = mean(Value),
-                                            q.m.se = sd(Value)/sqrt(n()))
-      
-    q.weekly <- flow_data %>% group_by(Year, Weeknum) %>% 
-                                 summarize(q.yrwk    = mean(Value),
-                                           q.yrwk.max = max(Value),
-                                           q.yrwk.se = sd(Value)/sqrt(n()))
-    
-    q.wk <-flow_data %>% group_by(Weeknum) %>%
-                                summarize(q.wk    = mean(Value),
-                                          q.wk.se = sd(Value)/sqrt(n()))
-                                
-    ## Merge Flow Datasets
-    flow.dat <- left_join(flow_data, q.yearly, by = "Year")
-    flow.dat <- left_join(flow.dat, q.monthly, by = c("Year","Month"))
-    flow.dat <- left_join(flow.dat, q.m,       by = ("Month"))
-    flow.dat <- left_join(flow.dat, q.wk,      by = ("Weeknum"))
-    flow.data <- left_join(flow.dat, q.weekly, by = c("Year", "Weeknum"))
-    
-    
+    ## Flow Data Through Tyee Season(July 1 to Sept 30. 2000 to 2022)
+      str(flow.data.all)
+
+    flow.data.tyee <- flow.data.all %>% 
+                        filter(between(Month,7,9)) %>%
+                        mutate(q.daily         = as.numeric(Value),
+                               Date            = as.Date(Date),
+                               Year            = format(Date, '%Y'),
+                               Month           = format(Date, '%m'),
+                               Weeknum         = format(Date, format = "%V")) %>%
+                        group_by(Year) %>% 
+                              mutate(q.yr.mean  = mean(Value, na.rm = TRUE),
+                                     q.yr.se = sd(Value, na.rm = TRUE)/sqrt(n())) %>% 
+                        ungroup() %>%
+                                           
+                        group_by(Month) %>%                                              
+                              mutate(q.m       = mean(Value, na.rm = TRUE),
+                                     q.m.se    = sd(Value, na.rm = TRUE)/sqrt(n())) %>%
+                              ungroup() %>%
+                                         
+                         group_by(Year, Month) %>% 
+                              mutate(q.yrm     = mean(Value, na.rm = TRUE),
+                                     q.yrm.se  = sd(Value, na.rm = TRUE)/sqrt(n())) %>%
+                              ungroup() %>%
+                   
+                         group_by(Year, Weeknum) %>% 
+                              mutate(q.yrwk     = mean(Value, na.rm = TRUE),
+                                     q.yrwk.max = max(Value, na.rm = TRUE),
+                                     q.yrwk.se  = sd(Value, na.rm = TRUE)/sqrt(n())) %>%
+                              ungroup()   %>%      
+ 
+                        group_by(Weeknum) %>%
+                              mutate(q.wk       = mean(Value, na.rm = TRUE),
+                                     q.wk.se    = sd(Value, na.rm = TRUE)/sqrt(n())) %>%
+                              ungroup() %>%
+                        mutate(q.5yr.roll.mean = rollmean(q.daily, k = 455, align = "right", fill=NA), # 5yr running flow
+                               q.5y.roll.se    = rollapply(q.daily, width = 455, FUN = sd, align = "right", fill = NA)/sqrt(455)) %>%
+                        filter(Year > 2001)
+
 ## 5. Add age data
     age_data <- read_excel(age.dat)
+    
+## 6. Salmon Catch Data
+    comm.catch.dat <- read_excel(comm.catch.dat) 
 
+    comm.catch <- comm.catch.dat %>% pivot_longer(cols = c(7:103),
+                                                  names_to = "Year",
+                                                  values_to = "Total.Catch",
+                                                  values_drop_na = TRUE) %>%
+                                      rename(Area = 'Reporting Area')
 ```
 
 ## The Data
@@ -194,7 +216,8 @@ This analysis uses the following publicly available data:
 1. Annual catch records from the [Tyee Club](https://www.tyeeclub.org/catch-records/>). 
 2. Discharge data collected on the Campbell River by the [Water Survey of Canada](https://wateroffice.ec.gc.ca/index_e.html).
 3. Annual Chinook Salmon escapement data available in the [DFO NuSEDS database](https://open.canada.ca/data/en/dataset/c48669a3-045b-400d-b730-48aafe8c5ee6).
-  
+4. Annual catch statistics from the [North Pacific Anadromous Fish Commission](https://npafc.org/statistics/)
+5. Area based commercial catch statistics from DFO are [available from 2001 to 2016](https://www.pac.dfo-mpo.gc.ca/stats/smon/index-eng.html) 
 
 This is certainly an interesting dataset, but it has its limitations. For example, there is no information on effort (# boats per day) and biological data is limited (e.g. size, girth and age of tyees or number of undersized fish captured). 
 
@@ -225,7 +248,8 @@ suppressWarnings(print(plot1))
 
 
 A quick look at `r fig_nums("plot1", display = "cite")` shows:
-  1. There is a fairly clear 4-year cycle of relatively higher catches (highlighted with shading).
+  1. There is a fairly clear 4-year cycle of relatively higher catches (highlighted with shading). Which is interesting, and raises lots of questions...
+  * Based on available age data, it seems most fish returning to Campbell River are Age 4 or Age 5, with very few Age 6 fish. Given their size you would expect Tyee's to        primarily be at least Age 5. Assuming there is a strong genetic component to spawner age, and that Tyee's are at least Age-5, it is possible that the 4-year cycle is a      carry-over effect from increased juvenile success 5 or 6 years before the 4 year peak.    
   2. There has been a consistent decline in the number of Tyee salmon captured per year and that there was a major crash in 2014.
         
 ```{r include=FALSE}
@@ -237,7 +261,9 @@ cr_yearly <- cr_data %>% mutate(Year = as.numeric(Year)) %>%
                          select(Year, catch_yr.total, catch_yr.mean, Esc_Scaled, Species, tyee_cycle4)
 ```
 
-## Tyee Catches Relative to Escapement        
+## Tyee Catches Relative to Escapement    
+
+ADD ESCAPEMENT OF OTHER SPECIES. IS THERE A LULL in year before 4-year cylce peaks?
 ```{r plot2_CR_Esc, echo = FALSE}
 
 ## Prepare plot
@@ -301,8 +327,12 @@ table1
 Last year there was a lot of speculation that high flows in the Campbell River may have caused fish to move directly into the river rather than staging in the pool. Let's look at flow in the Campbell River to see how 2022 flows compared to previous years. 
 
 ```{r plot3-4prep, include = FALSE}
-    flow.catch <- left_join(flow.data, catch_data, by = c("Year","Month","Weeknum","Date"))
-    
+    catch_data <- catch_data %>% mutate(Year = format(Date, '%Y'),
+                                        Month = format(Date, '%m'),
+                                        Weeknum = format(Date, '%V'))    
+
+    flow.catch <- left_join(flow.data.tyee, catch_data, by = c("Year","Month","Weeknum","Date"))
+
     
     ## Reduce to past 5 years only.                          
     flow.catch <- flow.catch %>%  
@@ -337,7 +367,7 @@ plot3 <-    ggplot(flow.catch.2022) +
                  facet_grid(Year~.) +
                  theme_bw() +
                  theme(legend.position = "bottom") 
-
+str(flow.catch.recent)
 plot4 <-    ggplot(flow.catch.recent) +
                  geom_bar(aes(x = date.std, y = catch_scaled, fill = PARAM), stat= "identity", color = "Navy") +
                  geom_line(aes(x = date.std, y = q.daily, linetype = "dashed", color = "Daily")) +
@@ -411,7 +441,7 @@ plot5.3 <- ggplot(flow.catch.scatter, aes(x=q.daily.ln, y = total.catch.ln)) +
 ```
 
 ```{r, echo=FALSE}
-suppressWarnings(print(plot5))
+suppressWarnings(print(plot5.1))
 ```
 
 `r fig_nums("plot5", "Relationship between river flow and fish capture")`
@@ -426,12 +456,75 @@ suppressWarnings(print(plot5.1))
 `r fig_nums("plot5", "Relationship between the natural log of discharge and fish capture")`
 
 
-Now we know there is a relationship, lets have a look at some of the older data. 
+OK, well there is a relationship (that could be due to a number of things). Lets have a look at some of the older data. 
 
 ```{r plot_flow,  fig.dim = c(8,30), echo=FALSE}
 suppressWarnings(print(plot4))
 ```
 
 `r fig_nums("plot4", "Catches of Tyee Salmon since 2007 relative to flow in the Campebll River.")`
+
+## What else could be affecting returns and catches?
+Let's look at commercial catches. Maybe there is a fishery that could be intercepting a large number of Tyees.
+
+```{r}
+can.catch <- comm.catch %>% rename(Catch.Type = 'Catch Type',
+                                   Data.Type  = 'Data Type') %>%
+                            mutate(Area         = as.factor(Area),
+                                   Species      = as.factor(Species),
+                                   Year         = as.numeric(Year),
+                                   Catch.Type = as.factor(Catch.Type)) %>%
+                            filter(Country   ==  "Canada",
+                                   Year      >= 1997,
+                                   Data.Type == "Number (000's)")
+
+can.catch.cn <- can.catch %>% filter(Species   == "Chinook",
+                                     Area      == "Whole country")
+
+      CN.catch.plot <- ggplot(can.catch.cn) +
+                              geom_line(aes(x = Year, y = Total.Catch, color = Catch.Type)) +
+                       labs(x = "Year", y = "Total Catch (0000's of fish") +
+                       theme_bw()
+      
+      CN.catch.plot
+
+can.catch.cn2 <- can.catch %>% filter(Species   == "Chinook",
+                                      Catch.Type == "Sport")
+      summary(can.catch.cn2)
+
+      CN.catch.plot2 <- ggplot(can.catch.cn2) +
+                              geom_line(aes(x = Year, y = Total.Catch, color = Area)) +
+                                   labs(x = "Year", y = "Total Catch (0000's of fish") +
+                                   theme_bw()
+      CN.catch.plot2
+
+      
+
+can.catch.sk <- can.catch %>% filter(Species   == "Sockeye")
+
+colnames
+summary(can.catch.cn2)
+
+
+CN.catch.plot
+
+sk.catch.plot <- ggplot(can.catch.sk) +
+                        geom_line(aes(x = Year, y = Total.Catch, color = Species, linetype = Catch.Type))
+sk.catch.plot
+
+```
+
+
+###Notes
+Plot peak flows 4 to 5 years previous (e.g. impact of peak flows on recruitment).
+- Assume mortality at >200 cms
+- spawning habitat lost at 300-400 cms
+- Is Quinsam flow regulated? Ask Mary. 
+
+Is return age genetic? Or environmental? 
+
+
+
+
 
 
