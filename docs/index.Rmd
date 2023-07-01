@@ -8,7 +8,7 @@ output:
     code_folding: "show"
 ---
 
-A high-level look at trends in catches of Tyee salmon in Campbell River's legendary Tyee Pool All data exploration is being completed for [fun](https://i.giphy.com/media/Cz6TlrRVVyv9S/giphy.webp) and to learn some new tools. There are far more technical ways of examining this data, but they aren't as fun. All results and interpretation are purely speculative. 
+A high-level look at trends in catches of Tyee salmon in Campbell River's legendary Tyee Pool. All data exploration is being completed for [fun](https://i.giphy.com/media/Cz6TlrRVVyv9S/giphy.webp) and to learn some new tools. There are far more technical ways of examining this data, but they aren't as fun. All results and interpretation are purely speculative. 
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -209,28 +209,37 @@ getOption("rstudio.help.showDataPreview")
                                       rename(Area = 'Reporting Area')
 ```
 
-## The Data
+## The Data and what we know.
 
 This analysis uses the following publicly available data:
 
-1. Annual catch records from the [Tyee Club](https://www.tyeeclub.org/catch-records/>). 
-2. Discharge data collected on the Campbell River by the [Water Survey of Canada](https://wateroffice.ec.gc.ca/index_e.html).
-3. Annual Chinook Salmon escapement data available in the [DFO NuSEDS database](https://open.canada.ca/data/en/dataset/c48669a3-045b-400d-b730-48aafe8c5ee6).
-4. Annual catch statistics from the [North Pacific Anadromous Fish Commission](https://npafc.org/statistics/)
-5. Area based commercial catch statistics from DFO are [available from 2001 to 2016](https://www.pac.dfo-mpo.gc.ca/stats/smon/index-eng.html) 
+1) Annual catch records from the [Tyee Club](https://www.tyeeclub.org/catch-records/>). 
+2) Discharge data collected on the Campbell River by the [Water Survey of Canada](https://wateroffice.ec.gc.ca/index_e.html).
+3) Annual Chinook Salmon escapement data available in the [DFO NuSEDS database](https://open.canada.ca/data/en/dataset/c48669a3-045b-400d-b730-48aafe8c5ee6).
+4) Annual catch statistics from the [North Pacific Anadromous Fish Commission](https://npafc.org/statistics/)
+5) Area based commercial catch statistics from DFO are [available from 2001 to 2016](https://www.pac.dfo-mpo.gc.ca/stats/smon/index-eng.html) 
+
 
 This is certainly an interesting dataset, but it has its limitations. For example, there is no information on effort (# boats per day) and biological data is limited (e.g. size, girth and age of tyees or number of undersized fish captured). 
 
+Information on Campbell River Chinook salmon is somewhat more available. For example, data collected by [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf) suggests that a roughly equal proportion of spawners return to the Campbell River as age-4 and age-5 fish (Table 1 and Table 2), with age-4 fish ranging in size from 550-949 mm (mean ~ 780 mm) and age-5 fish ranging in size from 700-949 mm (mean ~ 840 mm). Age-6 fish were identified, accounted for less than 1% of all fish in the Campbell  (n = 1 fish, 930 mm) and Quinsam rivers. 
+
+Juvenile Chinook Salmon in the Campbell River have been studied intensively since 2015 (e.g. [Thornton et al. 2022](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf). These data suggests nearly all Campbell River Chinook out migrate as Age-0+ juveniles from March through July. Smaller recently emerged Age-0+ fry are dominant and typically captured from March through early May (37 to 52 m). Larger Age-0+ smolts are less common and move out from May through July (64 to 88 mm).
+
+Spawner and redd surveys of the Campbell River canyon, where most Chinook Salmon spawn, have been completed bi-weekly throughout the spawning period since 2014 (e.g. Thornton et al. 2022). These data show that Chinook spawning occurs from late September through early November and peaks in mid-October and that spawners reside in the river for ~12 days. 
+
+Estimates of juvenile Chinook production based on numbers of observed spawners have generally been less than numbers trapped throughout the outmigration period. which may be due to increased juvenile survival or inaccurate/coarse estimates of fecundity.        
+
 For now, I have only looked at data back to 2002, as that is the limit of easily accessible Tyee catch data. 
 
-## Tyee Catches per Year  
+
 ```{r plot1_tyeecatch, echo = FALSE}
 ## Prepare Plot
 plot1 <- ggplot(catch_data) +
                       geom_bar(aes(x= Year, y = catch_binary, fill = tyee_cycle4), stat = "identity") +
                       geom_hline(aes(yintercept=catch_yrs.mean.total, color = catch_yrs.mean.total), 
                                 linetype = "dashed", linewidth = 0.5) +
-                      ylab("# Tyee Salmon") +
+                      labs(y = "# Tyee Salmon", x = "") +
                       guides(fill = "none", #guide_legend(title = "Tyee Cycle"),
                              color = guide_legend(title = "Mean catches per year", label = FALSE)) + 
                       scale_x_continuous(breaks = seq(2002,2023,2)) +
@@ -240,18 +249,9 @@ plot1 <- ggplot(catch_data) +
                             legend.box.background = element_rect(colour = "black", linewidth = 1.25, fill = NA)) 
 ```
 
-```{r tyeecatch.plot, echo=FALSE}
+```{r tyeecatch.plot, include = FALSE}
 suppressWarnings(print(plot1)) 
 ```
-
-`r fig_nums("plot1", "Number of Tyee Salmon captured per year.")`
-
-
-A quick look at `r fig_nums("plot1", display = "cite")` shows:
-  1. There is a fairly clear 4-year cycle of relatively higher catches (highlighted with shading). Which is interesting, and raises lots of questions...
-  * Based on available age data, it seems most fish returning to Campbell River are Age 4 or Age 5, with very few Age 6 fish. Given their size you would expect Tyee's to        primarily be at least Age 5. Assuming there is a strong genetic component to spawner age, and that Tyee's are at least Age-5, it is possible that the 4-year cycle is a      carry-over effect from increased juvenile success 5 or 6 years before the 4 year peak.    
-  2. There has been a consistent decline in the number of Tyee salmon captured per year and that there was a major crash in 2014.
-        
 ```{r include=FALSE}
 ## Merge escapement data with tyee catch data
 cr_data <- left_join(catch_data, cr_esc, by = "Year")
@@ -262,11 +262,9 @@ cr_yearly <- cr_data %>% mutate(Year = as.numeric(Year)) %>%
 ```
 
 ## Tyee Catches Relative to Escapement    
-
-ADD ESCAPEMENT OF OTHER SPECIES. IS THERE A LULL in year before 4-year cylce peaks?
 ```{r plot2_CR_Esc, echo = FALSE}
 
-## Prepare plot
+## Prepare plot of # Tyee vs annual escapement.
 plot2 <- ggplot(cr_data) +
                 geom_bar(aes(x = Year, y = catch_binary, fill = tyee_cycle4), 
                               stat = "identity") +
@@ -287,13 +285,6 @@ plot2 <- ggplot(cr_data) +
 
 ```
 
-If we look at Escapement trends presented in `r fig_nums("plot2", display = "cite")` , we can see:
-      1. There has been a general declining trend in escapement (consistent with regional trends),
-      2. Periods of increased escapement correspond with periods of increased Tyee catches, but not always (e.g. 2005, 2017 and             2020). Given the lack of information on effort (e.g. # of boats fishing per day) we cannot tease apart whether the lack of         catches in some years is due to reduction in pressure. 
-      3. It is also possible that years with high escapement and low Tyee numbers were due to an increased proportion of smaller            fish returning to the Campbell. Without annual information on age structure I cannot tease this apart.
-
-
-
 ```{r tyee vs escapement, echo=FALSE}
 suppressWarnings(print(plot2))   
 ```
@@ -301,25 +292,110 @@ suppressWarnings(print(plot2))
 `r fig_nums("plot2", "Trends in Tyee Salmon captures and Campbell River Chinook Salmon escapement.")`
 
 
-Publicly accessible information on the age structure of Chinook Salmon in the Campbell River is relatively limited. Data           reported by [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf) are          presented in `r table_nums("table1", display = "cite")` and show that most fish returning to the Campbell River are Age 4          (length from 550-949 mm, mean = 780 mm) and Age 5 (length = 700-949 mm, mean = 846 mm).
+A quick look at `r fig_nums("plot2", display = "cite")` shows:
 
-If additional biological data was available, it would be possible to crudely estimate the number of Tyee salmon returning each year. 
+* There is a fairly clear 4-year cycle of relatively higher catches (highlighted with shading). Which is interesting, and raises lots of        questions...
+* There has been a consistent decline in the number of Tyee salmon captured per year.
+* There was a major crash or failure in 2014. 
 
 
+
+If we look at Escapement trends presented in `r fig_nums("plot2", display = "cite")` , we can see:
+
+
+1) There has been a general declining trend in escapement (consistent with regional trends),
+2) Periods of increased escapement correspond with periods of increased Tyee catches, but not always (e.g. 2005, 2017 and 2020). Given the lack of information on effort (e.g. # of boats fishing per day) we cannot tease apart whether the lack of catches in some years is due to reduction in pressure. 
+3) It is also possible that years with high escapement and low Tyee numbers were due to an increased proportion of smaller fish returning to the Campbell. Without annual information on age structure I cannot tease this apart.
 
 ```{r table1prep, include = FALSE}
-age_table <- age_data %>% select(Waterbody, Sex, Age, n, Perc.Total.by.Sex, Perc.Total.by.Stream, bin_range, meanFL, SE)
+library(dplyr)
 
+age_table1 <- age_data %>% select(Waterbody, Age, n, bin_min, bin_max, meanFL, SD, SE) %>%
+                           #filter(Waterbody == "Campbell River") %>%
+                           mutate(Age = as.factor(Age),
+                                  meanFL = as.numeric(meanFL),
+                                  bin_min = as.numeric(bin_min),
+                                  bin_max = as.numeric(bin_max))
 
-table1 <- knitr::kable(age_table, col.names = c("Waterbody","Sex", "Age", "n", "% of Total <br>(by Sex)", "% of Total <br>(by Stream)", "Size Range <br>(mm)", "Mean Lenght <br>(mm)", "Std. Error"),
-             digits = 2,  align=rep('c', 5),
-             caption = "Table 1. Size at age of Chinook Salmon captured in Campbell River watershed")
+  age_table1 <- age_table1 %>% dplyr::group_by(Waterbody, Age) %>%
+                                summarize(n = sum(n),
+                                          bin_min = min(bin_min),
+                                          bin_max = max(bin_max),
+                                          mean = mean(meanFL)) %>%
+                                mutate('% of Total' = prop.table(n)*100,
+                                       size_range = paste(bin_min, "-", bin_max)) %>%
+                                select(Waterbody, Age, n, '% of Total',size_range, mean, )
+                                
+  
+table1 <- knitr::kable(age_table1, col.names = c("Waterbody", "Age", "n", "% of Total", "Size Range <br>(mm)", "Mean Lenght <br>(mm)"),
+             digits = 1,  align=rep('c', 5),
+             caption = "Table 1. Size at age of Chinook Salmon captured in Campbell River watershed from [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf)")
 ```
-
 
 ```{r, echo = FALSE}
 table1
 ```
+
+## What could be affecting returns and catches?
+At it's most basic level, there are three things that are likely affecting catches of Tyee salmon.
+
+
+**1. Juvenile recruitment**
+
+* This is determined by the number of eggs that are deposited (for easy math, lets say     females account for 50% of escapement, that each one deposits 4000 eggs and that egg to fry survival is 10%).     We will assume that fish that survive to fry will enter the sea. Hydrometric data on the Campbell is vailable     back to 1949 and it is likely that extreme high flow events (e.g. greater than 300 cms) during the               rearing/incubation period (maybe October to February) will reduce juvenile recruitment.
+
+**2. Marine survival and productivity**
+
+* This is way too complicated for right now. Let's feel warm and fuzzy by assuming survival and productivity are stable (side note, they arent!). But if we don't do this we can't assume that proportions calculated from Sturham et al. are representative of current returns (they likely are not, fish sizes are decreasing as water temperatures and pH increase, so there are likely fewer Tyee returning now than in previous years). 
+  
+**3. Fishing effort and catchability **
+
+  * For now, I am going to assume effort (# of boats fishing per tide/day) is constant and that catchability (percent of Tyees present that are captured) are stable. In reality, effort has likely decreased over time (especially since 2014) and catchability has likely increased as peoples knowledge, skill and fishing technology have improved over time (not everyone though, I still suck). Either way, not much I am going to do with this.
+
+**4. Fishing Conditions **
+  * No question that fewer fish will be captured during seasons with poor fishing conditions (e.g. very windy, lots of rain). It is also possible that fish behaviour will change in response to river conditions. Certainly there was a lot of speculation that low catches in 2022 were due to high water levels (as evidenced by lowest catch on record while many very large fish were being captured in the river).  
+  
+
+**So, what can we look at? **Well, we could look at everything. But I am lazy, so let's just look at how many Tyee should return to the river each year and fishing conditions. We can estimate the number of Tyee salmon that should return to the Campbell River ***very crudely*** if we make some BIG assumptions: 
+    + Fecundity of Campbell River Tyee salmon is ????4500??? eggs per female.
+    + Sex ratios are 60:40 female to male (based on Sturham data for Campbell River)
+    + Egg to fry survival is approximately XXXX (estimated from Thronton et al. 2022).
+    + Tyee Salmon are over 900 mm. In the Campbell River, I will assume that 10% of Age-4 male adults, 15% of Age-5 spawners (both sexes), and        all Age-6 fish are 30+ lbs (this is **very** loosely based on Sturham data, but I have not seen raw tables so its an guestimate).
+    
+
+```{r how many fish should come back, echo = FALSE}
+## Define assumptions
+      fecundity <- 4500
+      female <- 0.6  # 60% of fish are females
+      male <- 0.4    # 40% of fish are male
+      Age4 <- 0.447  # 44.7% of fish are Age-4
+      Age5 <- 0.461  # 46.1% of fish are Age-5
+      Age6 <- 0.013  #  1.3% of fish are Age-6
+      Tyee.Age4m.prop   <- 0.1  # 10% of Age-4 males are Tyee
+      Tyee.Age5mf.prop  <- 0.15 # 15% of all Age-5 fish are Tyee
+      Tyee.Age6mf.prop  <- 1    # 100% of all Age-6 fish are Tyee
+## Calculate Ratios
+      ratio.Age4.tyee <- male * Age4 * Tyee.Age4m.prop # multiply this by annual escapement to calculate # Age-4 males that are tyees.
+      ratio.Age5.tyee <- Age5 * Tyee.Age5mf.prop # multiply this by annual escapement to calculate # Age-5 fish that are tyees.
+      ratio.Age5.tyee <- Age6 * Tyee.Age6mf.prop # multiply this by annual escapement to calculate # Age-5 fish that are tyees.
+      
+pred.fish <- cr_esc %>% mutate(Year.Age4 = Year-4,
+                               Year.Age5 = Year-5,
+                               Year.Age6 = Year-6)
+
+                      # Need to find out how to reference escapement in each brood year, then apply relevant ratio calculation.
+```
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -441,20 +517,12 @@ plot5.3 <- ggplot(flow.catch.scatter, aes(x=q.daily.ln, y = total.catch.ln)) +
 ```
 
 ```{r, echo=FALSE}
-suppressWarnings(print(plot5.1))
+suppressWarnings(print(plot5))
 ```
 
 `r fig_nums("plot5", "Relationship between river flow and fish capture")`
 
 `r fig_nums("plot5", display = "cite")` shows a strong negative relationship between discharge and the number of fish that are captured. This is what you would expect, that fish will hold in the pool while flows are low and that they will move into the river when flows are higher and they can safely navigate upstream. However, the fishery occurs during the late summer, when flows are typically low and it is possible that the timing of the fishery has contributed to observed trends. 
-
-Scaling the discharge data improved the fit, and still shows a negative relationship between captures and discharge.
-```{r, echo=FALSE}
-suppressWarnings(print(plot5.1))
-```
-
-`r fig_nums("plot5", "Relationship between the natural log of discharge and fish capture")`
-
 
 OK, well there is a relationship (that could be due to a number of things). Lets have a look at some of the older data. 
 
@@ -464,7 +532,8 @@ suppressWarnings(print(plot4))
 
 `r fig_nums("plot4", "Catches of Tyee Salmon since 2007 relative to flow in the Campebll River.")`
 
-## What else could be affecting returns and catches?
+
+  
 Let's look at commercial catches. Maybe there is a fishery that could be intercepting a large number of Tyees.
 
 ```{r}
@@ -525,6 +594,22 @@ Is return age genetic? Or environmental?
 
 
 
+
+### Supplemental Tables and Figures
+```{r table2prep, include = FALSE}
+# Table of size by age class and sex.
+age_table2 <- age_data %>% select(Waterbody, Sex, Age, n, Perc.Total.by.Sex, Perc.Total.by.Stream, bin_range, meanFL, SE)
+
+
+table2 <- knitr::kable(age_table2, col.names = c("Waterbody","Sex", "Age", "n", "% of Total <br>(by Sex)", "% of Total <br>(by Stream)", "Size Range <br>(mm)", "Mean Lenght <br>(mm)", "Std. Error"),
+             digits = 2,  align=rep('c', 5),
+             caption = "Table 1. Size at age of male and female Chinook Salmon captured in Campbell River watershed")
+```
+
+
+```{r, echo = FALSE}
+table2
+```
 
 
 
