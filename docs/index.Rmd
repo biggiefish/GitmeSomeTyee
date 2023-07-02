@@ -129,7 +129,8 @@ getOption("rstudio.help.showDataPreview")
     
         ## Prepare dataset for CR Escapement 
         cr_esc <- esc_data %>% filter(GAZETTED_NAME == "CAMPBELL RIVER",                 # only show data for CR
-                                      ANALYSIS_YR >=2002) %>%                             # data for same time period as tyee catch data    
+                                      #ANALYSIS_YR >=2002) %>% # data for same time period as tyee catch data
+                                      ANALYSIS_YR >=1990) %>% # data from prior to tyee catch data so we can predict tyee returns.    
                                mutate(Year          =  as.numeric(ANALYSIS_YR),
                                      Waterbody      =  as.factor(GAZETTED_NAME),
                                      Esc_Count      =  as.numeric(MAX_ESTIMATE),
@@ -222,11 +223,11 @@ This analysis uses the following publicly available data:
 
 This is certainly an interesting dataset, but it has its limitations. For example, there is no information on effort (# boats per day) and biological data is limited (e.g. size, girth and age of tyees or number of undersized fish captured). 
 
-Information on Campbell River Chinook salmon is somewhat more available. For example, data collected by [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf) suggests that a roughly equal proportion of spawners return to the Campbell River as age-4 and age-5 fish (Table 1 and Table 2), with age-4 fish ranging in size from 550-949 mm (mean ~ 780 mm) and age-5 fish ranging in size from 700-949 mm (mean ~ 840 mm). Age-6 fish were identified, accounted for less than 1% of all fish in the Campbell  (n = 1 fish, 930 mm) and Quinsam rivers. 
+Information on Campbell River Chinook salmon is somewhat more available. For example, data collected by [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf) suggests that a roughly equal proportion of spawners return to the Campbell River as age-4 and age-5 fish (Table 1 and Table 2), with age-4 fish ranging in size from 550-949 mm (mean ~ 780 mm) and age-5 fish ranging in size from 700-949 mm (mean ~ 840 mm). Age-6 fish were identified, accounted for less than 1% of all fish in the Campbell  (n = 1 fish, 930 mm) and Quinsam rivers. However, [Ewart & Anderson, 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf) report that the 2012 return was comprised of ~2% Age-3, ~37% Age 4 and 61% Age-5 fish and that female Chinook in the Campbell River carried roughly ~5,700 to 6,000 eggs (decreasing trend).
 
-Juvenile Chinook Salmon in the Campbell River have been studied intensively since 2015 (e.g. [Thornton et al. 2022](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf). These data suggests nearly all Campbell River Chinook out migrate as Age-0+ juveniles from March through July. Smaller recently emerged Age-0+ fry are dominant and typically captured from March through early May (37 to 52 m). Larger Age-0+ smolts are less common and move out from May through July (64 to 88 mm).
+Juvenile Chinook Salmon in the Campbell River have been studied intensively since 2015 (e.g. [Thornton et al. 2022](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf). These data suggests nearly all Campbell River Chinook out migrate as Age-0+ juveniles from March through July. Smaller recently emerged Age-0+ fry are dominant and typically captured from March through early May (37 to 52 m). Larger Age-0+ smolts are less common and move out from May through July (64 to 88 mm). Marine survival of unfed fry released from the Quinsam hatchery range from 0.2% to 0.4% (yes, that 0.002 to 0.004) ([Ewart & Anderson 2013]( http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf)).  
 
-Spawner and redd surveys of the Campbell River canyon, where most Chinook Salmon spawn, have been completed bi-weekly throughout the spawning period since 2014 (e.g. Thornton et al. 2022). These data show that Chinook spawning occurs from late September through early November and peaks in mid-October and that spawners reside in the river for ~12 days. 
+Spawner and redd surveys of the Campbell River canyon, where most Chinook Salmon spawn, have been completed bi-weekly throughout the spawning period since 2014 (e.g. Thornton et al. 2022). These data show that Chinook spawning occurs from late September through early November and peaks in mid-October and that spawners reside in the river for ~12 days. [Ewart & Anderson 2013]( http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf) report that 56% of the otoliths examined from the 2012 return showed no signs of hatchery marking and are assumed wild. The remaining 44% are presumed to have originated from instream incubators (31%), seapen released smolts (4%) and Quinsam River released smolts (9%). 
 
 Estimates of juvenile Chinook production based on numbers of observed spawners have generally been less than numbers trapped throughout the outmigration period. which may be due to increased juvenile survival or inaccurate/coarse estimates of fecundity.        
 
@@ -252,9 +253,13 @@ plot1 <- ggplot(catch_data) +
 ```{r tyeecatch.plot, include = FALSE}
 suppressWarnings(print(plot1)) 
 ```
+
 ```{r include=FALSE}
+## Filter escapement data.... 
+cr_esc2 <- cr_esc %>% filter(Year >=2002)
+
 ## Merge escapement data with tyee catch data
-cr_data <- left_join(catch_data, cr_esc, by = "Year")
+cr_data <- left_join(catch_data, cr_esc2, by = "Year")
     
 cr_yearly <- cr_data %>% mutate(Year = as.numeric(Year)) %>%
                          group_by(Year) %>%
@@ -342,7 +347,7 @@ At it's most basic level, there are three things that are likely affecting catch
 
 **1. Juvenile recruitment**
 
-* This is determined by the number of eggs that are deposited (for easy math, lets say     females account for 50% of escapement, that each one deposits 4000 eggs and that egg to fry survival is 10%).     We will assume that fish that survive to fry will enter the sea. Hydrometric data on the Campbell is vailable     back to 1949 and it is likely that extreme high flow events (e.g. greater than 300 cms) during the               rearing/incubation period (maybe October to February) will reduce juvenile recruitment.
+* This is determined by the number of eggs that are deposited (for easy math, lets say     females account for 50% of escapement, that each one deposits 4000 eggs and that egg to fry survival is 10%).     We will assume that fish that survive to fry will enter the sea. Hydrometric data on the Campbell is vailable back to 1949 and it is likely that extreme high or low flow events (e.g. greater than 300 cms, less than ??50 cms??) during the rearing/incubation period (maybe October to February) will reduce juvenile recruitment.
 
 **2. Marine survival and productivity**
 
@@ -365,25 +370,82 @@ At it's most basic level, there are three things that are likely affecting catch
 
 ```{r how many fish should come back, echo = FALSE}
 ## Define assumptions
-      fecundity <- 4500
-      female <- 0.6  # 60% of fish are females
+      fecundity <- 5700 # typically around 6000 for CR, http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf
+      perc.female <- 0.6  # 60% of fish are females
+      egg.to.fry <- 0.1
+      fry.to.smolt <- 0.2
+      marine.surv <- 0.003 #marine survival reported as 0.002 to 0.004 by  http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf 
       male <- 0.4    # 40% of fish are male
       Age4 <- 0.447  # 44.7% of fish are Age-4
       Age5 <- 0.461  # 46.1% of fish are Age-5
       Age6 <- 0.013  #  1.3% of fish are Age-6
-      Tyee.Age4m.prop   <- 0.1  # 10% of Age-4 males are Tyee
-      Tyee.Age5mf.prop  <- 0.15 # 15% of all Age-5 fish are Tyee
-      Tyee.Age6mf.prop  <- 1    # 100% of all Age-6 fish are Tyee
+      Tyee.Age4m.prop   <- 0.15  # 10% of Age-4 males are Tyee - MADE UP NUMBER!
+      Tyee.Age5mf.prop  <- 0.35 # 15% of all Age-5 fish are Tyee - MADE UP NUMBER!
+      Tyee.Age6mf.prop  <- 1    # 100% of all Age-6 fish are Tyee - MADE UP NUMBER!
+      
 ## Calculate Ratios
       ratio.Age4.tyee <- male * Age4 * Tyee.Age4m.prop # multiply this by annual escapement to calculate # Age-4 males that are tyees.
       ratio.Age5.tyee <- Age5 * Tyee.Age5mf.prop # multiply this by annual escapement to calculate # Age-5 fish that are tyees.
       ratio.Age5.tyee <- Age6 * Tyee.Age6mf.prop # multiply this by annual escapement to calculate # Age-5 fish that are tyees.
+      summary(cr_esc$Esc_Count)
+      colnames(cr_esc)
+      str(cr_esc)
       
-pred.fish <- cr_esc %>% mutate(Year.Age4 = Year-4,
-                               Year.Age5 = Year-5,
-                               Year.Age6 = Year-6)
+## Estimate number of fish predicted to return from each age class based on historic escapement.       
+pred.fish <- cr_esc %>% mutate(pred.returns = Esc_Count * perc.female *fecundity *
+                                              egg.to.fry * fry.to.smolt * marine.surv,  
+                               Age4_Yr = Year+4,
+                               Age4_returns = Age4*pred.returns,
+                               Age4_tyee    = Age4_returns * male * Tyee.Age4m.prop,
+                               Age5_Yr = Year+5,
+                               Age5_returns = Age5*pred.returns,
+                               Age5_tyee    = Age5_returns * Tyee.Age5mf.prop,
+                               Age6_Yr = Year+6,
+                               Age6_returns = Age6*pred.returns,
+                               Age6_tyee    = Age6_returns * Tyee.Age6mf.prop)
 
-                      # Need to find out how to reference escapement in each brood year, then apply relevant ratio calculation.
+## Estimate total number of Tyee expected to return in each year.
+pred.tyee <- pred.fish %>% select(pred.returns,Age4_Yr, Age5_Yr,Age6_Yr,Age4_tyee,Age5_tyee,Age6_tyee) %>%
+                                  pivot_longer(-pred.returns,
+                                                names_to = c("Var", ".value"),
+                                                names_sep = "_") %>%
+                                  rename("Returning.AgeClass"   = "Var",
+                                           "Year"               = "Yr",
+                                           "Tyee.Total"         = "tyee") %>%
+                                  group_by(Year) %>%
+                                  summarize(Tyee.Total.Predicted = sum(Tyee.Total)) %>%
+                                  mutate(Year = as.numeric(Year))
+str(pred.fish)
+str(pred.tyee)
+## Join predicted fish database with estimate of total tyees per year
+total.pred.tyee <- left_join(pred.fish, pred.tyee, by = c("Year")) %>%  
+                   mutate(Tyee.Prop = Tyee.Total.Predicted/Esc_Count,
+                          Tyee.Total.Predicted = coalesce(Tyee.Total.Predicted, 0),) ## Calculate proportion of Tyees relative to overall escapement
+
+colnames(total.pred.tyee)
+
+summary(total.pred.tyee$Tyee.Total.Predicted)
+
+plot66 <- ggplot(total.pred.tyee) +
+                geom_bar(aes(x = Year, y = catch_binary, fill = tyee_cycle4, alpha = 0.8), 
+                              stat = "identity") +
+                geom_bar(aes(x = Year, y = Tyee.Total.Predicted, fill = 'lightblue', alpha = 0.3), 
+                              stat = 'identity') +
+                geom_line(aes(x = Year, y = Esc_Scaled, linetype = Species), 
+                              color = "lightblue", linewidth = 1.2) +
+                geom_hline(aes(yintercept = catch_yrs.mean.total, color = catch_yrs.mean.total), 
+                              linetype = "dashed", linewidth = 0.5) +
+                labs(x = "Year", y = "Number Tyee Captured") + 
+                guides(fill =  "none", #guide_legend(title = "Tyee Cycle", label = FALSE),
+                       linetype = guide_legend(title = "Escapement", label = FALSE),
+                       color = guide_legend(title = "Mean Tyee Catch", label = FALSE)) +
+                scale_y_continuous(breaks = seq(0, 100, 5),
+                                    sec.axis = sec_axis(~.*25, name = "Escapement")) +  #scale secondary access by x25
+                scale_x_continuous(breaks = seq(2002,2022,2)) +            
+                theme_bw() +
+                theme(legend.direction = "horizontal",
+                      legend.position = "bottom")
+
 ```
 
 

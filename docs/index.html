@@ -11,7 +11,7 @@
 
 <meta name="author" content="Eric V" />
 
-<meta name="date" content="2023-07-01" />
+<meta name="date" content="2023-07-02" />
 
 <title>GitTyee</title>
 
@@ -440,7 +440,7 @@ display: none;
 
 <h1 class="title toc-ignore">GitTyee</h1>
 <h4 class="author">Eric V</h4>
-<h4 class="date">2023-07-01</h4>
+<h4 class="date">2023-07-02</h4>
 
 </div>
 
@@ -476,20 +476,32 @@ return to the Campbell River as age-4 and age-5 fish (Table 1 and Table
 2), with age-4 fish ranging in size from 550-949 mm (mean ~ 780 mm) and
 age-5 fish ranging in size from 700-949 mm (mean ~ 840 mm). Age-6 fish
 were identified, accounted for less than 1% of all fish in the Campbell
-(n = 1 fish, 930 mm) and Quinsam rivers.</p>
+(n = 1 fish, 930 mm) and Quinsam rivers. However, <a href="http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf">Ewart
+&amp; Anderson, 2013</a> report that the 2012 return was comprised of
+~2% Age-3, ~37% Age 4 and 61% Age-5 fish and that female Chinook in the
+Campbell River carried roughly ~5,700 to 6,000 eggs (decreasing
+trend).</p>
 <p>Juvenile Chinook Salmon in the Campbell River have been studied
 intensively since 2015 (e.g. <a href="https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf">Thornton
 et al. 2022</a>. These data suggests nearly all Campbell River Chinook
 out migrate as Age-0+ juveniles from March through July. Smaller
 recently emerged Age-0+ fry are dominant and typically captured from
 March through early May (37 to 52 m). Larger Age-0+ smolts are less
-common and move out from May through July (64 to 88 mm).</p>
+common and move out from May through July (64 to 88 mm). Marine survival
+of unfed fry released from the Quinsam hatchery range from 0.2% to 0.4%
+(yes, that 0.002 to 0.004) (<a href="http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf">Ewart
+&amp; Anderson 2013</a>).</p>
 <p>Spawner and redd surveys of the Campbell River canyon, where most
 Chinook Salmon spawn, have been completed bi-weekly throughout the
 spawning period since 2014 (e.g. Thornton et al. 2022). These data show
 that Chinook spawning occurs from late September through early November
 and peaks in mid-October and that spawners reside in the river for ~12
-days.</p>
+days. <a href="http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf">Ewart
+&amp; Anderson 2013</a> report that 56% of the otoliths examined from
+the 2012 return showed no signs of hatchery marking and are assumed
+wild. The remaining 44% are presumed to have originated from instream
+incubators (31%), seapen released smolts (4%) and Quinsam River released
+smolts (9%).</p>
 <p>Estimates of juvenile Chinook production based on numbers of observed
 spawners have generally been less than numbers trapped throughout the
 outmigration period. which may be due to increased juvenile survival or
@@ -659,9 +671,9 @@ easy math, lets say females account for 50% of escapement, that each one
 deposits 4000 eggs and that egg to fry survival is 10%). We will assume
 that fish that survive to fry will enter the sea. Hydrometric data on
 the Campbell is vailable back to 1949 and it is likely that extreme high
-flow events (e.g. greater than 300 cms) during the rearing/incubation
-period (maybe October to February) will reduce juvenile
-recruitment.</li>
+or low flow events (e.g. greater than 300 cms, less than ??50 cms??)
+during the rearing/incubation period (maybe October to February) will
+reduce juvenile recruitment.</li>
 </ul>
 <p><strong>2. Marine survival and productivity</strong></p>
 <ul>
@@ -703,6 +715,48 @@ Campbell River, I will assume that 10% of Age-4 male adults, 15% of
 Age-5 spawners (both sexes), and all Age-6 fish are 30+ lbs (this is
 <strong>very</strong> loosely based on Sturham data, but I have not seen
 raw tables so its an guestimate).</p>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##   123.0   486.2   701.0   871.8  1180.2  3398.0</code></pre>
+<pre><code>## [1] &quot;Year&quot;           &quot;Waterbody&quot;      &quot;Species&quot;        &quot;Esc_Count&quot;     
+## [5] &quot;Esc_Scaled&quot;     &quot;Esc_Mean&quot;       &quot;Esc_MeanScaled&quot;</code></pre>
+<pre><code>## tibble [34 × 7] (S3: tbl_df/tbl/data.frame)
+##  $ Year          : num [1:34] 1990 1991 1992 1993 1994 ...
+##  $ Waterbody     : Factor w/ 1 level &quot;CAMPBELL RIVER&quot;: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ Species       : Factor w/ 1 level &quot;Chinook&quot;: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ Esc_Count     : num [1:34] 3398 1382 770 219 476 ...
+##  $ Esc_Scaled    : num [1:34] 135.92 55.28 30.8 8.76 19.04 ...
+##  $ Esc_Mean      : num [1:34] 872 872 872 872 872 ...
+##  $ Esc_MeanScaled: num [1:34] 34.9 34.9 34.9 34.9 34.9 ...</code></pre>
+<pre><code>## tibble [34 × 17] (S3: tbl_df/tbl/data.frame)
+##  $ Year          : num [1:34] 1990 1991 1992 1993 1994 ...
+##  $ Waterbody     : Factor w/ 1 level &quot;CAMPBELL RIVER&quot;: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ Species       : Factor w/ 1 level &quot;Chinook&quot;: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ Esc_Count     : num [1:34] 3398 1382 770 219 476 ...
+##  $ Esc_Scaled    : num [1:34] 135.92 55.28 30.8 8.76 19.04 ...
+##  $ Esc_Mean      : num [1:34] 872 872 872 872 872 ...
+##  $ Esc_MeanScaled: num [1:34] 34.9 34.9 34.9 34.9 34.9 ...
+##  $ pred.returns  : num [1:34] 697.3 283.6 158 44.9 97.7 ...
+##  $ Age4_Yr       : num [1:34] 1994 1995 1996 1997 1998 ...
+##  $ Age4_returns  : num [1:34] 311.7 126.8 70.6 20.1 43.7 ...
+##  $ Age4_tyee     : num [1:34] 18.7 7.61 4.24 1.21 2.62 ...
+##  $ Age5_Yr       : num [1:34] 1995 1996 1997 1998 1999 ...
+##  $ Age5_returns  : num [1:34] 321.4 130.7 72.8 20.7 45 ...
+##  $ Age5_tyee     : num [1:34] 112.5 45.76 25.49 7.25 15.76 ...
+##  $ Age6_Yr       : num [1:34] 1996 1997 1998 1999 2000 ...
+##  $ Age6_returns  : num [1:34] 9.065 3.687 2.054 0.584 1.27 ...
+##  $ Age6_tyee     : num [1:34] 9.065 3.687 2.054 0.584 1.27 ...</code></pre>
+<pre><code>## tibble [34 × 2] (S3: tbl_df/tbl/data.frame)
+##  $ Year                : num [1:34] 1994 1995 1996 1997 1998 ...
+##  $ Tyee.Total.Predicted: num [1:34] 18.7 120.1 59.1 30.4 11.9 ...</code></pre>
+<pre><code>##  [1] &quot;Year&quot;                 &quot;Waterbody&quot;            &quot;Species&quot;             
+##  [4] &quot;Esc_Count&quot;            &quot;Esc_Scaled&quot;           &quot;Esc_Mean&quot;            
+##  [7] &quot;Esc_MeanScaled&quot;       &quot;pred.returns&quot;         &quot;Age4_Yr&quot;             
+## [10] &quot;Age4_returns&quot;         &quot;Age4_tyee&quot;            &quot;Age5_Yr&quot;             
+## [13] &quot;Age5_returns&quot;         &quot;Age5_tyee&quot;            &quot;Age6_Yr&quot;             
+## [16] &quot;Age6_returns&quot;         &quot;Age6_tyee&quot;            &quot;Tyee.Total.Predicted&quot;
+## [19] &quot;Tyee.Prop&quot;</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##    0.00   18.84   30.06   31.82   43.57  120.11</code></pre>
 </div>
 <div id="influence-of-river-flow-on-catches" class="section level2">
 <h2>Influence of river flow on catches</h2>
@@ -806,7 +860,7 @@ colnames</code></pre>
 ##         else character()
 ##     }
 ## }
-## &lt;bytecode: 0x0000025849173180&gt;
+## &lt;bytecode: 0x000001910ce22640&gt;
 ## &lt;environment: namespace:base&gt;</code></pre>
 <pre class="r"><code>summary(can.catch.cn2)</code></pre>
 <pre><code>##    Country          Whole Country/Province/State
@@ -875,6 +929,17 @@ in Campbell River watershed</caption>
 <tbody>
 <tr class="odd">
 <td align="center">Campbell River</td>
+<td align="center">F</td>
+<td align="center">3</td>
+<td align="center">0</td>
+<td align="center">0.00</td>
+<td align="center">0.00</td>
+<td align="center">500 - 699</td>
+<td align="center">595</td>
+<td align="center">20.82</td>
+</tr>
+<tr class="even">
+<td align="center">Campbell River</td>
 <td align="center">M</td>
 <td align="center">3</td>
 <td align="center">6</td>
@@ -883,6 +948,17 @@ in Campbell River watershed</caption>
 <td align="center">500 - 699</td>
 <td align="center">595</td>
 <td align="center">20.82</td>
+</tr>
+<tr class="odd">
+<td align="center">Campbell River</td>
+<td align="center">F</td>
+<td align="center">4</td>
+<td align="center">21</td>
+<td align="center">0.48</td>
+<td align="center">0.28</td>
+<td align="center">700 - 899</td>
+<td align="center">783</td>
+<td align="center">10.69</td>
 </tr>
 <tr class="even">
 <td align="center">Campbell River</td>
@@ -897,50 +973,6 @@ in Campbell River watershed</caption>
 </tr>
 <tr class="odd">
 <td align="center">Campbell River</td>
-<td align="center">M</td>
-<td align="center">5</td>
-<td align="center">12</td>
-<td align="center">0.38</td>
-<td align="center">0.16</td>
-<td align="center">700 - 949</td>
-<td align="center">846</td>
-<td align="center">14.43</td>
-</tr>
-<tr class="even">
-<td align="center">Campbell River</td>
-<td align="center">M</td>
-<td align="center">6</td>
-<td align="center">1</td>
-<td align="center">0.03</td>
-<td align="center">0.01</td>
-<td align="center">900 - 949</td>
-<td align="center">930</td>
-<td align="center">0.00</td>
-</tr>
-<tr class="odd">
-<td align="center">Campbell River</td>
-<td align="center">F</td>
-<td align="center">3</td>
-<td align="center">0</td>
-<td align="center">0.00</td>
-<td align="center">0.00</td>
-<td align="center">500 - 699</td>
-<td align="center">595</td>
-<td align="center">20.82</td>
-</tr>
-<tr class="even">
-<td align="center">Campbell River</td>
-<td align="center">F</td>
-<td align="center">4</td>
-<td align="center">21</td>
-<td align="center">0.48</td>
-<td align="center">0.28</td>
-<td align="center">700 - 899</td>
-<td align="center">783</td>
-<td align="center">10.69</td>
-</tr>
-<tr class="odd">
-<td align="center">Campbell River</td>
 <td align="center">F</td>
 <td align="center">5</td>
 <td align="center">23</td>
@@ -952,6 +984,17 @@ in Campbell River watershed</caption>
 </tr>
 <tr class="even">
 <td align="center">Campbell River</td>
+<td align="center">M</td>
+<td align="center">5</td>
+<td align="center">12</td>
+<td align="center">0.38</td>
+<td align="center">0.16</td>
+<td align="center">700 - 949</td>
+<td align="center">846</td>
+<td align="center">14.43</td>
+</tr>
+<tr class="odd">
+<td align="center">Campbell River</td>
 <td align="center">F</td>
 <td align="center">6</td>
 <td align="center">0</td>
@@ -961,136 +1004,15 @@ in Campbell River watershed</caption>
 <td align="center">930</td>
 <td align="center">0.00</td>
 </tr>
-<tr class="odd">
-<td align="center">Quinsam River</td>
-<td align="center">M</td>
-<td align="center">3</td>
-<td align="center">45</td>
-<td align="center">0.41</td>
-<td align="center">0.22</td>
-<td align="center">500 - 849</td>
-<td align="center">626</td>
-<td align="center">12.07</td>
-</tr>
 <tr class="even">
-<td align="center">Quinsam River</td>
-<td align="center">M</td>
-<td align="center">4</td>
-<td align="center">56</td>
-<td align="center">0.51</td>
-<td align="center">0.28</td>
-<td align="center">550 - 949</td>
-<td align="center">723</td>
-<td align="center">9.35</td>
-</tr>
-<tr class="odd">
-<td align="center">Quinsam River</td>
-<td align="center">M</td>
-<td align="center">5</td>
-<td align="center">9</td>
-<td align="center">0.08</td>
-<td align="center">0.04</td>
-<td align="center">700 - 949</td>
-<td align="center">806</td>
-<td align="center">21.00</td>
-</tr>
-<tr class="even">
-<td align="center">Quinsam River</td>
+<td align="center">Campbell River</td>
 <td align="center">M</td>
 <td align="center">6</td>
-<td align="center">0</td>
-<td align="center">0.00</td>
-<td align="center">0.00</td>
-<td align="center">800 - 849</td>
-<td align="center">838</td>
-<td align="center">2.83</td>
-</tr>
-<tr class="odd">
-<td align="center">Quinsam River</td>
-<td align="center">F</td>
-<td align="center">3</td>
 <td align="center">1</td>
-<td align="center">0.01</td>
-<td align="center">0.00</td>
-<td align="center">700 - 749</td>
-<td align="center">700</td>
-<td align="center">0.00</td>
-</tr>
-<tr class="even">
-<td align="center">Quinsam River</td>
-<td align="center">F</td>
-<td align="center">4</td>
-<td align="center">58</td>
-<td align="center">0.63</td>
-<td align="center">0.29</td>
-<td align="center">650 - 849</td>
-<td align="center">744</td>
-<td align="center">4.73</td>
-</tr>
-<tr class="odd">
-<td align="center">Quinsam River</td>
-<td align="center">F</td>
-<td align="center">5</td>
-<td align="center">31</td>
-<td align="center">0.34</td>
-<td align="center">0.15</td>
-<td align="center">700 - 949</td>
-<td align="center">830</td>
-<td align="center">7.54</td>
-</tr>
-<tr class="even">
-<td align="center">Quinsam River</td>
-<td align="center">F</td>
-<td align="center">6</td>
-<td align="center">2</td>
-<td align="center">0.02</td>
-<td align="center">0.01</td>
-<td align="center">800 - 849</td>
-<td align="center">838</td>
-<td align="center">2.83</td>
-</tr>
-<tr class="odd">
-<td align="center">Quinsam Hatchery</td>
-<td align="center">M</td>
-<td align="center">3</td>
-<td align="center">67</td>
-<td align="center">0.38</td>
-<td align="center">0.18</td>
-<td align="center">400 - 749</td>
-<td align="center">595</td>
-<td align="center">6.84</td>
-</tr>
-<tr class="even">
-<td align="center">Quinsam Hatchery</td>
-<td align="center">M</td>
-<td align="center">4</td>
-<td align="center">95</td>
-<td align="center">0.54</td>
-<td align="center">0.25</td>
-<td align="center">550 - 899</td>
-<td align="center">745</td>
-<td align="center">5.64</td>
-</tr>
-<tr class="odd">
-<td align="center">Quinsam Hatchery</td>
-<td align="center">M</td>
-<td align="center">5</td>
-<td align="center">12</td>
-<td align="center">0.07</td>
 <td align="center">0.03</td>
-<td align="center">750 - 949</td>
-<td align="center">845</td>
-<td align="center">13.57</td>
-</tr>
-<tr class="even">
-<td align="center">Quinsam Hatchery</td>
-<td align="center">M</td>
-<td align="center">6</td>
-<td align="center">1</td>
 <td align="center">0.01</td>
-<td align="center">0.00</td>
-<td align="center">750 - 799</td>
-<td align="center">756</td>
+<td align="center">900 - 949</td>
+<td align="center">930</td>
 <td align="center">0.00</td>
 </tr>
 <tr class="odd">
@@ -1106,6 +1028,17 @@ in Campbell River watershed</caption>
 </tr>
 <tr class="even">
 <td align="center">Quinsam Hatchery</td>
+<td align="center">M</td>
+<td align="center">3</td>
+<td align="center">67</td>
+<td align="center">0.38</td>
+<td align="center">0.18</td>
+<td align="center">400 - 749</td>
+<td align="center">595</td>
+<td align="center">6.84</td>
+</tr>
+<tr class="odd">
+<td align="center">Quinsam Hatchery</td>
 <td align="center">F</td>
 <td align="center">4</td>
 <td align="center">130</td>
@@ -1114,6 +1047,17 @@ in Campbell River watershed</caption>
 <td align="center">600 - 899</td>
 <td align="center">742</td>
 <td align="center">3.77</td>
+</tr>
+<tr class="even">
+<td align="center">Quinsam Hatchery</td>
+<td align="center">M</td>
+<td align="center">4</td>
+<td align="center">95</td>
+<td align="center">0.54</td>
+<td align="center">0.25</td>
+<td align="center">550 - 899</td>
+<td align="center">745</td>
+<td align="center">5.64</td>
 </tr>
 <tr class="odd">
 <td align="center">Quinsam Hatchery</td>
@@ -1128,6 +1072,17 @@ in Campbell River watershed</caption>
 </tr>
 <tr class="even">
 <td align="center">Quinsam Hatchery</td>
+<td align="center">M</td>
+<td align="center">5</td>
+<td align="center">12</td>
+<td align="center">0.07</td>
+<td align="center">0.03</td>
+<td align="center">750 - 949</td>
+<td align="center">845</td>
+<td align="center">13.57</td>
+</tr>
+<tr class="odd">
+<td align="center">Quinsam Hatchery</td>
 <td align="center">F</td>
 <td align="center">6</td>
 <td align="center">1</td>
@@ -1136,6 +1091,105 @@ in Campbell River watershed</caption>
 <td align="center">800 - 849</td>
 <td align="center">812</td>
 <td align="center">0.00</td>
+</tr>
+<tr class="even">
+<td align="center">Quinsam Hatchery</td>
+<td align="center">M</td>
+<td align="center">6</td>
+<td align="center">1</td>
+<td align="center">0.01</td>
+<td align="center">0.00</td>
+<td align="center">750 - 799</td>
+<td align="center">756</td>
+<td align="center">0.00</td>
+</tr>
+<tr class="odd">
+<td align="center">Quinsam River</td>
+<td align="center">F</td>
+<td align="center">3</td>
+<td align="center">1</td>
+<td align="center">0.01</td>
+<td align="center">0.00</td>
+<td align="center">700 - 749</td>
+<td align="center">700</td>
+<td align="center">0.00</td>
+</tr>
+<tr class="even">
+<td align="center">Quinsam River</td>
+<td align="center">M</td>
+<td align="center">3</td>
+<td align="center">45</td>
+<td align="center">0.41</td>
+<td align="center">0.22</td>
+<td align="center">500 - 849</td>
+<td align="center">626</td>
+<td align="center">12.07</td>
+</tr>
+<tr class="odd">
+<td align="center">Quinsam River</td>
+<td align="center">F</td>
+<td align="center">4</td>
+<td align="center">58</td>
+<td align="center">0.63</td>
+<td align="center">0.29</td>
+<td align="center">650 - 849</td>
+<td align="center">744</td>
+<td align="center">4.73</td>
+</tr>
+<tr class="even">
+<td align="center">Quinsam River</td>
+<td align="center">M</td>
+<td align="center">4</td>
+<td align="center">56</td>
+<td align="center">0.51</td>
+<td align="center">0.28</td>
+<td align="center">550 - 949</td>
+<td align="center">723</td>
+<td align="center">9.35</td>
+</tr>
+<tr class="odd">
+<td align="center">Quinsam River</td>
+<td align="center">F</td>
+<td align="center">5</td>
+<td align="center">31</td>
+<td align="center">0.34</td>
+<td align="center">0.15</td>
+<td align="center">700 - 949</td>
+<td align="center">830</td>
+<td align="center">7.54</td>
+</tr>
+<tr class="even">
+<td align="center">Quinsam River</td>
+<td align="center">M</td>
+<td align="center">5</td>
+<td align="center">9</td>
+<td align="center">0.08</td>
+<td align="center">0.04</td>
+<td align="center">700 - 949</td>
+<td align="center">806</td>
+<td align="center">21.00</td>
+</tr>
+<tr class="odd">
+<td align="center">Quinsam River</td>
+<td align="center">F</td>
+<td align="center">6</td>
+<td align="center">2</td>
+<td align="center">0.02</td>
+<td align="center">0.01</td>
+<td align="center">800 - 849</td>
+<td align="center">838</td>
+<td align="center">2.83</td>
+</tr>
+<tr class="even">
+<td align="center">Quinsam River</td>
+<td align="center">M</td>
+<td align="center">6</td>
+<td align="center">0</td>
+<td align="center">0.00</td>
+<td align="center">0.00</td>
+<td align="center">800 - 849</td>
+<td align="center">838</td>
+<td align="center">2.83</td>
 </tr>
 </tbody>
 </table>
