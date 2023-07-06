@@ -32,6 +32,7 @@ getOption("rstudio.help.showDataPreview")
     library(knitr)
     library(captioner)
     library(zoo)
+    library(gridExtra)
 
 ## Define Working Directory ---
 #setwd("C:/Users/evogt/R Analysis/EAV/Tyee/")
@@ -126,6 +127,8 @@ getOption("rstudio.help.showDataPreview")
 ## * 3. Escapement Data ----
         ## Load Data      
         esc_data <- read_excel(esc.dat)
+        
+        esc.dat2 <- filter(esc_data, ANALYSIS_YR > 2010)
     
         ## Prepare dataset for CR Escapement 
         cr_esc <- esc_data %>% filter(GAZETTED_NAME == "CAMPBELL RIVER",                 # only show data for CR
@@ -313,8 +316,7 @@ If we look at Escapement trends presented in `r fig_nums("plot2", display = "cit
 3) It is also possible that years with high escapement and low Tyee numbers were due to an increased proportion of smaller fish returning to the Campbell. Without annual information on age structure I cannot tease this apart.
 
 ```{r table1prep, include = FALSE}
-library(dplyr)
-
+## Prepare data for table
 age_table1 <- age_data %>% select(Waterbody, Age, n, bin_min, bin_max, meanFL, SD, SE) %>%
                            #filter(Waterbody == "Campbell River") %>%
                            mutate(Age = as.factor(Age),
@@ -368,7 +370,7 @@ At it's most basic level, there are three things that are likely affecting catch
     + Tyee Salmon are over 900 mm. In the Campbell River, I will assume that 10% of Age-4 male adults, 15% of Age-5 spawners (both sexes), and        all Age-6 fish are 30+ lbs (this is **very** loosely based on Sturham data, but I have not seen raw tables so its an guestimate).
     
 
-```{r how many fish should come back, echo = FALSE}
+```{r how many fish should come back, include= FALSE}
 ## Define assumptions
       fecundity <- 5700 # typically around 6000 for CR, http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf
       perc.female <- 0.6  # 60% of fish are females
@@ -420,25 +422,51 @@ str(pred.tyee)
 ## Join predicted fish database with estimate of total tyees per year
 total.pred.tyee <- left_join(pred.fish, pred.tyee, by = c("Year")) %>%  
                    mutate(Tyee.Prop = Tyee.Total.Predicted/Esc_Count,
-                          Tyee.Total.Predicted = coalesce(Tyee.Total.Predicted, 0),) ## Calculate proportion of Tyees relative to overall escapement
+                          Tyee.Total.Predicted = coalesce(Tyee.Total.Predicted, 0)) ## Calculate proportion of Tyees relative to overall escapement
+
 
 colnames(total.pred.tyee)
+colnames(cr_data)
+
+cr_data.yr <- cr_data %>% select(Year, tyee_cycle4, catch_binary, catch_yr.total,
+                                 catch_yr.mean,catch_yrs.mean.total) 
+
+cr_data.yr <- cr_data.yr %>% group_by(Year) %>%
+                             summarize(tyee_cycle4   = mean(tyee_cycle4),
+                                       catch_binary  = sum(catch_binary),
+                                       catch_yr.total = mean(catch_yr.total),
+                                       catch_yr.mean = mean(catch_yr.mean),
+                                       catch_yrs.mean.total = mean(catch_yrs.mean.total)) %>%
+                             mutate(Year = as.numeric(Year))
+
+
+## Join Total PRedicted Tyee w. Summarized Tyee Catch data                                           
+total.pred.tyee2 <- left_join(total.pred.tyee, cr_data.yr, by = "Year") %>% 
+                                       filter(Year >2001)  
 
 summary(total.pred.tyee$Tyee.Total.Predicted)
 
-plot66 <- ggplot(total.pred.tyee) +
-                geom_bar(aes(x = Year, y = catch_binary, fill = tyee_cycle4, alpha = 0.8), 
-                              stat = "identity") +
-                geom_bar(aes(x = Year, y = Tyee.Total.Predicted, fill = 'lightblue', alpha = 0.3), 
+#tyee_cycle4 = as.numeric(rep(1:4, length.out = length(Year))
+## need cr_data 
+str(total.pred.tyee2)
+plot66 <- ggplot(total.pred.tyee2) +
+                 geom_bar(aes(x = Year, y = catch_yr.total, alpha = 0.3, fill = 'Total Tyee Catch'), 
+                               stat = "identity") +
+                 geom_bar(aes(x = Year, y = Tyee.Total.Predicted, alpha = 0.3, fill = 'Predicted Tyee Returns'), 
                               stat = 'identity') +
+                # geom_bar(aes(x = Year, y = catch_yr.total, fill = tyee_cycle4, alpha = 0.8), 
+                #                stat = "identity") +
+                # geom_bar(aes(x = Year, y = Tyee.Total.Predicted, fill = 'Total Predicted Tyee', alpha = 0.3), 
+                #               stat = 'identity') +
                 geom_line(aes(x = Year, y = Esc_Scaled, linetype = Species), 
                               color = "lightblue", linewidth = 1.2) +
                 geom_hline(aes(yintercept = catch_yrs.mean.total, color = catch_yrs.mean.total), 
                               linetype = "dashed", linewidth = 0.5) +
-                labs(x = "Year", y = "Number Tyee Captured") + 
-                guides(fill =  "none", #guide_legend(title = "Tyee Cycle", label = FALSE),
+                labs(x = "", y = "Number Tyee Captured") + 
+                guides(fill =  guide_legend(title = "", label = TRUE),
                        linetype = guide_legend(title = "Escapement", label = FALSE),
-                       color = guide_legend(title = "Mean Tyee Catch", label = FALSE)) +
+                       color = guide_legend(title = "Mean Tyee Catch", label = FALSE),
+                       alpha = "none") +
                 scale_y_continuous(breaks = seq(0, 100, 5),
                                     sec.axis = sec_axis(~.*25, name = "Escapement")) +  #scale secondary access by x25
                 scale_x_continuous(breaks = seq(2002,2022,2)) +            
@@ -446,16 +474,73 @@ plot66 <- ggplot(total.pred.tyee) +
                 theme(legend.direction = "horizontal",
                       legend.position = "bottom")
 
+plot66
+```
+```{r plot.predictred.returns,  echo = FALSE}
+suppressWarnings(print(plot66))  
 ```
 
+`r fig_nums("plot66", "Comparison of catches of Tyee Salmon, predicted returns of Tyee Salmon and annual Chinook Salmon escapement counts.")`
+
+Well this is interesting!
+
+1) There is a fairly drastic shift in predicted returns that coincides with the crash in 2014. Prior to the crash, predicted returns are consistently underestimated (`(8/11)*100`% of years are less than actual catches) whereas after the crash predicted Tyee returns are greater than total tyee catches in all but one year. 
+
+A couple of things to keep in mind when trying to understand what this means.
+
+      +   We should assume that only a proportion of all returning Tyees are captured each year. If all Tyee salmon were captured each               year, we would be actively selecting against large fish and it would be reasonable to expect to see a continuous decline in the            total number of Tyees returning each year. So, based on this logic (and my personal observation of tyees on the spawning ground),           the predicted Tyee returns should always be greater than total catches.  
+      +   The formula and values used to estimate predicted returns of tyee salmon do not change. If we assume there is no change in                 catchability and that the number of Tyees captured in the pool is a representation of the number of tyees that return to the               river there appears to have been a dramatic reduction in the number of Tyee salmon in 2014. This aligns with escapement data,              which is also greatly reduced.
+      +   Additionally, the figure shows that my formula and estimates are way off - which is not surprising as they were very crude!                This is most apparent in the years prior to the 2014 crash, but suggests predictions after the crash are also off too.     
+      
+So, what happened in 2014!? Did runs crash everywhere?
+
+```{r, escapement comparison, include=FALSE}
+unique(esc_data$GAZETTED_NAME)
+esc.plot.dat <- esc_data %>% filter(GAZETTED_NAME %in% c("ARTLISH RIVER","BEDWELL RIVER", "BURMAN RIVER", "COWICHAN RIVER", 
+                                                     "ENGLISHMAN RIVER","GOLD RIVER", "LITTLE QUALICUM RIVER","NIMPKISH RIVER", 
+                                                     "PHILLIPS RIVER", "QUALICUM RIVER", "QUINSAM RIVER", "SALMON RIVER", 
+                                                     "WANNOCK RIVER")) %>% 
+                          mutate(Year = as.numeric(ANALYSIS_YR),
+                                 Stream = as.factor(GAZETTED_NAME),
+                                 Area   = recode(as.factor(GAZETTED_NAME),
+                                                 'ARTLISH RIVER'         = "West Coast VI", 
+                                                 'BEDWELL RIVER'         = "West Coast VI",
+                                                 'BURMAN RIVER'          = "West Coast VI",
+                                                 'GOLD RIVER'            = "West Coast VI",
+                                                 'COWICHAN RIVER'        = "East Coast VI",
+                                                 'ENGLISHMAN RIVER'      = "East Coast VI", 
+                                                 'LITTLE QUALICUM RIVER' = "East Coast VI",
+                                                 'NIMPKISH RIVER'        = "East Coast VI",
+                                                 'QUALICUM RIVER'        = "East Coast VI",
+                                                 'QUINSAM RIVER'         = "East Coast VI",
+                                                 'SALMON RIVER'          = "East Coast VI",
+                                                 'PHILLIPS RIVER'        = "Mainland Coast",
+                                                 'WANNOCK RIVER'          = "Mainland Coast")) %>%
+                          group_by(Area, Stream, Year) %>%
+                          summarize(Count =sum(MAX_ESTIMATE)) %>%
+                          filter (Year > 2000)
 
 
 
+str(esc.plot.dat)
+plot.esc <- ggplot(esc.plot.dat, aes(x= Year, y = Count))+
+            geom_line(aes(color = Stream), linewidth = 0.8) +
+            labs(x = "", y = "# Spawning Chinook") +
+            scale_x_continuous(breaks = c(2000, 2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016, 2018, 2020)) +
+            theme_bw() +
+            theme(legend.position = "bottom") +
+            facet_grid(Area~.) 
+plot.esc
 
+#do.call(grid.arrange, plot.esc)
+## Add line weight or line type based on increasing or decreasing trend in 2014.
 
+```
+```{r plot.escapement,  echo = FALSE}
+suppressWarnings(print(plot.esc))  
+```
 
-
-
+`r fig_nums("plot.esc", "Chinook Salmon escapement from rivers on mainland coast as well as on East and West Coast of Vancouver Island.")`
 
 
 
