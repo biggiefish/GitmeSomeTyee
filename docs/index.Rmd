@@ -26,6 +26,26 @@ rm(list = ls())
 options(rstudio.help.showDataPreview = FALSE)
 getOption("rstudio.help.showDataPreview")
 
+## Load Packages and dependencies. 
+list.of.packages <- c("tidyverse",
+                      "tidyr",
+                      "dplyr",
+                      "lubridate",
+                      "reshape2",
+                      "ggplot2",
+                      "readxl",
+                      "downloadthis",
+                      "knitr",
+                      "captioner",
+                      "zoo",
+                      "gridExtra",
+                      "plotly",
+                      "htmlwidgets")
+
+  ## Load any missing packags.
+    new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+    if(length(new.packages)) install.packages(new.packages)
+
 ## Load Packages
     library(tidyverse)
     library(tidyr)
@@ -41,6 +61,7 @@ getOption("rstudio.help.showDataPreview")
     library(gridExtra)
     library(plotly)
     library(htmlwidgets)
+
 
 ## Define Working Directory ---
 #setwd("C:/Users/evogt/R Analysis/EAV/Tyee/")
@@ -324,14 +345,26 @@ table1
 
 ## 2.2 What else do we know about Chinook Salmon?
 
-**1) They are decreasing in size**
+**1) They are decreasing in size and age at maturity** 
 
-    -    
+  +   [Ohlberger et al. 2018](https://onlinelibrary.wiley.com/doi/full/10.1111/faf.12272) have shown that there is a reduction in the proportion of older age classes throughout most regions of the East Pacific and that length-at-age of older fish has decreased while length-at-age of smaller fish has increased.
+  +   [Malick et al. 2023](https://onlinelibrary.wiley.com/doi/abs/10.1111/faf.12738) compiled 3 decades worth of broodstock data from 43 hatcheries to examine trends in fecundity. They found significant changes in both fecundity and length and state the greastest drop in fecundity has occured over the past decade. Interestingly, they also estimate that 1 mm reduction in lenght results in ~7.8 few eggs.   
+  +   [Oke et al. 2020](https://www.nature.com/articles/s41467-020-17726-z) state that relative to salmon maturing before 1990, adult Chinook salmon now produce 16% fewer eggs, transport 28% less nutrients and have lost 21% of their fisheries value.  
 
-**2) Overall, returns are decreasing**
+   
+**2) Survival rates have collapsed and returns are decreasing**
 
+  +   [Welch et al. 2018](https://onlinelibrary.wiley.com/doi/epdf/10.1111/faf.12514) used coded-wire tag data to look at large scale patterns of Chinook salmon survival. This data demonstrates that survival collapsed over the past half century by a factor of ~3 and is currently ~1% in many regions. Survival in relatively pristine and undeveloped regions (e.g. Northern BC and Alaska) was comparable to areas with extensive water management and land development (e.g. Columbia River) that were previously considered to have poorest survival. The authors suggest the widespread trends in survival may be evidence that marine conditions are  more influential than local factors (e.g. freshwater habitat). 
+  +   Similar trends have been observed in other species. For example, [Price et al. 2021](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/1365-2664.13835) used genetic tools to quantify changes in population and life history diversity of Skeena Sockeye. They found a 69% reduction in wild Sockeye salmon returns (though overall returns are comparable to historic levels due to intensive enhancement); that population diversity has decreased by ~70%, and; that life history diversity has shifted with populations now migrating from freshwater earlier and remaining at sea for longer. 
+    
 **3) Enhancement levels have never been higher**
 
+  +   [Ruggerone & Irvine 2018](https://afspubs.onlinelibrary.wiley.com/doi/full/10.1002/mcf2.10023) show that intensive enhancement has resulted in the greatest abundance of salmon in the ocean than ever before (specifically pink, sockeye and chum) and that marine carrying capacity may have been reached within recent decades.         
+  +   [Nelson et al. 2019](https://esajournals.onlinelibrary.wiley.com/doi/full/10.1002/ecs2.2922) present evidence that hatchery practices have altered size and time that juveniles are released and have reduced diversity of life history traits (e.g. size, age and timing of smoltification). The authors argue that current enhancement practices may release fish at a time and size that is preferred by predators (e.g. all fish being released at same time and size and are easy pickings for large aggregations of predators).
+    
+**4) I am not the only person who doesn't understand what is going on **
+
+  +   [Beamish 2022](https://academic.oup.com/icesjms/article/79/4/1005/6550345) emphasizes that due to the large number of juvenile salmon in the ocean and overall poor survival, any small change in survival can results in major changes in adult abundance. Unfortunately, we don't understand what is causing those small changes in survival in the marine environment and need a better understanding of biologically based mechanisms linking climate change to salmon abundance.
 
 
 
@@ -339,23 +372,33 @@ table1
 So, let's begin by having a look at the catch data from the Tyee pool and how catches fluctuate relative to Chinook Salmon escapement in the Campbell River.
 ```{r plot1_tyeecatch, echo = FALSE}
 ## Prepare Plot
-plot1 <- ggplot(catch_data) +
-                      geom_bar(aes(x= Year, y = catch_binary, fill = tyee_cycle4), stat = "identity") +
-                      geom_hline(aes(yintercept=catch_yrs.mean.total, color = catch_yrs.mean.total), 
+catch.data.yearly <- catch_data %>% 
+                          group_by(Year, tyee_cycle4) %>%
+                          summarize(Total.Catch = mean(catch_yr.total),
+                                    Overall.Mean.Catch = mean(catch_yrs.mean.total)) %>%
+                          mutate(Year = as.factor(Year))
+                                      
+plot1 <- ggplot(catch.data.yearly) +
+                      geom_col(aes(x= Year, y = Total.Catch, fill = tyee_cycle4)) + 
+                      geom_hline(aes(yintercept=Overall.Mean.Catch, color = Overall.Mean.Catch), 
                                 linetype = "dashed", linewidth = 0.5) +
                       labs(y = "# Tyee Salmon", x = "") +
                       guides(fill = "none", #guide_legend(title = "Tyee Cycle"),
-                             color = guide_legend(title = "Mean catches per year", label = FALSE)) + 
-                      scale_x_continuous(breaks = seq(2002,2023,2)) +
-                      scale_y_continuous(breaks = seq(0, 100, 5)) +
-                      theme_bw() +  
+                             color = guide_legend(title = "Mean catches per year", label = FALSE)) +
+                      # scale_x_discrete(breaks = seq(2002,2023,2)) +
+                      # scale_y_discrete(breaks = seq(0, 100, 5)) +
+                      theme_bw() +
                       theme(legend.position = c(0.78, 0.88),
-                            legend.box.background = element_rect(colour = "black", linewidth = 1.25, fill = NA)) 
+                            legend.box.background = element_rect(colour = "black", linewidth = 1.25, fill = NA))
+
+ggplotly(plot1, tooltip = c("Year", "Total.Catch"))
+
 ```
 
 ```{r tyeecatch.plot, include = FALSE}
-suppressWarnings(print(plot1)) 
+suppressWarnings(ggplotly(plot1)) 
 ```
+
 
 ```{r include=FALSE}
 ## Filter escapement data.... 
@@ -364,36 +407,68 @@ cr_esc2 <- cr_esc %>% filter(Year >=2002)
 ## Merge escapement data with tyee catch data
 cr_data <- left_join(catch_data, cr_esc2, by = "Year")
     
-cr_yearly <- cr_data %>% mutate(Year = as.numeric(Year)) %>%
-                         group_by(Year) %>%
-                         select(Year, catch_yr.total, catch_yr.mean, Esc_Scaled, Species, tyee_cycle4)
+cr_yearly <- cr_data %>% filter(Year < 2022) %>%
+                         group_by(Year, tyee_cycle4) %>%
+                         summarize(Total.Catch        = mean(catch_yr.total),
+                                   Overall.Mean.Catch = mean(catch_yrs.mean.total),
+                                   Escapement         = mean(Esc_Scaled)) %>%
+                         mutate(Year = as.numeric(Year),
+                                Data.Type = "Escapement") 
+                        
+
+
+
+
 ```
 
 ```{r plot2_CR_Esc, echo = FALSE}
 
 ## Prepare plot of # Tyee vs annual escapement.
-plot2 <- ggplot(cr_data) +
-                geom_bar(aes(x = Year, y = catch_binary, fill = tyee_cycle4), 
-                              stat = "identity") +
-                geom_line(aes(x = Year, y = Esc_Scaled, linetype = Species), 
-                              color = "lightblue", linewidth = 1.2) +
-                geom_hline(aes(yintercept = catch_yrs.mean.total, color = catch_yrs.mean.total), 
-                              linetype = "dashed", linewidth = 0.5) +
-                labs(x = "Year", y = "Number Tyee Captured") + 
-                guides(fill =  "none", #guide_legend(title = "Tyee Cycle", label = FALSE),
-                       linetype = guide_legend(title = "Escapement", label = FALSE),
-                       color = guide_legend(title = "Mean Tyee Catch", label = FALSE)) +
-                scale_y_continuous(breaks = seq(0, 100, 5),
-                                    sec.axis = sec_axis(~.*25, name = "Escapement")) +  #scale secondary access by x25
-                scale_x_continuous(breaks = seq(2002,2022,2)) +            
-                theme_bw() +
-                theme(legend.direction = "horizontal",
-                      legend.position = "bottom")
+colnames(cr_yearly)
+str(cr_yearly)
+
+summary(cr_yearly)
+
+plot2.1<- ggplot(cr_yearly, aes(x = Year)) +
+                      geom_col(aes(y = Total.Catch, fill = tyee_cycle4)) +
+                      geom_line(aes(y = Escapement, linetype = Data.Type), 
+                                color = "lightblue", linewidth = 1.2) +
+                      geom_hline(aes(yintercept = Overall.Mean.Catch, color = Overall.Mean.Catch), 
+                                linetype = "dashed", linewidth = 0.5) +
+                      labs(y = "# Tyee Salmon", x = "") +
+                      guides(linetype = "none",
+                             fill = "none",
+                             color = guide_legend(title = "Mean catches per year", label = FALSE)) +
+                      scale_x_discrete(breaks = seq(2002,2023,2)) +
+                      scale_y_discrete(breaks = seq(0, 100, 5)) +
+                      theme_bw() +
+                      theme(legend.position = c(0.78, 0.88),
+                            legend.box.background = element_rect(colour = "black", linewidth = 1.25, fill = NA))
+
+# # ##x----
+# # colnames(cr_data)
+# plot2 <- ggplot(cr_data) +
+#                 geom_bar(aes(x = Year, y = catch_binary, fill = tyee_cycle4),
+#                               stat = "identity") +
+#                 geom_line(aes(x = Year, y = Esc_Scaled, linetype = Species),
+#                               color = "lightblue", linewidth = 1.2) +
+#                 geom_hline(aes(yintercept = catch_yrs.mean.total, color = catch_yrs.mean.total),
+#                               linetype = "dashed", linewidth = 0.5) +
+#                 labs(x = "Year", y = "Number Tyee Captured") +
+#                 guides(fill =  "none",
+#                        linetype = guide_legend(title = "Escapement", label = FALSE),
+#                        color = guide_legend(title = "Mean Tyee Catch", label = FALSE)) +
+#                 scale_y_continuous(breaks = seq(0, 100, 5),
+#                                     sec.axis = sec_axis(~.*25, name = "Escapement")) +  #scale secondary access by x25
+#                 scale_x_continuous(breaks = seq(2002,2022,2)) +
+#                 theme_bw() +
+#                 theme(legend.direction = "horizontal",
+#                       legend.position = "bottom")
 
 ```
 
 ```{r tyee vs escapement, echo=FALSE}
-suppressWarnings(print(plot2))   
+suppressWarnings(ggplotly(plot2.1, tooltip = c("Year","Total.Catch", "Escapement", "Overall.Mean.Catch")))   
 ```
 
 `r fig_nums("plot2", "Trends in Tyee Salmon captures and Campbell River Chinook Salmon escapement.")`
