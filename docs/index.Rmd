@@ -168,12 +168,12 @@ list.of.packages <- c("tidyverse",
                                       ANALYSIS_YR >=1990) %>% # data from prior to tyee catch data so we can predict tyee returns.    
                                mutate(Year          =  as.numeric(ANALYSIS_YR),
                                      Waterbody      =  as.factor(GAZETTED_NAME),
-                                     Esc_Count      =  as.numeric(MAX_ESTIMATE),
+                                     esc_count      =  as.numeric(MAX_ESTIMATE),
                                      Esc_Scaled     =  as.numeric(MAX_ESTIMATE/25),
                                      Esc_Mean       =  as.numeric(mean(MAX_ESTIMATE)),
                                      Esc_MeanScaled =  as.numeric(mean(MAX_ESTIMATE/25)),
                                      Species        =  as.factor(SPECIES)) %>%
-                               select(Year, Waterbody, Species, Esc_Count, Esc_Scaled, Esc_Mean, Esc_MeanScaled)
+                               select(Year, Waterbody, Species, esc_count, Esc_Scaled, Esc_Mean, Esc_MeanScaled)
         
         
         
@@ -531,7 +531,7 @@ If we run these numbers, each female will generate `r 5700*.003` offspring, of w
 But this doesn't make sense, if each female produced `r 5700*.003` offspring escapement would be increasing rapidly. And it most certainly is not. So, what gives?  
 
 
-```{r prep_how many fish should come back, include= FALSE}
+```{r predicted.returns.data.prep, include= FALSE}
 ## Define assumptions
       fecundity <- 5700 # typically around 6000 for CR, http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf
       perc.female <- 0.6  # 60% of fish are females
@@ -543,6 +543,7 @@ But this doesn't make sense, if each female produced `r 5700*.003` offspring esc
       Age4 <- 0.447               # 44.7% of fish are Age-4
       Age5 <- 0.461               # 46.1% of fish are Age-5
       Age6 <- 0.013               #  1.3% of fish are Age-6
+      Tyee.Age3m.prop   <- 0      # No Age-3 males are Tyee.
       Tyee.Age4m.prop   <- 0.15   # 10% of Age-4 males are Tyee - MADE UP NUMBER!
       Tyee.Age5mf.prop  <- 0.35   # 15% of all Age-5 fish are Tyee - MADE UP NUMBER!
       Tyee.Age6mf.prop  <- 0.85   # 100% of all Age-6 fish are Tyee - MADE UP NUMBER!
@@ -551,48 +552,94 @@ But this doesn't make sense, if each female produced `r 5700*.003` offspring esc
       ratio.Age4.tyee <- perc.male * Age4 * Tyee.Age4m.prop # multiply this by annual escapement to calculate # Age-4 males that are tyees.
       ratio.Age5.tyee <- Age5 * Tyee.Age5mf.prop # multiply this by annual escapement to calculate # Age-5 fish that are tyees.
       ratio.Age5.tyee <- Age6 * Tyee.Age6mf.prop # multiply this by annual escapement to calculate # Age-5 fish that are tyees.
-      summary(cr_esc$Esc_Count)
+      summary(cr_esc$esc_count)
       colnames(cr_esc)
       str(cr_esc)
       
 ## Estimate number of fish predicted to return from each age class based on historic escapement.       
-pred.fish <- cr_esc %>% mutate(pred.returns = Esc_Count * perc.female *fecundity *
+pred.fish <- cr_esc %>% mutate(brood.yr     = Year,
+                               pred.fish    = esc_count * perc.female *fecundity *
                                               egg.to.fry * marine.surv,  #fry.to.smolt *
-                               Age3_Yr = Year+3,
-                               Age3_returns = Age3*pred.returns,
-                               Age4_Yr = Year+4,
-                               Age4_returns = Age4*pred.returns,
+                               Age3_Yr      = Year+3,
+                               Age3_returns = Age3*pred.fish,
+                               Age3_tyee    = Age3_returns * perc.male * Tyee.Age3m.prop,
+                               Age4_Yr      = Year+4,
+                               Age4_returns = Age4*pred.fish,
                                Age4_tyee    = Age4_returns * perc.male * Tyee.Age4m.prop,
-                               Age5_Yr = Year+5,
-                               Age5_returns = Age5*pred.returns,
+                               Age5_Yr      = Year+5,
+                               Age5_returns = Age5*pred.fish,
                                Age5_tyee    = Age5_returns * Tyee.Age5mf.prop,
-                               Age6_Yr = Year+6,
-                               Age6_returns = Age6*pred.returns,
+                               Age6_Yr      = Year+6,
+                               Age6_returns = Age6*pred.fish,
                                Age6_tyee    = Age6_returns * Tyee.Age6mf.prop)
-                               
 
 
 ## Estimate total number of Tyee expected to return in each year.
-pred.tyee <- pred.fish %>% select(Esc_Count,pred.returns,Age4_Yr, Age5_Yr,Age6_Yr,Age4_tyee,Age5_tyee,Age6_tyee) %>%
-                                  pivot_longer(-c(Esc_Count, pred.returns),
+pred.returns <- pred.fish %>% select(brood.yr, esc_count,pred.fish,Age3_Yr, Age4_Yr, Age5_Yr,Age6_Yr,Age3_returns, 
+                                     Age4_returns,Age5_returns,Age6_returns, Age3_tyee, Age4_tyee, Age5_tyee, Age6_tyee) %>%
+                              pivot_longer(-c(brood.yr, esc_count, pred.fish),
                                                 names_to = c("Var", ".value"),
                                                 names_sep = "_") %>%
-                                  rename("Returning.AgeClass"   = "Var",
-                                           "Year"               = "Yr",
-                                           "Tyee.Total"         = "tyee") %>%
-                                  group_by(Year) %>%
-                                  summarize(Tyee.Total.Predicted = sum(Tyee.Total),
-                                            Esc_Count            = mean(Esc_Count),
-                                            pred.returns         = mean(pred.returns)) %>%
-                                  mutate(Year = as.numeric(Year))
+                              rename("returning.ageclass"   = "Var",
+                                     "return.year"          = "Yr",
+                                     "returning.fish"       = "returns",
+                                     "returning.tyee"       = "tyee") %>%
+                              group_by(return.year) %>%
+                              summarize(esc_count            = mean(esc_count),
+                                        total.returning.fish = sum(returning.fish),
+                                        total.returning.tyee = sum(returning.tyee),
+                                        total.pred.returns   = mean(pred.fish), #) %>%
+                                        Age3.fish = Age3 * total.pred.returns,
+                                        Age4.fish = Age4 * total.pred.returns,
+                                        Age5.fish = Age5 * total.pred.returns,
+                                        Age6.fish = Age6 * total.pred.returns,
+                                        Age3.tyee = Age3.fish * 0,
+                                        Age4.tyee = Age4.fish * perc.male * Tyee.Age4m.prop,
+                                        Age5.tyee = Age5.fish * Tyee.Age5mf.prop,
+                                        Age6.tyee = Age6.fish *Tyee.Age6mf.prop)
+
+# pred.tyee <- pred.fish %>% select(brood.yr, esc_count,pred.fish,Age3_Yr, Age4_Yr, Age5_Yr,Age6_Yr,Age3_tyee, 
+#                                      Age4_tyee,Age5_tyee,Age6_tyee) %>%
+#                               pivot_longer(-c(brood.yr, esc_count, pred.fish),
+#                                                 names_to = c("Var", ".value"),
+#                                                 names_sep = "_") %>%
+#                               rename("returning.ageclass"   = "Var",
+#                                      "return.year"          = "Yr",
+#                                      "returning.tyee"       = "tyee") %>%
+#                               group_by(return.year) %>%
+#                               summarize(esc_count            = mean(esc_count),
+#                                         total.returning.fish = sum(returning.fish),
+#                                         total.pred.tyee      = mean(pred.fish)) %>%
+#                               mutate(Age3.fish = Age3 * total.pred.tyee,
+#                                      Age4.fish = Age4 * total.pred.tyee,
+#                                      Age5.fish = Age5 * total.pred.tyee,
+#                                      Age6.fish = Age6 * total.pred.tyee)
+# 
+# pred.tyee <- pred.fish %>% select(esc_count,pred.fish,Age4_Yr, Age5_Yr,Age6_Yr,Age4_tyee,Age5_tyee,Age6_tyee) %>%
+#                                   pivot_longer(-c(esc_count, pred.fish),
+#                                                 names_to = c("Var", ".value"),
+#                                                 names_sep = "_") %>%
+#                                   rename("Returning.AgeClass"   = "Var",
+#                                          "Year"               = "Yr",
+#                                          "Tyee.Total"         = "tyee") %>%
+#                                   group_by(Year) %>%
+#                                   summarize(esc_count            = mean(esc_count),
+#                                             Total.Returning.Tyee = sum(Tyee.Total),
+#                                             Total.Pred.Returns   = mean(pred.fish)) %>%
+#                                   mutate(Year = as.numeric(Year))
+                                         
+
+```
 
 
+```{r predicted.returns.plot.prep}
 ###########################################################################
 ###-------------------------FIX THIS PLOT-------------------------------###
 ###########################################################################
-predicted.plot <- ggplot(pred.tyee, aes(x = Year)) +
-                        geom_line(aes(y = Esc_Count, color = Esc_Count))+
-                        geom_line(aes(y = pred.returns, color = pred.returns))
+colnames(pred.returns)
+predicted.plot <- ggplot(pred.returns, aes(x = return.year)) +
+                        geom_line(aes(y = esc_count, color = 'blue'))+
+                        geom_line(aes(y = total.pred.returns, color = 'red'))
 
 print(predicted.plot)
 
@@ -603,7 +650,7 @@ print(predicted.plot)
 
 ## Join predicted fish database with estimate of total tyees per year
 total.pred.tyee <- left_join(pred.fish, pred.tyee, by = c("Year")) %>%
-                   mutate(Tyee.Prop = Tyee.Total.Predicted/Esc_Count.y,
+                   mutate(Tyee.Prop = Tyee.Total.Predicted/esc_count.y,
                           Tyee.Total.Predicted = coalesce(Tyee.Total.Predicted, 0)) ## Calculate proportion of Tyees relative to overall escapement
 # 
 #     colnames(total.pred.tyee)
