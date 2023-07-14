@@ -11,8 +11,14 @@ output:
     toc_float: true
   
 ---
+
+
+```{r link to site, include = FALSE}
+"https://biggiefish.github.io/GitmeSomeTyee/"
+```
+
 # 1. What is this?
-A high-level, and very casual, look at trends in catches of Tyee salmon in Campbell River's legendary [Tyee Pool](https://goo.gl/maps/4Nb4etqRVjoSSfqSA). All data exploration is being completed for [fun](https://i.giphy.com/media/Cz6TlrRVVyv9S/giphy.webp) and to learn some new tools (namely [R Markdown](https://rmarkdown.rstudio.com/) and [plotly](https://plotly.com/r/)). 
+A high-level, and very casual, self-deprecating look at trends in catches of Tyee salmon in Campbell River's legendary [Tyee Pool](https://goo.gl/maps/4Nb4etqRVjoSSfqSA). All data exploration is being completed for [fun](https://i.giphy.com/media/Cz6TlrRVVyv9S/giphy.webp) and to learn some new tools (namely [R Markdown](https://rmarkdown.rstudio.com/) and [plotly](https://plotly.com/r/)). 
 
 There are far more technical ways of examining this data, but they aren't as much fun - and are frankly hard. This analysis is living and will evolve over time. All results and interpretation are purely speculative and should be considered nothing more than ramblings of a fish nerd. 
 
@@ -267,7 +273,7 @@ This is certainly an interesting dataset, especially given it is the Tyee Club c
 ## 2.1 What we* know about Campbell River Chinook? 
 
 
-(* more like, what do I know, which isn't much).
+(* more like what do I know about Campbell River Chinook Salmon, which isn't much).
 
 
 There has been a lot of information collected on Campbell River Chinook Salmon, including from Tyee Salmon captured in the Tyee Pool, however, most of this data is not readily available online. Data that is available (and that I have found) is summarized below. 
@@ -552,16 +558,14 @@ But this doesn't make sense, if each female produced `r 5700*.003` offspring esc
       ratio.Age4.tyee <- perc.male * Age4 * Tyee.Age4m.prop # multiply this by annual escapement to calculate # Age-4 males that are tyees.
       ratio.Age5.tyee <- Age5 * Tyee.Age5mf.prop # multiply this by annual escapement to calculate # Age-5 fish that are tyees.
       ratio.Age5.tyee <- Age6 * Tyee.Age6mf.prop # multiply this by annual escapement to calculate # Age-5 fish that are tyees.
-      summary(cr_esc$esc_count)
-      colnames(cr_esc)
-      str(cr_esc)
+
       
 ## Estimate number of fish predicted to return from each age class based on historic escapement.       
 pred.fish <- cr_esc %>% mutate(brood.yr     = Year,
-                               pred.fish    = esc_count * perc.female *fecundity *
-                                              egg.to.fry * marine.surv,  #fry.to.smolt *
+                               pred.fish    = esc_count * perc.female *fecundity *          # total number of fish that will be produced based on 
+                                              egg.to.fry * marine.surv,  #fry.to.smolt *      escapement count.
                                Age3_Yr      = Year+3,
-                               Age3_returns = Age3*pred.fish,
+                               Age3_returns = Age3*pred.fish,                               # number of produced fish that will return in 3 years.
                                Age3_tyee    = Age3_returns * perc.male * Tyee.Age3m.prop,
                                Age4_Yr      = Year+4,
                                Age4_returns = Age4*pred.fish,
@@ -583,11 +587,14 @@ pred.returns <- pred.fish %>% select(brood.yr, esc_count,pred.fish,Age3_Yr, Age4
                               rename("returning.ageclass"   = "Var",
                                      "return.year"          = "Yr",
                                      "returning.fish"       = "returns",
-                                     "returning.tyee"       = "tyee") %>%
+                                     "returning.tyee"       = "tyee")
+
+## Summarize predicted returns.
+pred.returns2 <- pred.returns %>% 
                               group_by(return.year) %>%
                               summarize(esc_count            = mean(esc_count),
-                                        total.returning.fish = sum(returning.fish),
-                                        total.returning.tyee = sum(returning.tyee),
+                                        total.pred.return = sum(returning.fish),         # number fish returning based on age.classes
+                                        total.pred.tyee = sum(returning.tyee),
                                         total.pred.returns   = mean(pred.fish), #) %>%
                                         Age3.fish = Age3 * total.pred.returns,
                                         Age4.fish = Age4 * total.pred.returns,
@@ -596,8 +603,11 @@ pred.returns <- pred.fish %>% select(brood.yr, esc_count,pred.fish,Age3_Yr, Age4
                                         Age3.tyee = Age3.fish * 0,
                                         Age4.tyee = Age4.fish * perc.male * Tyee.Age4m.prop,
                                         Age5.tyee = Age5.fish * Tyee.Age5mf.prop,
-                                        Age6.tyee = Age6.fish *Tyee.Age6mf.prop)
+                                        Age6.tyee = Age6.fish *Tyee.Age6mf.prop) %>%
+                              filter(return.year >= 1996)
+```
 
+```{r original.predicted code.OLD.DO.NOT.USE, include = FALSE}
 # pred.tyee <- pred.fish %>% select(brood.yr, esc_count,pred.fish,Age3_Yr, Age4_Yr, Age5_Yr,Age6_Yr,Age3_tyee, 
 #                                      Age4_tyee,Age5_tyee,Age6_tyee) %>%
 #                               pivot_longer(-c(brood.yr, esc_count, pred.fish),
@@ -620,53 +630,89 @@ pred.returns <- pred.fish %>% select(brood.yr, esc_count,pred.fish,Age3_Yr, Age4
 #                                                 names_to = c("Var", ".value"),
 #                                                 names_sep = "_") %>%
 #                                   rename("Returning.AgeClass"   = "Var",
-#                                          "Year"               = "Yr",
+#                                          "Return.Year"               = "Yr",
 #                                          "Tyee.Total"         = "tyee") %>%
 #                                   group_by(Year) %>%
 #                                   summarize(esc_count            = mean(esc_count),
 #                                             Total.Returning.Tyee = sum(Tyee.Total),
 #                                             Total.Pred.Returns   = mean(pred.fish)) %>%
-#                                   mutate(Year = as.numeric(Year))
-                                         
-
+#                                   mutate(Return.Year = as.numeric(Return.Year))
+ 
 ```
 
+                                        
+```{r, predicted.age.class.plot}
+pred.jnk1 <- pred.returns %>% select(brood.yr,esc_count,pred.fish) %>%
+                               group_by(brood.yr) %>%
+                               summarize(esc_count = mean(esc_count),
+                                         pred.fish = mean(pred.fish)) %>%
+                               rename(Year = brood.yr)
 
-```{r predicted.returns.plot.prep}
-###########################################################################
-###-------------------------FIX THIS PLOT-------------------------------###
-###########################################################################
-colnames(pred.returns)
-predicted.plot <- ggplot(pred.returns, aes(x = return.year)) +
-                        geom_line(aes(y = esc_count, color = 'blue'))+
-                        geom_line(aes(y = total.pred.returns, color = 'red'))
+pred.jnk2 <- pred.returns %>% select(return.year, returning.ageclass, returning.fish) %>%
+                               group_by(return.year, returning.ageclass) %>%
+                               summarize(returning.fish = sum(returning.fish)) %>%
+                               rename(Year = return.year)
 
-print(predicted.plot)
-
-###########################################################################
-###-------------------------FIX THIS PLOT-------------------------------###
-###########################################################################
+pred.jnk3 <- pred.returns %>% select(return.year, returning.tyee) %>%
+                               group_by(return.year) %>%
+                               summarize(returning.tyee = sum(returning.tyee)) %>%
+                               rename(Year = return.year)
+                              
+pred.jnk4 <- left_join(pred.jnk1, pred.jnk2, by = c("Year")) %>% filter(Year >1995)
 
 
-## Join predicted fish database with estimate of total tyees per year
-total.pred.tyee <- left_join(pred.fish, pred.tyee, by = c("Year")) %>%
-                   mutate(Tyee.Prop = Tyee.Total.Predicted/esc_count.y,
-                          Tyee.Total.Predicted = coalesce(Tyee.Total.Predicted, 0)) ## Calculate proportion of Tyees relative to overall escapement
-# 
-#     colnames(total.pred.tyee)
-#     colnames(cr_data)
-# 
-cr_data.yr <- cr_data %>% select(Year, tyee_cycle4, catch_binary, catch_yr.total,
-                                 catch_yr.mean,catch_yrs.mean.total)
+pred.jnk5 <- left_join(pred.jnk4, pred.jnk3, by = c("Year"))
+         
+pred.jnk6 <- catch_data %>% select(Year, catch_yr.total) %>%
+                            group_by(Year) %>%
+                            summarize(catch_yr.total = mean(catch_yr.total))
 
-cr_data.yr <- cr_data.yr %>% group_by(Year) %>%
-                             summarize(tyee_cycle4   = mean(tyee_cycle4),
-                                       catch_binary  = sum(catch_binary),
-                                       catch_yr.total = mean(catch_yr.total),
-                                       catch_yr.mean = mean(catch_yr.mean),
-                                       catch_yrs.mean.total = mean(catch_yrs.mean.total)) %>%
-                             mutate(Year = as.numeric(Year))
+pred.plot.dat <- left_join(pred.jnk5, pred.jnk6, by = "Year") %>%
+                          mutate(catch_yr.total = coalesce(catch_yr.total, 0))
+colnames(pred.plot.dat)
 
+# pred.long.dat <- pred.plot.dat %>% pivot_longer(-c(Year, returning.fish, returning.ageclass)) # THIS DOESNT WORK
+
+pred.age.class.plot <- ggplot(pred.plot.dat, aes(x = Year)) +
+                          geom_col(aes(y = returning.fish, fill = returning.ageclass)) +
+                          geom_line(aes(y = esc_count, linetype = "Escapement")) +
+                          geom_line(aes(y = returning.tyee, color = "Predicted", color = 'dodgerblue')) +
+                          geom_line(aes(y = catch_yr.total, color = "Captured", color = 'maroon')) +
+                          scale_x_continuous(limits = c(1996,2021)) +
+                          labs(y = "# Tyee Salmon", x = "") +
+                          guides(linetype = guide_legend(title = "Escapement", label = FALSE),
+                                 fill = guide_legend(title = "Predicted Returns \n by Age Class"),
+                                 linetype = guide_legend(title = "Number Tyee", label = TRUE)) +
+                                 #color = guide_legend(title = "Mean catches per year", label = FALSE)) +
+                          scale_x_continuous(breaks = seq(1990,2022,2)) +
+                          scale_y_continuous(breaks = seq(0, 1800, 200)) +
+                          theme_bw() 
+                          # theme(legend.position = c(0.78, 0.88),
+                          #       legend.box.background = element_rect(colour = "black", linewidth = 1.25, fill = NA))
+```
+
+```{r pred.age.class.plot, echo = FALSE}
+## ggplot figure
+suppressWarnings(print(pred.age.class.plot))
+
+## plotly figure
+    #suppressWarnings(ggplotly(pred.age.class.plot), tooltip = c("Year","returning.fish", "returning.ageclass", "esc_count", "returning.tyee")))   
+```
+
+`r fig_nums("pred.age.class.plot", "Predicted returns by age-class relative to measured escapement.")`
+
+Well that's interesting. There are periods when my predicted returns closely align with actual escapement (most closely from 2003 to 2007, but my values are comparable from 2003 to 2010). This suggests my estimates may not be WAY off but does not confirm they are correct. Other notes:
+
+  +   Also clearly periods when my predictions are off! Most notably from 1998 to 2002, 2011-2012, **2014** and 2019 to 2022.
+  +   There are number of years where something appears to have happened and fish simply did not return (2005, 2011, 2014).
+  +   There are also years where something positive appears to have happened and far more fish than expected returned to the river (1999 to 2001, 2020).
+  
+
+I wonder how my predicted tyee returns align with actual tyee captures. 
+
+
+
+```{r predicted.returns.plot.prep, include = FALSE, eval = FALSE}
 
 ## Join Total Predicted Tyee w. Summarized Tyee Catch data                                           
 total.pred.tyee2 <- left_join(total.pred.tyee, cr_data.yr, by = "Year") %>% 
@@ -705,7 +751,7 @@ plot66 <- ggplot(total.pred.tyee2) +
 ```
 
 
-```{r plot.predictred.returns,  echo = FALSE}
+```{r plot.predictred.returns,  echo = FALSE, eval = FALSE}
 suppressWarnings(print(plot66))  
 ```
 
