@@ -522,25 +522,27 @@ Off the top of my head there are two ways we can approach this:
 
 ## 4.1 How Historic Conditions Influenced Captures
 
-
-We can ***VERY CRUDELY*** estimate the number of Tyee salmon that should return to the Campbell River if we make a couple of big assumptions:
+We can ***VERY CRUDELY*** estimate the number of salmon that should return to the Campbell River if we make a couple of big assumptions:
 
   +   Fecundity is ~5,700 eggs per female ([Ewart & Anderson, 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf) 
-  +   Sex ratios are 60:40 female to male ([Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf). on Sturham data for Campbell River)
-  +   Egg to fry survival is approximately 0.003 (estimated from Thronton et al. 2022).
+  +   Sex ratios are 60:40 female to male using [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf)) data for Campbell River)
   
-  +   Tyee Salmon are over 900 mm. In the Campbell River, I will assume that 10% of Age-4 male adults, 15% of Age-5
-      spawners (both sexes), and all Age-6 fish are >900 mm and therefore >30 lbs (this is **very** loosely based on Sturham 
-      data, but I have not seen raw tables so its an guestimate).
+  +   Egg-to-fry survival is approximately 0.1, can't recall where this number came from but its commonly used as a measure of egg-to-fry survival of wild fish (compared to 0.9 for hatchery reared fish). Give results from [Thornton et al. 2022](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf) it is likely that egg-to-fry survival in the Campbell is higher.
+  
+  +   Marine survival (smolt to adult)  is approximately 0.003 ([Ewart & Anderson, 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf)
+  
+  +   7.9% of fish will return as Age-3, 44.7% of fish will return as Age-4 fish, 46.1% will return as Age-5 fish and 1.3% will return as Age-6 fish.
+  
+We can expand this to estimate the number of Tyee salmon that will return if we make even more assumptions! 
+  
+  +   For fun, let's assume all fish > 900 mm are Tyee Salmon (I know girth is important too, but I dont have girth data) and using the [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf)) data as a rough guide I will assume that 10% of Age-4 male adults are >900 mm, 15% of Age-5 fish (males and females) are >900 mm and 85% of Age-6 fish are >900 mm.
+  
+If we run these numbers, each female will generate `r format(5700*0.1*.003, digits = 2)` offspring, of which `r format((5700*0.1*0.003*0.079), digits = 2)` will be Age-3, `r format((5700*0.1*.003*.447), digits = 2)` will be Age-4, `r format((5700*0.1*.003*0.461), digits = 2)` will be Age-5 and `r format((5700*0.1*.003*.013), digits = 2)` will be Age-6. Furthermore, each female will produce `r format(((57000.1**.003*.447*.4*.15) + (5700*0.1*.003*0.461*.35) + (5700*0.1*.003*.013*.85)),digits = 2)`  Tyee salmon. *Let's take a moment to remember that these assumptions are terrible. Larger fish are more likely to produce larger fish, so in reality some fish will produce a decent number of Tyee and others will produce none. But let's keep it simple for now and assume every fish is able to make an equal number of Tyees*
 
-Using these numbers we can assume that 60% of a given years fish will be female and spawn successfully. Each one will lay ~5,700 eggs, of which 0.3% will survive to spawn. Of the 0.3% of eggs that survive to spawn, 44.7% will return as Age-4 (15% will be Tyees), 46.1% will return as Age-5 (35% will be Tyees) and 1.3% will return as Age-6 fish (85% will be Tyees). 
-
-If we run these numbers, each female will generate `r 5700*.003` offspring, of which `r format((5700*.003*.447), digits = 2)` will be Age-4, `r format((5700*.003*0.461), digits = 2)` will be Age-5 and `r format((5700*.003*.013), digits = 2)` will be Age-6 - of which `r format(((5700*.003*.447*.4*.15) + (5700*.003*0.461*.35) + (5700*.003*.013*.85)),digits = 2)` will be Tyee salmon.
-
-But this doesn't make sense, if each female produced `r 5700*.003` offspring escapement would be increasing rapidly. And it most certainly is not. So, what gives?  Let's look at a figure.
+Based on this, each female should produce `r 5700*0.1*.003` offspring that return to spawn. Which is less than ideal. 
 
 
-```{r predicted.returns.data.prep, include= FALSE}
+```{r predicted.returns.data.prep0.1fry, include= FALSE}
 ## Define assumptions
       fecundity <- 5700 # typically around 6000 for CR, http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf
       perc.female <- 0.6  # 60% of fish are females
@@ -704,14 +706,16 @@ suppressWarnings(print(pred.age.class.plot))
     #suppressWarnings(ggplotly(pred.age.class.plot), tooltip = c("Year","returning.fish", "returning.ageclass", "esc_count", "returning.tyee")))   
 ```
 
-**`r fig_nums("pred.age.class.plot", "Predicted returns by age-class relative to measured escapement.")`**
+**`r fig_nums("pred.age.class.plot", "Predicted returns by age-class relative to measured escapement, assuming 10% egg to fry survival.")`**
 
 Well that's interesting. There are periods when my predicted returns closely align with actual escapement (most closely from 2003 to 2007, but my values are comparable from 2003 to 2010). This suggests my estimates may not be WAY off but does not confirm they are correct. Other notes:
 
   +   Also clearly periods when my predictions are off! Most notably from 1998 to 2002, 2011-2012, **2014** and 2019 to 2022.
   +   There are number of years where something appears to have happened and fish simply did not return (2005, 2011, 2014).
   +   There are also years where something positive appears to have happened and far more fish than expected returned to the river (1999 to 2001, 2020).
-  
+
+How does this change if we increase egg-to-fry survival to 0.2? 
+
 
 I wonder how my predicted tyee returns align with actual tyee captures. 
 
