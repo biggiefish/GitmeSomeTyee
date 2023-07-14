@@ -18,7 +18,7 @@ output:
 ```
 
 # 1. What is this?
-A high-level, and very casual, self-deprecating look at trends in catches of Tyee salmon in Campbell River's legendary [Tyee Pool](https://goo.gl/maps/4Nb4etqRVjoSSfqSA). All data exploration is being completed for [fun](https://i.giphy.com/media/Cz6TlrRVVyv9S/giphy.webp) and to learn some new tools (namely [R Markdown](https://rmarkdown.rstudio.com/) and [plotly](https://plotly.com/r/)). 
+A high-level, very casual, and often self-deprecating look at trends in catches of Tyee salmon in Campbell River's legendary [Tyee Pool](https://goo.gl/maps/4Nb4etqRVjoSSfqSA). All data exploration is being completed for [fun](https://i.giphy.com/media/Cz6TlrRVVyv9S/giphy.webp) and to learn some new tools (namely [R Markdown](https://rmarkdown.rstudio.com/) and [plotly](https://plotly.com/r/)). 
 
 There are far more technical ways of examining this data, but they aren't as much fun - and are frankly hard. This analysis is living and will evolve over time. All results and interpretation are purely speculative and should be considered nothing more than ramblings of a fish nerd. 
 
@@ -261,6 +261,7 @@ This analysis uses the following publicly available data:
 3) Annual Chinook Salmon escapement data available in the [DFO NuSEDS database](https://open.canada.ca/data/en/dataset/c48669a3-045b-400d-b730-48aafe8c5ee6).
 4) Annual catch statistics from the [North Pacific Anadromous Fish Commission](https://npafc.org/statistics/)
 5) Area based commercial catch statistics from DFO are [available from 2001 to 2016](https://www.pac.dfo-mpo.gc.ca/stats/smon/index-eng.html) 
+6) Straight of Georgia herring [spawn](https://www.pac.dfo-mpo.gc.ca/science/species-especes/pelagic-pelagique/herring-hareng/herspawn/tabsfram-eng.html) and [catch](https://www.pac.dfo-mpo.gc.ca/science/species-especes/pelagic-pelagique/herring-hareng/herspawn/tabcfram-eng.html) data 
 
 
 This is certainly an interesting dataset, especially given it is the Tyee Club centenary,  but it has its limitations. For example, there is no information on effort (# boats per day) and biological data is limited (e.g. size, girth and age of tyees or number of undersized fish captured). 
@@ -273,7 +274,7 @@ This is certainly an interesting dataset, especially given it is the Tyee Club c
 ## 2.1 What we* know about Campbell River Chinook? 
 
 
-(* more like what do I know about Campbell River Chinook Salmon, which isn't much).
+(* more like what have other learned about Campbell River Chinook Salmon, I don't know much).
 
 
 There has been a lot of information collected on Campbell River Chinook Salmon, including from Tyee Salmon captured in the Tyee Pool, however, most of this data is not readily available online. Data that is available (and that I have found) is summarized below. 
@@ -404,7 +405,7 @@ plot1 <- ggplot(catch.data.yearly) +
 
 #suppressWarnings(ggplotly(plot1, tooltip = c("Year", "Total.Catch")))
 
-#`r fig_nums("plot1", "Number of Tyee Salmon captured per year since 2002.")`
+# **`r fig_nums("plot1", "Number of Tyee Salmon captured per year since 2002.")`**
 
 #suppressWarnings(print(plot1)) 
 ```
@@ -473,7 +474,7 @@ suppressWarnings(print(plot2))
     #suppressWarnings(ggplotly(plot2.1, tooltip = c("Year","Total.Catch", "Escapement", "Overall.Mean.Catch")))   
 ```
 
-`r fig_nums("plot2", "Trends in Tyee Salmon captures and Campbell River Chinook Salmon escapement.")`
+**`r fig_nums("plot2", "Trends in Tyee Salmon captures and Campbell River Chinook Salmon escapement.")`**
 
 
 
@@ -514,11 +515,13 @@ At it's most basic level, there are four things that are likely affecting catche
 
 Off the top of my head there are two ways we can approach this:
 
-  1.) We can look at what factors influenced how many fish were available for capture in the Tyee pool (i.e. how historic 
+1.) We can look at what factors influenced how many fish were available for capture in the Tyee pool (i.e. how historic 
   conditions may have contributed to observed captures), and/or;
-  2.) We can look at what factors influenced how returning fish were captured (i.e. conditions during the fishing season)
+  
+2.) We can look at what factors influenced how returning fish were captured (i.e. conditions during the fishing season)
 
 ## 4.1 How Historic Conditions Influenced Captures
+
 
 We can ***VERY CRUDELY*** estimate the number of Tyee salmon that should return to the Campbell River if we make a couple of big assumptions:
 
@@ -534,7 +537,7 @@ Using these numbers we can assume that 60% of a given years fish will be female 
 
 If we run these numbers, each female will generate `r 5700*.003` offspring, of which `r format((5700*.003*.447), digits = 2)` will be Age-4, `r format((5700*.003*0.461), digits = 2)` will be Age-5 and `r format((5700*.003*.013), digits = 2)` will be Age-6 - of which `r format(((5700*.003*.447*.4*.15) + (5700*.003*0.461*.35) + (5700*.003*.013*.85)),digits = 2)` will be Tyee salmon.
 
-But this doesn't make sense, if each female produced `r 5700*.003` offspring escapement would be increasing rapidly. And it most certainly is not. So, what gives?  
+But this doesn't make sense, if each female produced `r 5700*.003` offspring escapement would be increasing rapidly. And it most certainly is not. So, what gives?  Let's look at a figure.
 
 
 ```{r predicted.returns.data.prep, include= FALSE}
@@ -641,7 +644,7 @@ pred.returns2 <- pred.returns %>%
 ```
 
                                         
-```{r, predicted.age.class.plot}
+```{r, predicted.age.class.plot, include = FALSE}
 pred.jnk1 <- pred.returns %>% select(brood.yr,esc_count,pred.fish) %>%
                                group_by(brood.yr) %>%
                                summarize(esc_count = mean(esc_count),
@@ -675,21 +678,23 @@ colnames(pred.plot.dat)
 
 pred.age.class.plot <- ggplot(pred.plot.dat, aes(x = Year)) +
                           geom_col(aes(y = returning.fish, fill = returning.ageclass)) +
-                          geom_line(aes(y = esc_count, linetype = "Escapement")) +
-                          geom_line(aes(y = returning.tyee, color = "Predicted", color = 'dodgerblue')) +
-                          geom_line(aes(y = catch_yr.total, color = "Captured", color = 'maroon')) +
+                          geom_line(aes(y = esc_count, color = "Escapement"), linewidth = 1) +
+                          geom_line(aes(y = returning.tyee, color = "Total Predicted Tyee"), linewidth = 1) +
+                          geom_line(aes(y = catch_yr.total, color = "Tyee Captured"), linewidth = 1) +
+                          scale_color_manual(name = '# Fish', values = c("Escapement" = 'darkblue', 
+                                                                         "Total Predicted Tyee"  = 'maroon',
+                                                                         "Tyee Captured"   =  'hotpink')) +
                           scale_x_continuous(limits = c(1996,2021)) +
                           labs(y = "# Tyee Salmon", x = "") +
-                          guides(linetype = guide_legend(title = "Escapement", label = FALSE),
-                                 fill = guide_legend(title = "Predicted Returns \n by Age Class"),
-                                 linetype = guide_legend(title = "Number Tyee", label = TRUE)) +
-                                 #color = guide_legend(title = "Mean catches per year", label = FALSE)) +
-                          scale_x_continuous(breaks = seq(1990,2022,2)) +
+                          guides(fill = guide_legend(title = "Predicted Returns \n by Age Class"),
+                                 linewidth ="none") +
                           scale_y_continuous(breaks = seq(0, 1800, 200)) +
                           theme_bw() 
                           # theme(legend.position = c(0.78, 0.88),
                           #       legend.box.background = element_rect(colour = "black", linewidth = 1.25, fill = NA))
 ```
+
+
 
 ```{r pred.age.class.plot, echo = FALSE}
 ## ggplot figure
@@ -699,7 +704,7 @@ suppressWarnings(print(pred.age.class.plot))
     #suppressWarnings(ggplotly(pred.age.class.plot), tooltip = c("Year","returning.fish", "returning.ageclass", "esc_count", "returning.tyee")))   
 ```
 
-`r fig_nums("pred.age.class.plot", "Predicted returns by age-class relative to measured escapement.")`
+**`r fig_nums("pred.age.class.plot", "Predicted returns by age-class relative to measured escapement.")`**
 
 Well that's interesting. There are periods when my predicted returns closely align with actual escapement (most closely from 2003 to 2007, but my values are comparable from 2003 to 2010). This suggests my estimates may not be WAY off but does not confirm they are correct. Other notes:
 
@@ -709,7 +714,6 @@ Well that's interesting. There are periods when my predicted returns closely ali
   
 
 I wonder how my predicted tyee returns align with actual tyee captures. 
-
 
 
 ```{r predicted.returns.plot.prep, include = FALSE, eval = FALSE}
@@ -755,7 +759,7 @@ plot66 <- ggplot(total.pred.tyee2) +
 suppressWarnings(print(plot66))  
 ```
 
-`r fig_nums("plot66", "Comparison of catches of Tyee Salmon, predicted returns of Tyee Salmon and annual Chinook Salmon escapement counts.")`
+**`r fig_nums("plot66", "Comparison of catches of Tyee Salmon, predicted returns of Tyee Salmon and annual Chinook Salmon escapement counts.")`**
 
 Well, even though my estimates are clearly wrong, this is still interesting. There is a fairly drastic shift in predicted returns that coincides with the crash in 2014. Prior to the crash, predicted returns are consistently underestimated (`r format((8/11)*100, digits = 1)`% of years are less than actual catches) whereas after the crash predicted Tyee returns are greater than total tyee catches in all but one year. Not sure exactly what this means, or how to interpret it, but I think its worth considering:
 
@@ -818,7 +822,7 @@ ggplotly(plot.esc)
 suppressWarnings(ggplotly(plot.esc))  
 ```
 
-`r fig_nums("plot.esc", "Chinook Salmon escapement from rivers on East and West Coast of Vancouver Island.")`
+**`r fig_nums("plot.esc", "Chinook Salmon escapement from rivers on East and West Coast of Vancouver Island.")`**
 
 
 Well, that figure sucks. But it shows how variable escapement is between years. On the East Coast of the Island, abundance increased in 'r format(3/7*100, digits = 2)`% of plotted streams and decreased in all others. Decreases  
@@ -901,7 +905,7 @@ plot4 <-    ggplot(flow.catch.recent) +
 suppressWarnings(print(plot3))  
 ```
 
-`r fig_nums("plot3", "Catches of Tyee Salmon since 2016 relative to flow in the Campebll River.")`
+**`r fig_nums("plot3", "Catches of Tyee Salmon since 2016 relative to flow in the Campebll River.")`**
 
 
 Well, it's clear that flows in 2022 were higher than past years and higher than mean flows over the past 5-years. But this doesn't mean that is why fewer fish were captured. Either way let's take a closer look at the correlation between flow and capture.
