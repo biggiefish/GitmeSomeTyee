@@ -526,10 +526,10 @@ daily.decadal.catch.plot
 ```{r daily.decadal.tyee.plot, echo=FALSE}
 
 ## ggplot figure
-suppressWarnings(print(daily.decadal.catch.plot))
+#suppressWarnings(print(daily.decadal.catch.plot))
 
 ## plotly figure
-    suppressWarnings(ggplotly(daily.decadal.catch.plot, tooltip = c("Decade", "Date","Total Catch")))   
+    suppressWarnings(ggplotly(daily.decadal.catch.plot, tooltip = c("decade", "date.std","catch")))   
 ```
 
 **`r fig_nums("daily.decadal.catch", "Total fish captured by date and decade")`**
