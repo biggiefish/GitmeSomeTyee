@@ -373,7 +373,7 @@ table1
 
 
 # 3. Let's look at the Tyee catch data!
-So, let's begin by having a look at the catch data from the Tyee pool and how catches fluctuate relative to Chinook Salmon escapement in the Campbell River.
+So, let's begin by having a look at the catch data from the Tyee pool and seeing how catches fluctuate relative to Chinook Salmon escapement in the Campbell River.
 ```{r plot1_prep_tyeecatch, include=FALSE}
 ## Prepare Plot
 catch.data.yearly <- catch_data %>% 
@@ -489,6 +489,55 @@ If we look at Escapement data (blue line) shown in `r fig_nums("plot2", display 
 1) There has been a general declining trend in escapement (consistent with regional trends),
 2) Periods of increased escapement correspond with periods of increased Tyee catches, but not always (e.g. 2005, 2017 and 2020). Given the lack of information on effort (e.g. # of boats fishing per day) we cannot tease apart whether the lack of catches in some years is due to reduction in pressure. 
 3) It is also possible that years with high escapement and low Tyee numbers were due to an increased proportion of smaller fish returning to the Campbell. Without annual information on age structure I cannot tease this apart.
+
+Now, lets see when fish are most frequently captured throughout the season, and if there has been a change over time.
+
+
+```{r daily.decadal.tyee.prep, include = FALSE}
+colnames(catch_data)
+str(catch_data)
+
+daily.decadal.catch <- catch_data %>% 
+                            mutate(decade   = format(floor_date(Date, years(10)), '%Y'),             ## calculate decade
+                                   date.std = case_when(year(Date) >= 0 ~ 'year<-'(Date, 2021))) %>%  #Set all dates to same year
+                            group_by(decade, date.std) %>%
+                            summarize(catch = sum(catch_binary))
+
+colnames(daily.decadal.catch)
+str(daily.decadal.catch)
+
+                          
+daily.decadal.catch.plot <- ggplot(daily.decadal.catch) +
+                                geom_col(aes(x= date.std, y = catch, fill = decade)) +
+                                labs(x = "", y = "# Tyees Captured") +
+                                scale_x_date(date_minor_breaks = "1 day", date_breaks = '1 week', 
+                                             date_labels = '%b-%d', 
+                                             limits = c(as.Date("2021-07-01"), as.Date("2021-09-15"))) +
+                                # scale_y_discrete(breaks = seq(0, 30, 5)) +
+                                guides(fill = guide_legend(title = "Decade")) +
+                                theme_bw() +
+                                theme(axis.text.x = element_text(angle = 45, vjust = 1.1, hjust = 1)) 
+                                
+daily.decadal.catch.plot
+                        
+                              
+
+```
+```{r daily.decadal.tyee.plot, echo=FALSE}
+
+## ggplot figure
+suppressWarnings(print(daily.decadal.catch.plot))
+
+## plotly figure
+    suppressWarnings(ggplotly(daily.decadal.catch.plot, tooltip = c("Decade", "Date","Total Catch")))   
+```
+
+**`r fig_nums("daily.decadal.catch", "Total fish captured by date and decade")`**
+
+HEY! Who let someone register a Tyee in the first week of July!? This plot will become a lot more interesting once I can get my hands on some historical data. 
+
+
+
 
 ## 3.1. What could be affecting returns and catches?
 At it's most basic level, there are four things that are likely affecting catches of Tyee salmon (in reality, there are many many many many many more.
@@ -809,7 +858,7 @@ str(esc.plot.dat)
 plot.esc <- ggplot(esc.plot.dat, aes(x= Year, y = Count))+
             geom_line(aes(color = Stream), linewidth = 0.4) +
             labs(x = "", y = "# Spawning Chinook") +
-            scale_x_continuous(breaks = c(2000, 2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016, 2018, 2020)) +
+            scale_x_continuous(breaks = seq(2000, 2020, by = 2)) +   
             geom_vline(xintercept = 2014, linewidth = 5, color = 'gray', alpha = 0.2) +
             theme_bw() +
             theme(legend.position = "bottom") +
