@@ -22,6 +22,9 @@ A high-level, very casual, and often self-deprecating look at trends in catches 
 
 There are far more technical ways of examining this data, but they aren't as much fun - and are frankly hard. This analysis is living and will evolve over time. All results and interpretation are purely speculative and should be considered nothing more than ramblings of a fish nerd. 
 
+Normally this is where I would put pictures of all the beauty Tyee I have captured, but that hasn't happened yet. So far, these are the [best things](images/IMG_2815.v2.jpg) I have managed to get in my boat. 
+
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ## Prepare Working Environment ----
@@ -419,7 +422,7 @@ cr_esc2 <- cr_esc %>% filter(Year >=2002)
 ## Merge escapement data with tyee catch data
 cr_data <- left_join(catch_data, cr_esc2, by = "Year")
     
-cr_yearly <- cr_data %>% filter(Year < 2022) %>%
+cr_yearly <- cr_data %>% filter(Year <= 2022) %>%
                          group_by(Year, tyee_cycle4) %>%
                          summarize(Total.Catch        = mean(catch_yr.total),
                                    Overall.Mean.Catch = mean(catch_yrs.mean.total),
@@ -517,10 +520,6 @@ daily.decadal.catch.plot <- ggplot(daily.decadal.catch) +
                                 guides(fill = guide_legend(title = "Decade")) +
                                 theme_bw() +
                                 theme(axis.text.x = element_text(angle = 45, vjust = 1.1, hjust = 1)) 
-                                
-daily.decadal.catch.plot
-                        
-                              
 
 ```
 ```{r daily.decadal.tyee.plot, echo=FALSE}
@@ -534,365 +533,17 @@ daily.decadal.catch.plot
 
 **`r fig_nums("daily.decadal.catch", "Total fish captured by date and decade")`**
 
-HEY! Who let someone register a Tyee in the first week of July!? This plot will become a lot more interesting once I can get my hands on some historical data. But for now, we can see:
-  +   People either do not fish, or do not catch fish before late July/early August.
+Hey! Who let someone register a Tyee in the first week of July!? This plot will become a lot more interesting once I can get my hands on some historical data. But for now, we can see:
+
+  +   People either do not fish, or do not catch fish before late July/early August. Given the way catches increase through August I am thinking it is the latter.
   +   Peak catches occur in mid to late August. 
   
 
+Ok, well now we know not to bother fishing until early August, that I should book the off the last 3 weeks of August and that adds are that 2023 is not going to set a new record for most Tyee's captured. But who knows. Anyhow, lets see what might be contributing to variability in the number of Tyee captured per year.
 
+Might also be fun to look at daily catches in each year. Given speculation that high flows contributed to record low catches in 2022 lets include some measures of flow.
 
-
-## 3.1. What could be affecting returns and catches?
-At it's most basic level, there are four things that are likely affecting catches of Tyee salmon (in reality, there are many many many many many more.
-
-
-**3.1.1. Juvenile recruitment**
-
-* This is determined by the number of eggs that are deposited (for easy math, lets say females account for 50% of escapement, that each one deposits 4000 eggs and that egg to fry survival is 10%). We will assume that fish that survive to fry will enter the sea. Hydrometric data on the Campbell is available back to 1949 and it is likely that extreme high or low flow events (e.g. greater than 300 cms, less than ??50 cms??) during the incubation/rearing periods (maybe November through March) will reduce juvenile recruitment.
-
-**3.1.2. Marine survival and productivity**
-
-* This is way too complicated for right now. Let's feel warm and fuzzy by assuming survival and productivity are stable (side note, they arent!). But if we don't do this we can't assume that proportions calculated from Sturham et al. are representative of current returns (unfortunately recent evidence shows this assumption is wrong and that fish are decreasing in size, so there are likely fewer Tyee returning now than in previous years). 
-  
-**3.1.3. Fishing effort and catchability **
-
-  * For now, I am going to assume effort (# of boats fishing per tide/day) is constant and that catchability (percent of Tyees present that are captured) are stable. In reality, effort has likely decreased over time (especially since 2014) and catchability has likely increased as peoples knowledge, skill and fishing technology have improved over time (not everyone though, I still suck). Either way, without some hard data it is hard to much with this.
-
-**3.1.4. Fishing Conditions **
-
-  * No question that fewer fish will be captured during seasons with poor fishing conditions (e.g. very windy, lots of rain). It is also possible that fish behaviour will change in response to river conditions. Certainly there was a lot of speculation that high flows during the 2022 Tyee season contributed to record low catches.  
-  
-
-# 4. So, what can we look at? 
-
-Off the top of my head there are two ways we can approach this:
-
-1.) We can look at what factors influenced how many fish were available for capture in the Tyee pool (i.e. how historic 
-  conditions may have contributed to observed captures), and/or;
-  
-2.) We can look at what factors influenced how returning fish were captured (i.e. conditions during the fishing season)
-
-## 4.1 How Historic Conditions Influenced Captures
-
-We can ***VERY CRUDELY*** estimate the number of salmon that should return to the Campbell River if we make a couple of big assumptions:
-
-  +   Fecundity is ~5,700 eggs per female ([Ewart & Anderson, 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf) 
-  +   Sex ratios are 60:40 female to male using [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf)) data for Campbell River)
-  
-  +   Egg-to-fry survival is approximately 0.1, can't recall where this number came from but its commonly used as a measure of egg-to-fry survival of wild fish (compared to 0.9 for hatchery reared fish). Give results from [Thornton et al. 2022](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf) it is likely that egg-to-fry survival in the Campbell is higher.
-  
-  +   Marine survival (smolt to adult)  is approximately 0.003 ([Ewart & Anderson, 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf)
-  
-  +   7.9% of fish will return as Age-3, 44.7% of fish will return as Age-4 fish, 46.1% will return as Age-5 fish and 1.3% will return as Age-6 fish.
-  
-We can expand this to estimate the number of Tyee salmon that will return if we make even more assumptions! 
-  
-  +   For fun, let's assume all fish > 900 mm are Tyee Salmon (I know girth is important too, but I dont have girth data) and using the [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf)) data as a rough guide I will assume that 10% of Age-4 male adults are >900 mm, 15% of Age-5 fish (males and females) are >900 mm and 85% of Age-6 fish are >900 mm.
-  
-If we run these numbers, each female will generate `r format(5700*0.1*.003, digits = 2)` offspring, of which `r format((5700*0.1*0.003*0.079), digits = 2)` will be Age-3, `r format((5700*0.1*.003*.447), digits = 2)` will be Age-4, `r format((5700*0.1*.003*0.461), digits = 2)` will be Age-5 and `r format((5700*0.1*.003*.013), digits = 2)` will be Age-6. Furthermore, each female will produce `r format(((57000.1**.003*.447*.4*.15) + (5700*0.1*.003*0.461*.35) + (5700*0.1*.003*.013*.85)),digits = 2)`  Tyee salmon. *Let's take a moment to remember that these assumptions are terrible. Larger fish are more likely to produce larger fish, so in reality some fish will produce a decent number of Tyee and others will produce none. But let's keep it simple for now and assume every fish is able to make an equal number of Tyees*
-
-Based on this, each female should produce `r 5700*0.1*.003` offspring that return to spawn. Which is less than ideal. 
-
-
-```{r predicted.returns.data.prep0.1fry, include= FALSE}
-## Define assumptions
-      fecundity <- 5700 # typically around 6000 for CR, http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf
-      perc.female <- 0.6  # 60% of fish are females
-      egg.to.fry <- 0.1 
-      fry.to.smolt <- 0.2
-      marine.surv <- 0.003 #marine survival reported as 0.002 to 0.004 by  http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf 
-      perc.male <- 0.4                 # 40% of fish are male
-      Age3 <- 0.079
-      Age4 <- 0.447               # 44.7% of fish are Age-4
-      Age5 <- 0.461               # 46.1% of fish are Age-5
-      Age6 <- 0.013               #  1.3% of fish are Age-6
-      Tyee.Age3m.prop   <- 0      # No Age-3 males are Tyee.
-      Tyee.Age4m.prop   <- 0.15   # 10% of Age-4 males are Tyee - MADE UP NUMBER!
-      Tyee.Age5mf.prop  <- 0.35   # 15% of all Age-5 fish are Tyee - MADE UP NUMBER!
-      Tyee.Age6mf.prop  <- 0.85   # 100% of all Age-6 fish are Tyee - MADE UP NUMBER!
-      
-## Calculate Ratios
-      ratio.Age4.tyee <- perc.male * Age4 * Tyee.Age4m.prop # multiply this by annual escapement to calculate # Age-4 males that are tyees.
-      ratio.Age5.tyee <- Age5 * Tyee.Age5mf.prop # multiply this by annual escapement to calculate # Age-5 fish that are tyees.
-      ratio.Age5.tyee <- Age6 * Tyee.Age6mf.prop # multiply this by annual escapement to calculate # Age-5 fish that are tyees.
-
-      
-## Estimate number of fish predicted to return from each age class based on historic escapement.       
-pred.fish <- cr_esc %>% mutate(brood.yr     = Year,
-                               pred.fish    = esc_count * perc.female *fecundity *          # total number of fish that will be produced based on 
-                                              egg.to.fry * marine.surv,  #fry.to.smolt *      escapement count.
-                               Age3_Yr      = Year+3,
-                               Age3_returns = Age3*pred.fish,                               # number of produced fish that will return in 3 years.
-                               Age3_tyee    = Age3_returns * perc.male * Tyee.Age3m.prop,
-                               Age4_Yr      = Year+4,
-                               Age4_returns = Age4*pred.fish,
-                               Age4_tyee    = Age4_returns * perc.male * Tyee.Age4m.prop,
-                               Age5_Yr      = Year+5,
-                               Age5_returns = Age5*pred.fish,
-                               Age5_tyee    = Age5_returns * Tyee.Age5mf.prop,
-                               Age6_Yr      = Year+6,
-                               Age6_returns = Age6*pred.fish,
-                               Age6_tyee    = Age6_returns * Tyee.Age6mf.prop)
-
-
-## Estimate total number of Tyee expected to return in each year.
-pred.returns <- pred.fish %>% select(brood.yr, esc_count,pred.fish,Age3_Yr, Age4_Yr, Age5_Yr,Age6_Yr,Age3_returns, 
-                                     Age4_returns,Age5_returns,Age6_returns, Age3_tyee, Age4_tyee, Age5_tyee, Age6_tyee) %>%
-                              pivot_longer(-c(brood.yr, esc_count, pred.fish),
-                                                names_to = c("Var", ".value"),
-                                                names_sep = "_") %>%
-                              rename("returning.ageclass"   = "Var",
-                                     "return.year"          = "Yr",
-                                     "returning.fish"       = "returns",
-                                     "returning.tyee"       = "tyee")
-
-## Summarize predicted returns.
-pred.returns2 <- pred.returns %>% 
-                              group_by(return.year) %>%
-                              summarize(esc_count            = mean(esc_count),
-                                        total.pred.return = sum(returning.fish),         # number fish returning based on age.classes
-                                        total.pred.tyee = sum(returning.tyee),
-                                        total.pred.returns   = mean(pred.fish), #) %>%
-                                        Age3.fish = Age3 * total.pred.returns,
-                                        Age4.fish = Age4 * total.pred.returns,
-                                        Age5.fish = Age5 * total.pred.returns,
-                                        Age6.fish = Age6 * total.pred.returns,
-                                        Age3.tyee = Age3.fish * 0,
-                                        Age4.tyee = Age4.fish * perc.male * Tyee.Age4m.prop,
-                                        Age5.tyee = Age5.fish * Tyee.Age5mf.prop,
-                                        Age6.tyee = Age6.fish *Tyee.Age6mf.prop) %>%
-                              filter(return.year >= 1996)
-```
-
-```{r original.predicted code.OLD.DO.NOT.USE, include = FALSE}
-# pred.tyee <- pred.fish %>% select(brood.yr, esc_count,pred.fish,Age3_Yr, Age4_Yr, Age5_Yr,Age6_Yr,Age3_tyee, 
-#                                      Age4_tyee,Age5_tyee,Age6_tyee) %>%
-#                               pivot_longer(-c(brood.yr, esc_count, pred.fish),
-#                                                 names_to = c("Var", ".value"),
-#                                                 names_sep = "_") %>%
-#                               rename("returning.ageclass"   = "Var",
-#                                      "return.year"          = "Yr",
-#                                      "returning.tyee"       = "tyee") %>%
-#                               group_by(return.year) %>%
-#                               summarize(esc_count            = mean(esc_count),
-#                                         total.returning.fish = sum(returning.fish),
-#                                         total.pred.tyee      = mean(pred.fish)) %>%
-#                               mutate(Age3.fish = Age3 * total.pred.tyee,
-#                                      Age4.fish = Age4 * total.pred.tyee,
-#                                      Age5.fish = Age5 * total.pred.tyee,
-#                                      Age6.fish = Age6 * total.pred.tyee)
-# 
-# pred.tyee <- pred.fish %>% select(esc_count,pred.fish,Age4_Yr, Age5_Yr,Age6_Yr,Age4_tyee,Age5_tyee,Age6_tyee) %>%
-#                                   pivot_longer(-c(esc_count, pred.fish),
-#                                                 names_to = c("Var", ".value"),
-#                                                 names_sep = "_") %>%
-#                                   rename("Returning.AgeClass"   = "Var",
-#                                          "Return.Year"               = "Yr",
-#                                          "Tyee.Total"         = "tyee") %>%
-#                                   group_by(Year) %>%
-#                                   summarize(esc_count            = mean(esc_count),
-#                                             Total.Returning.Tyee = sum(Tyee.Total),
-#                                             Total.Pred.Returns   = mean(pred.fish)) %>%
-#                                   mutate(Return.Year = as.numeric(Return.Year))
- 
-```
-
-                                        
-```{r, predicted.age.class.plot, include = FALSE}
-pred.jnk1 <- pred.returns %>% select(brood.yr,esc_count,pred.fish) %>%
-                               group_by(brood.yr) %>%
-                               summarize(esc_count = mean(esc_count),
-                                         pred.fish = mean(pred.fish)) %>%
-                               rename(Year = brood.yr)
-
-pred.jnk2 <- pred.returns %>% select(return.year, returning.ageclass, returning.fish) %>%
-                               group_by(return.year, returning.ageclass) %>%
-                               summarize(returning.fish = sum(returning.fish)) %>%
-                               rename(Year = return.year)
-
-pred.jnk3 <- pred.returns %>% select(return.year, returning.tyee) %>%
-                               group_by(return.year) %>%
-                               summarize(returning.tyee = sum(returning.tyee)) %>%
-                               rename(Year = return.year)
-                              
-pred.jnk4 <- left_join(pred.jnk1, pred.jnk2, by = c("Year")) %>% filter(Year >1995)
-
-
-pred.jnk5 <- left_join(pred.jnk4, pred.jnk3, by = c("Year"))
-         
-pred.jnk6 <- catch_data %>% select(Year, catch_yr.total) %>%
-                            group_by(Year) %>%
-                            summarize(catch_yr.total = mean(catch_yr.total))
-
-pred.plot.dat <- left_join(pred.jnk5, pred.jnk6, by = "Year") %>%
-                          mutate(catch_yr.total = coalesce(catch_yr.total, 0))
-colnames(pred.plot.dat)
-
-# pred.long.dat <- pred.plot.dat %>% pivot_longer(-c(Year, returning.fish, returning.ageclass)) # THIS DOESNT WORK
-
-pred.age.class.plot <- ggplot(pred.plot.dat, aes(x = Year)) +
-                          geom_col(aes(y = returning.fish, fill = returning.ageclass)) +
-                          geom_line(aes(y = esc_count, color = "Escapement"), linewidth = 1) +
-                          geom_line(aes(y = returning.tyee, color = "Total Predicted Tyee"), linewidth = 1) +
-                          geom_line(aes(y = catch_yr.total, color = "Tyee Captured"), linewidth = 1) +
-                          scale_color_manual(name = '# Fish', values = c("Escapement" = 'darkblue', 
-                                                                         "Total Predicted Tyee"  = 'maroon',
-                                                                         "Tyee Captured"   =  'hotpink')) +
-                          scale_x_continuous(limits = c(1996,2021)) +
-                          labs(y = "# Tyee Salmon", x = "") +
-                          guides(fill = guide_legend(title = "Predicted Returns \n by Age Class"),
-                                 linewidth ="none") +
-                          scale_y_continuous(breaks = seq(0, 1800, 200)) +
-                          theme_bw() 
-                          # theme(legend.position = c(0.78, 0.88),
-                          #       legend.box.background = element_rect(colour = "black", linewidth = 1.25, fill = NA))
-```
-
-
-
-```{r pred.age.class.plot, echo = FALSE}
-## ggplot figure
-suppressWarnings(print(pred.age.class.plot))
-
-## plotly figure
-    #suppressWarnings(ggplotly(pred.age.class.plot), tooltip = c("Year","returning.fish", "returning.ageclass", "esc_count", "returning.tyee")))   
-```
-
-**`r fig_nums("pred.age.class.plot", "Predicted returns by age-class relative to measured escapement, assuming 10% egg to fry survival.")`**
-
-Well that's interesting. There are periods when my predicted returns closely align with actual escapement (most closely from 2003 to 2007, but my values are comparable from 2003 to 2010). This suggests my estimates may not be WAY off but does not confirm they are correct. Other notes:
-
-  +   Also clearly periods when my predictions are off! Most notably from 1998 to 2002, 2011-2012, **2014** and 2019 to 2022.
-  +   There are number of years where something appears to have happened and fish simply did not return (2005, 2011, 2014).
-  +   There are also years where something positive appears to have happened and far more fish than expected returned to the river (1999 to 2001, 2020).
-
-How does this change if we increase egg-to-fry survival to 0.2? 
-
-
-I wonder how my predicted tyee returns align with actual tyee captures. 
-
-
-```{r predicted.returns.plot.prep, include = FALSE, eval = FALSE}
-
-## Join Total Predicted Tyee w. Summarized Tyee Catch data                                           
-total.pred.tyee2 <- left_join(total.pred.tyee, cr_data.yr, by = "Year") %>% 
-                                       filter(Year >2001)  
-
-summary(total.pred.tyee$Tyee.Total.Predicted)
-
-
-## need cr_data 
-str(total.pred.tyee2)
-plot66 <- ggplot(total.pred.tyee2) +
-                 geom_bar(aes(x = Year, y = catch_yr.total, alpha = 0.3, fill = 'Total Tyee Catch'), 
-                               stat = "identity") +
-                 geom_bar(aes(x = Year, y = Tyee.Total.Predicted, alpha = 0.3, fill = 'Predicted Tyee Returns'), 
-                              stat = 'identity') +
-                # geom_bar(aes(x = Year, y = catch_yr.total, fill = tyee_cycle4, alpha = 0.8), 
-                #                stat = "identity") +
-                # geom_bar(aes(x = Year, y = Tyee.Total.Predicted, fill = 'Total Predicted Tyee', alpha = 0.3), 
-                #               stat = 'identity') +
-                geom_line(aes(x = Year, y = Esc_Scaled, linetype = Species), 
-                              color = "lightblue", linewidth = 1.2) +
-                geom_hline(aes(yintercept = catch_yrs.mean.total, color = catch_yrs.mean.total), 
-                              linetype = "dashed", linewidth = 0.5) +
-                labs(x = "", y = "Number Tyee Captured") + 
-                guides(fill =  guide_legend(title = "", label = TRUE),
-                       linetype = guide_legend(title = "Escapement", label = FALSE),
-                       color = guide_legend(title = "Mean Tyee Catch", label = FALSE),
-                       alpha = "none") +
-                scale_y_continuous(breaks = seq(0, 100, 5),
-                                    sec.axis = sec_axis(~.*25, name = "Escapement")) +  #scale secondary access by x25
-                scale_x_continuous(breaks = seq(2002,2022,2)) +            
-                theme_bw() +
-                theme(legend.direction = "horizontal",
-                      legend.position = "bottom")
-
-```
-
-
-```{r plot.predictred.returns,  echo = FALSE, eval = FALSE}
-suppressWarnings(print(plot66))  
-```
-
-**`r fig_nums("plot66", "Comparison of catches of Tyee Salmon, predicted returns of Tyee Salmon and annual Chinook Salmon escapement counts.")`**
-
-Well, even though my estimates are clearly wrong, this is still interesting. There is a fairly drastic shift in predicted returns that coincides with the crash in 2014. Prior to the crash, predicted returns are consistently underestimated (`r format((8/11)*100, digits = 1)`% of years are less than actual catches) whereas after the crash predicted Tyee returns are greater than total tyee catches in all but one year. Not sure exactly what this means, or how to interpret it, but I think its worth considering:
-
-  +   Only a proportion of all returning Tyees are captured each year. If all Tyee salmon were captured each year, we would be actively selecting 
-      against large fish and it would be reasonable to expect to see a continuous decline in the total number of Tyees returning each year. So,          based on this logic (and my personal observation of tyees on the spawning ground), the predicted Tyee returns should always be greater than 
-      total catches.  
-  +   The formula and values used to estimate predicted returns of tyee salmon do not change. If we assume there is no 
-      change in catchability and that the number of Tyees captured in the pool is a representation of the actual number of Tyee salmon
-      that return to the river there appears to have been a dramatic reduction in the number or proportion of Tyee salmon in 2014. Given low             escapement in 2014, it is most likely a poor return rather than a reduced proportion of Tyee.
-  +   Additionally, the figure shows that my formula and estimates are way off - which is not surprising as they were 
-      very crude! This is most apparent in the years prior to the 2014 crash, but suggests predictions after the crash are 
-      also off too.     
-
-So, what happened in 2014!? Did runs crash everywhere? Let's have a look at escapement in other systems in the area. 
-
-```{r, escapement comparison, include=FALSE}
-unique(esc_data$GAZETTED_NAME)
-esc.plot.dat <- esc_data %>% filter(GAZETTED_NAME %in% c("ARTLISH RIVER","BEDWELL RIVER", "BURMAN RIVER", "CAMPBELL RIVER", "COWICHAN RIVER", 
-                                                     "ENGLISHMAN RIVER","GOLD RIVER", "LITTLE QUALICUM RIVER","NIMPKISH 
-                                                     RIVER", "QUALICUM RIVER", "QUINSAM RIVER", "SALMON RIVER")) %>% 
-                          mutate(Year = as.numeric(ANALYSIS_YR),
-                                 Stream = as.factor(GAZETTED_NAME),
-                                 Area   = recode(as.factor(GAZETTED_NAME),
-                                                 'ARTLISH RIVER'         = "West Coast VI", 
-                                                 'BEDWELL RIVER'         = "West Coast VI",
-                                                 'BURMAN RIVER'          = "West Coast VI",
-                                                 'GOLD RIVER'            = "West Coast VI",
-                                                 'CAMPBELL RIVER'        = "East Coast VI",
-                                                 'COWICHAN RIVER'        = "East Coast VI",
-                                                 'ENGLISHMAN RIVER'      = "East Coast VI", 
-                                                 'LITTLE QUALICUM RIVER' = "East Coast VI",
-                                                 'NIMPKISH RIVER'        = "East Coast VI",
-                                                 'QUALICUM RIVER'        = "East Coast VI",
-                                                 'QUINSAM RIVER'         = "East Coast VI",
-                                                 'SALMON RIVER'          = "East Coast VI")) %>%
-                          group_by(Area, Stream, Year) %>%
-                          summarize(Count =sum(MAX_ESTIMATE)) %>%
-                          filter (Year > 2000)
-
-
-
-str(esc.plot.dat)
-plot.esc <- ggplot(esc.plot.dat, aes(x= Year, y = Count))+
-            geom_line(aes(color = Stream), linewidth = 0.4) +
-            labs(x = "", y = "# Spawning Chinook") +
-            scale_x_continuous(breaks = seq(2000, 2020, by = 2)) +   
-            geom_vline(xintercept = 2014, linewidth = 5, color = 'gray', alpha = 0.2) +
-            theme_bw() +
-            theme(legend.position = "bottom") +
-            guides(color = "none") + 
-            #guides(color = guide_legend(title = "", label = TRUE)) +
-            facet_grid(Area~.) 
-ggplotly(plot.esc) 
-## Add line weight or line type based on increasing or decreasing trend in 2014.
-
-```
-
-
-```{r plot.escapement,  echo = FALSE}
-suppressWarnings(ggplotly(plot.esc))  
-```
-
-**`r fig_nums("plot.esc", "Chinook Salmon escapement from rivers on East and West Coast of Vancouver Island.")`**
-
-
-Well, that figure sucks. But it shows how variable escapement is between years. On the East Coast of the Island, abundance increased in 'r format(3/7*100, digits = 2)`% of plotted streams and decreased in all others. Decreases  
-
-Relative to 2013, abundance in all plotted west coast streams was slightly reduced in 2014. There was a major crash in the Burnam River, but this is exaggerated by unusually high returns in 2013, 2015 and 2016. 
-
-### MAYBE RERUN ESCAPEMENT PLOT USING ALL ESCPAEMENT DATA!? FACET BY AREA?
-
-### ADD METRIC THAT STANDARDIZES ESCAPEMENT. E.G. total annual returns vs mean annual returns.
-
-## Influence of river flow on catches
-Last year there was a lot of speculation that high flows in the Campbell River may have caused fish to move directly into the river rather than staging in the pool. Let's look at flow in the Campbell River to see how 2022 flows compared to previous years. 
-
-```{r plot3-4prep, include = FALSE}
+```{r plot3-4prepA, include = FALSE}
     catch_data <- catch_data %>% mutate(Year = format(Date, '%Y'),
                                         Month = format(Date, '%m'),
                                         Weeknum = format(Date, '%V'))    
@@ -957,7 +608,390 @@ plot4 <-    ggplot(flow.catch.recent) +
 ```
 
 
-```{r plot3print,  echo = FALSE}
+```{r plot3printA,  echo = FALSE}
+
+suppressWarnings(print(plot3))  
+```
+**`r fig_nums("plot3", "Catches of Tyee Salmon since 2016 relative to flow in the Campebll River.")`**
+
+
+Well, it's clear that flows in 2022 were higher than past years and higher than mean flows over the past 5-years. But this doesn't mean that is why fewer fish were captured. 
+
+
+
+# 4. What could be affecting returns and catches?
+At it's most basic level, there are four things that are likely affecting catches of Tyee salmon (in reality, there are many many many many many more.
+
+
+#### 4.1. Juvenile recruitment
+
+* This is determined by the number of eggs that are deposited (for easy math, lets say females account for 50% of escapement, that each one deposits 4000 eggs and that egg to fry survival is 10%). We will assume that fish that survive to fry will enter the sea. Hydrometric data on the Campbell is available back to 1949 and it is likely that extreme high or low flow events (e.g. greater than 300 cms, less than ??50 cms??) during the incubation/rearing periods (maybe November through March) will reduce juvenile recruitment.
+
+#### 4.2. Marine survival and productivity
+
+* This is way too complicated for right now. Let's feel warm and fuzzy by assuming survival and productivity are stable (side note, they arent!). But if we don't do this we can't assume that proportions calculated from Sturham et al. are representative of current returns (unfortunately recent evidence shows this assumption is wrong and that fish are decreasing in size, so there are likely fewer Tyee returning now than in previous years). 
+  
+#### 4.3. Fishing effort and catchability
+
+  * For now, I am going to assume effort (# of boats fishing per tide/day) is constant and that catchability (percent of Tyees present that are captured) are stable. In reality, effort has likely decreased over time (especially since 2014) and catchability has likely increased as peoples knowledge, skill and fishing technology have improved over time (not everyone though, I still suck). Either way, without some hard data it is hard to much with this.
+
+#### 4.4. Fishing Conditions
+
+  * No question that fewer fish will be captured during seasons with poor fishing conditions (e.g. very windy, lots of rain). It is also possible that fish behaviour will change in response to river conditions. Certainly there was a lot of speculation that high flows during the 2022 Tyee season contributed to record low catches.  
+  
+  
+# 5. So, what can we look at? 
+
+Off the top of my head there are two ways we can approach this:
+
+1.) How many fish should come back based on past on escapement counts and available biological data.
+
+2.) We can look at what factors influenced how many fish were available for capture in the Tyee pool (i.e. how historic 
+  conditions may have contributed to observed captures), and/or;
+  
+3.) We can look at what factors influenced how returning fish were captured (i.e. conditions during the fishing season)
+
+## 5.1 How many fish should come back?
+
+```{r predicted.returns.data.prep0.1fry, include= FALSE}
+## Define assumptions
+      fecundity <- 5700 # typically around 6000 for CR, http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf
+      perc.female <- 0.6  # 60% of fish are females
+      egg.to.fry <- 0.1 
+      fry.to.smolt <- 0.2
+      marine.surv <- 0.003 #marine survival reported as 0.002 to 0.004 by  http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf 
+      perc.male <- 0.4                 # 40% of fish are male
+      Age3 <- 0.079
+      Age4 <- 0.447               # 44.7% of fish are Age-4
+      Age5 <- 0.461               # 46.1% of fish are Age-5
+      Age6 <- 0.013               #  1.3% of fish are Age-6
+      Tyee.Age3m.prop   <- 0      # No Age-3 males are Tyee.
+      Tyee.Age4m.prop   <- 0.10   # 10% of Age-4 males are Tyee - MADE UP NUMBER!
+      Tyee.Age5mf.prop  <- 0.25   # 15% of all Age-5 fish are Tyee - MADE UP NUMBER!
+      Tyee.Age6mf.prop  <- 0.75   # 100% of all Age-6 fish are Tyee - MADE UP NUMBER!
+      
+## Calculate Ratios
+      ratio.Age4.tyee <- perc.male * Age4 * Tyee.Age4m.prop # multiply this by annual escapement to calculate # Age-4 males that are tyees.
+      ratio.Age5.tyee <- Age5 * Tyee.Age5mf.prop # multiply this by annual escapement to calculate # Age-5 fish that are tyees.
+      ratio.Age5.tyee <- Age6 * Tyee.Age6mf.prop # multiply this by annual escapement to calculate # Age-5 fish that are tyees.
+
+      
+## Estimate number of fish predicted to return from each age class based on historic escapement.       
+pred.fish <- cr_esc %>% mutate(brood.yr     = Year,
+                               pred.fish    = esc_count * perc.female *fecundity *          # total number of fish that will be produced based on 
+                                              egg.to.fry * marine.surv,  #fry.to.smolt *      escapement count.
+                               Age3_Yr      = Year+3,
+                               Age3_returns = Age3*pred.fish,                               # number of produced fish that will return in 3 years.
+                               Age3_tyee    = Age3_returns * perc.male * Tyee.Age3m.prop,
+                               Age4_Yr      = Year+4,
+                               Age4_returns = Age4*pred.fish,
+                               Age4_tyee    = Age4_returns * perc.male * Tyee.Age4m.prop,
+                               Age5_Yr      = Year+5,
+                               Age5_returns = Age5*pred.fish,
+                               Age5_tyee    = Age5_returns * Tyee.Age5mf.prop,
+                               Age6_Yr      = Year+6,
+                               Age6_returns = Age6*pred.fish,
+                               Age6_tyee    = Age6_returns * Tyee.Age6mf.prop)
+
+
+## Estimate total number of Tyee expected to return in each year.
+pred.returns <- pred.fish %>% select(brood.yr, esc_count,pred.fish,Age3_Yr, Age4_Yr, Age5_Yr,Age6_Yr,Age3_returns, 
+                                     Age4_returns,Age5_returns,Age6_returns, Age3_tyee, Age4_tyee, Age5_tyee, Age6_tyee) %>%
+                              pivot_longer(-c(brood.yr, esc_count, pred.fish),
+                                                names_to = c("Var", ".value"),
+                                                names_sep = "_") %>%
+                              rename("returning.ageclass"   = "Var",
+                                     "return.year"          = "Yr",
+                                     "returning.fish"       = "returns",
+                                     "returning.tyee"       = "tyee")
+
+## Summarize predicted returns.
+pred.returns2 <- pred.returns %>% 
+                              group_by(return.year) %>%
+                              summarize(esc_count            = mean(esc_count),
+                                        total.pred.return = sum(returning.fish),         # number fish returning based on age.classes
+                                        total.pred.tyee = sum(returning.tyee),
+                                        total.pred.returns   = mean(pred.fish), #) %>%
+                                        Age3.fish = Age3 * total.pred.returns,
+                                        Age4.fish = Age4 * total.pred.returns,
+                                        Age5.fish = Age5 * total.pred.returns,
+                                        Age6.fish = Age6 * total.pred.returns,
+                                        Age3.tyee = Age3.fish * 0,
+                                        Age4.tyee = Age4.fish * perc.male * Tyee.Age4m.prop,
+                                        Age5.tyee = Age5.fish * Tyee.Age5mf.prop,
+                                        Age6.tyee = Age6.fish *Tyee.Age6mf.prop) %>%
+                              filter(return.year >= 1996)
+```
+
+We can ***VERY CRUDELY*** estimate the number of salmon that should return to the Campbell River if we make a couple of big assumptions:
+
+  +   Fecundity is ~5,700 eggs per female ([Ewart & Anderson, 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf) 
+  +   Sex ratios are 60:40 female to male using [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf)) data for Campbell River)
+  
+  +   Egg-to-fry survival is approximately 0.1, can't recall where this number came from but its commonly used as a measure of egg-to-fry survival of wild fish (compared to 0.9 for hatchery reared fish). Give results from [Thornton et al. 2022](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf) it is likely that egg-to-fry survival in the Campbell is higher.
+  
+  +   Marine survival (smolt to adult)  is approximately 0.003 ([Ewart & Anderson, 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf)
+  
+  +   7.9% of fish will return as Age-3, 44.7% of fish will return as Age-4 fish, 46.1% will return as Age-5 fish and 1.3% will return as Age-6 fish.
+  
+We can expand this to estimate the number of Tyee salmon that will return if we make even more assumptions! 
+  
+  +   For fun, let's assume all fish > 900 mm are Tyee Salmon (I know girth is important too, but I dont have girth data) and using the [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf)) data as a rough guide I will assume that `r 100*Tyee.Age4m.prop`% of Age-4 male adults are >900 mm, `r 100*Tyee.Age5mf.prop`% of Age-5 fish (males and females) are >900 mm and `r 100*Tyee.Age6mf.prop`% of Age-6 fish are >900 mm.
+  
+If we run these numbers, each female will generate `r format(fecundity * egg.to.fry * marine.surv, digits = 2)` offspring, of which `r format((fecundity * egg.to.fry * marine.surv * Age3), digits = 2)` will be Age-3, `r format((fecundity * egg.to.fry * marine.surv * Age4), digits = 2)` will be Age-4, `r format((fecundity * egg.to.fry * marine.surv * Age5), digits = 2)` will be Age-5 and `r format((fecundity * egg.to.fry * marine.surv * Age6), digits = 2)` will be Age-6. Furthermore, each female will produce `r format(((fecundity * egg.to.fry * marine.surv * Age4 * perc.male * Tyee.Age4m.prop) + (fecundity * egg.to.fry * marine.surv * Age5 * Tyee.Age5mf.prop) + (fecundity * egg.to.fry * marine.surv * Age6 * Tyee.Age6mf.prop)),digits = 2)`  Tyee salmon. *Let's take a moment to remember that these assumptions are terrible. Larger fish are more likely to produce larger fish, so in reality some fish will produce a decent number of Tyee and others will produce none. But let's keep it simple for now and assume every fish is able to make an equal number of Tyees*
+
+Based on this, each female should produce `r format((fecundity* egg.to.fry * marine.surv), digits = 2)` offspring that return to spawn. Which is less than ideal. 
+
+
+```{r original.predicted code.OLD.DO.NOT.USE, include = FALSE}
+# pred.tyee <- pred.fish %>% select(brood.yr, esc_count,pred.fish,Age3_Yr, Age4_Yr, Age5_Yr,Age6_Yr,Age3_tyee, 
+#                                      Age4_tyee,Age5_tyee,Age6_tyee) %>%
+#                               pivot_longer(-c(brood.yr, esc_count, pred.fish),
+#                                                 names_to = c("Var", ".value"),
+#                                                 names_sep = "_") %>%
+#                               rename("returning.ageclass"   = "Var",
+#                                      "return.year"          = "Yr",
+#                                      "returning.tyee"       = "tyee") %>%
+#                               group_by(return.year) %>%
+#                               summarize(esc_count            = mean(esc_count),
+#                                         total.returning.fish = sum(returning.fish),
+#                                         total.pred.tyee      = mean(pred.fish)) %>%
+#                               mutate(Age3.fish = Age3 * total.pred.tyee,
+#                                      Age4.fish = Age4 * total.pred.tyee,
+#                                      Age5.fish = Age5 * total.pred.tyee,
+#                                      Age6.fish = Age6 * total.pred.tyee)
+# 
+# pred.tyee <- pred.fish %>% select(esc_count,pred.fish,Age4_Yr, Age5_Yr,Age6_Yr,Age4_tyee,Age5_tyee,Age6_tyee) %>%
+#                                   pivot_longer(-c(esc_count, pred.fish),
+#                                                 names_to = c("Var", ".value"),
+#                                                 names_sep = "_") %>%
+#                                   rename("Returning.AgeClass"   = "Var",
+#                                          "Return.Year"               = "Yr",
+#                                          "Tyee.Total"         = "tyee") %>%
+#                                   group_by(Year) %>%
+#                                   summarize(esc_count            = mean(esc_count),
+#                                             Total.Returning.Tyee = sum(Tyee.Total),
+#                                             Total.Pred.Returns   = mean(pred.fish)) %>%
+#                                   mutate(Return.Year = as.numeric(Return.Year))
+ 
+```
+
+                                        
+```{r, predicted.age.class.plot, include = FALSE}
+pred.jnk1 <- pred.returns %>% select(brood.yr,esc_count,pred.fish) %>%
+                               group_by(brood.yr) %>%
+                               summarize(esc_count = mean(esc_count),
+                                         pred.fish = mean(pred.fish)) %>%
+                               rename(Year = brood.yr)
+
+pred.jnk2 <- pred.returns %>% select(return.year, returning.ageclass, returning.fish) %>%
+                               group_by(return.year, returning.ageclass) %>%
+                               summarize(returning.fish = sum(returning.fish)) %>%
+                               rename(Year = return.year)
+
+pred.jnk3 <- pred.returns %>% select(return.year, returning.tyee) %>%
+                               group_by(return.year) %>%
+                               summarize(returning.tyee = sum(returning.tyee)) %>%
+                               rename(Year = return.year)
+                              
+pred.jnk4 <- left_join(pred.jnk1, pred.jnk2, by = c("Year")) %>% filter(Year >1995)
+
+
+pred.jnk5 <- left_join(pred.jnk4, pred.jnk3, by = c("Year"))
+         
+pred.jnk6 <- catch_data %>% select(Year, catch_yr.total) %>%
+                            group_by(Year) %>%
+                            summarize(catch_yr.total = mean(catch_yr.total)) %>%
+                            mutate(Year = as.numeric(Year))
+str(pred.jnk5$Year)
+str(pred.jnk6$Year)
+
+pred.plot.dat <- left_join(pred.jnk5, pred.jnk6, by = "Year") %>%
+                          mutate(catch_yr.total = coalesce(catch_yr.total, 0))
+colnames(pred.plot.dat)
+
+# pred.long.dat <- pred.plot.dat %>% pivot_longer(-c(Year, returning.fish, returning.ageclass)) # THIS DOESNT WORK
+
+pred.age.class.plot <- ggplot(pred.plot.dat, aes(x = Year)) +
+                          geom_col(aes(y = returning.fish, fill = returning.ageclass)) +
+                          geom_line(aes(y = esc_count, color = "Escapement"), linewidth = 1) +
+                          geom_line(aes(y = returning.tyee, color = "Total Predicted Tyee"), linewidth = 1) +
+                          geom_line(aes(y = catch_yr.total, color = "Tyee Captured"), linewidth = 1) +
+                          scale_color_manual(name = '# Fish', values = c("Escapement" = 'darkblue', 
+                                                                         "Total Predicted Tyee"  = 'maroon',
+                                                                         "Tyee Captured"   =  'hotpink')) +
+                          scale_x_continuous(limits = c(1996,2021)) +
+                          labs(y = "# Tyee Salmon", x = "") +
+                          guides(fill = guide_legend(title = "Predicted Returns \n by Age Class"),
+                                 linewidth ="none") +
+                          scale_y_continuous(breaks = seq(0, 1800, 200)) +
+                          theme_bw() 
+                          # theme(legend.position = c(0.78, 0.88),
+                          #       legend.box.background = element_rect(colour = "black", linewidth = 1.25, fill = NA))
+```
+
+
+
+```{r pred.age.class.plot, echo = FALSE}
+## ggplot figure
+suppressWarnings(print(pred.age.class.plot))
+
+## plotly figure
+    #suppressWarnings(ggplotly(pred.age.class.plot), tooltip = c("Year","returning.fish", "returning.ageclass", "esc_count", "returning.tyee")))   
+```
+
+**`r fig_nums("pred.age.class.plot", "Predicted returns by age-class relative to measured escapement, assuming 10% egg to fry survival.")`**
+
+Well that's interesting. There are periods when my predicted returns closely align with actual escapement (most closely from 2003 to 2007, but my values are comparable from 2003 to 2010). This suggests my estimates may not be WAY off but does not confirm they are correct. Other notes:
+
+  +   Also clearly periods when my predictions are off! Most notably from 1998 to 2002, 2011-2012, **2014** and 2019 to 2022.
+  +   There are number of years where something appears to have happened and fish simply did not return (2005, 2011, 2014).
+  +   There are also years where something positive appears to have happened and far more fish than expected returned to the river (1999 to 2001, 2020).
+
+## 5.2 How many tyee should be returning?
+Let's look at little closer at how many Tyee salmon may be returning in a given year.If all Tyee salmon were captured each year, we would be actively selecting against large fish, so we would expect to see a rapid and continuous decline in the total number of Tyees returning each year (which I suppose we are). But, I have had the opportunity to snorkel the Campbell River canyon a number of times and have seen spawning Tyee, and last year there were lots of Tyee captured in the river... though not sure what their fate was. Aynways, all this to say that its unlikely every Tyee is captured in the pool, and the actual number returning to the pool should be at least equal to or higher than the number captured. 
+
+Reminder of key assumptions in the plot:
+
+  +   `r 100*Tyee.Age4m.prop`% of Age-4 fish will return as Tyee.
+  +   `r 100*Tyee.Age5mf.prop`% of Age-5 fish will return as Tyee.
+  +   `r 100*Tyee.Age6mf.prop`% of Age-6 fish will return as Tyee.
+
+
+```{r predicted.returns.plot.prep, include = FALSE}
+
+## Join Total Predicted Tyee w. Summarized Tyee Catch data     
+pred.return.dat <- pred.returns2 %>% rename(Year = return.year)
+
+total.pred.tyee2 <- left_join(pred.return.dat, cr_yearly, by = "Year") %>% 
+                    filter(Year >2001, Year <2023)  %>%
+                    mutate(esc.scaled = esc_count/6,
+                           mean.tyee.catch = mean(Total.Catch))                  
+## need cr_data 
+str(total.pred.tyee2)
+max(total.pred.tyee2$esc_count)
+mean(total.pred.tyee2$Total.Catch)
+
+1045/33
+
+plot66 <- ggplot(total.pred.tyee2, aes(x = Year)) +
+                 geom_bar(aes(y = Total.Catch, alpha = 0.3, fill = 'Total Tyee Catch'), 
+                               stat = "identity") +
+                 geom_bar(aes(y = total.pred.tyee, alpha = 0.3, fill = 'Predicted Tyee Returns'), 
+                              stat = 'identity') +
+                # geom_bar(aes(y = catch_yr.total, fill = tyee_cycle4, alpha = 0.8), 
+                #                stat = "identity") +
+                # geom_bar(aes(y = Tyee.Total.Predicted, fill = 'Total Predicted Tyee', alpha = 0.3), 
+                #               stat = 'identity') +
+                geom_line(aes(y = esc.scaled, linetype = "Species"), 
+                              color = "lightblue", linewidth = 1.2) +
+                geom_hline(aes(yintercept = mean.tyee.catch, color = mean.tyee.catch), 
+                              linetype = "dashed", linewidth = 0.5) +
+                labs(x = "", y = "Number Tyee Captured") + 
+                guides(fill =  guide_legend(title = "", label = TRUE),
+                       linetype = guide_legend(title = "Escapement", label = FALSE),
+                       color = guide_legend(title = "Mean Tyee Catch", label = FALSE),
+                       alpha = "none") +
+                scale_y_continuous(breaks = seq(0, 260, 10),
+                                    sec.axis = sec_axis(~.*6, name = "Escapement")) +  #scale secondary access by x6
+                scale_x_continuous(breaks = seq(2002,2022,2)) +            
+                theme_bw() +
+                theme(legend.direction = "horizontal",
+                      legend.position = "bottom")
+
+```
+
+
+```{r plot.predictred.returns,  echo = FALSE}
+suppressWarnings(print(plot66))  
+```
+
+**`r fig_nums("plot66", "Comparison of catches of Tyee Salmon, predicted returns of Tyee Salmon and annual Chinook Salmon escapement counts.")`**
+
+Well, this figure either shows how poor my estimates are, or that a tremendous number of Tyee are intercepted (e.g. marine survival of Tyee salmon is lower than other fish). 
+
+
+```{r old text to exclude, eval = FALSE, include = FALSE}
+# Well, even though my estimates are clearly wrong, this is still interesting. There is a fairly drastic shift in predicted returns that coincides with the crash in 2014. Prior to the crash, predicted returns are consistently underestimated (`r format((8/11)*100, digits = 1)`% of years are less than actual catches) whereas after the crash predicted Tyee returns are greater than total tyee catches in all but one year. Not sure exactly what this means, or how to interpret it, but I think its worth considering:
+# 
+#   +   Only a proportion of all returning Tyees are captured each year. If all Tyee salmon were captured each year, we would be actively selecting 
+#       against large fish and it would be reasonable to expect to see a continuous decline in the total number of Tyees returning each year. So,          based on this logic (and my personal observation of tyees on the spawning ground), the predicted Tyee returns should always be greater than 
+#       total catches.  
+#   +   The formula and values used to estimate predicted returns of tyee salmon do not change. If we assume there is no 
+#       change in catchability and that the number of Tyees captured in the pool is a representation of the actual number of Tyee salmon
+#       that return to the river there appears to have been a dramatic reduction in the number or proportion of Tyee salmon in 2014. Given low             escapement in 2014, it is most likely a poor return rather than a reduced proportion of Tyee.
+#   +   Additionally, the figure shows that my formula and estimates are way off - which is not surprising as they were 
+#       very crude! This is most apparent in the years prior to the 2014 crash, but suggests predictions after the crash are 
+#       also off too.     
+# 
+# So, what happened in 2014!? Did runs crash everywhere? Let's have a look at escapement in other systems in the area. 
+```
+
+```{r, escapement comparison, include=FALSE}
+unique(esc_data$GAZETTED_NAME)
+esc.plot.dat <- esc_data %>% filter(GAZETTED_NAME %in% c("ARTLISH RIVER","BEDWELL RIVER", "BURMAN RIVER", "CAMPBELL RIVER", "COWICHAN RIVER", 
+                                                     "ENGLISHMAN RIVER","GOLD RIVER", "LITTLE QUALICUM RIVER","NIMPKISH 
+                                                     RIVER", "QUALICUM RIVER", "QUINSAM RIVER", "SALMON RIVER")) %>% 
+                          mutate(Year = as.numeric(ANALYSIS_YR),
+                                 Stream = as.factor(GAZETTED_NAME),
+                                 Area   = recode(as.factor(GAZETTED_NAME),
+                                                 'ARTLISH RIVER'         = "West Coast VI", 
+                                                 'BEDWELL RIVER'         = "West Coast VI",
+                                                 'BURMAN RIVER'          = "West Coast VI",
+                                                 'GOLD RIVER'            = "West Coast VI",
+                                                 'CAMPBELL RIVER'        = "East Coast VI",
+                                                 'COWICHAN RIVER'        = "East Coast VI",
+                                                 'ENGLISHMAN RIVER'      = "East Coast VI", 
+                                                 'LITTLE QUALICUM RIVER' = "East Coast VI",
+                                                 'NIMPKISH RIVER'        = "East Coast VI",
+                                                 'QUALICUM RIVER'        = "East Coast VI",
+                                                 'QUINSAM RIVER'         = "East Coast VI",
+                                                 'SALMON RIVER'          = "East Coast VI")) %>%
+                          group_by(Area, Stream, Year) %>%
+                          summarize(Count =sum(MAX_ESTIMATE)) %>%
+                          filter (Year > 2000)
+
+
+
+str(esc.plot.dat)
+plot.esc <- ggplot(esc.plot.dat, aes(x= Year, y = Count))+
+            geom_line(aes(color = Stream), linewidth = 0.4) +
+            labs(x = "", y = "# Spawning Chinook") +
+            scale_x_continuous(breaks = seq(2000, 2020, by = 2)) +   
+            geom_vline(xintercept = 2014, linewidth = 5, color = 'gray', alpha = 0.2) +
+            theme_bw() +
+            theme(legend.position = "bottom") +
+            guides(color = "none") + 
+            #guides(color = guide_legend(title = "", label = TRUE)) +
+            facet_grid(Area~.) 
+ggplotly(plot.esc) 
+## Add line weight or line type based on increasing or decreasing trend in 2014.
+
+```
+
+
+```{r plot.escapement,  echo = FALSE}
+suppressWarnings(ggplotly(plot.esc))  
+```
+
+**`r fig_nums("plot.esc", "Chinook Salmon escapement from rivers on East and West Coast of Vancouver Island.")`**
+
+
+Well, that figure sucks. But it shows how variable escapement is between years. On the East Coast of the Island, abundance increased in 'r format(3/7*100, digits = 2)`% of plotted streams and decreased in all others. Decreases  
+
+Relative to 2013, abundance in all plotted west coast streams was slightly reduced in 2014. There was a major crash in the Burnam River, but this is exaggerated by unusually high returns in 2013, 2015 and 2016. 
+
+## 5.2 How Historic Conditions Influenced Captures
+
+### MAYBE RERUN ESCAPEMENT PLOT USING ALL ESCPAEMENT DATA!? FACET BY AREA?
+
+### ADD METRIC THAT STANDARDIZES ESCAPEMENT. E.G. total annual returns vs mean annual returns.
+
+## 5.3 How conditions may affect the number of fish that are captured.
+### 5.3.1 Influence of river flow on catches
+Last year there was a lot of speculation that high flows in the Campbell River may have caused fish to move directly into the river rather than staging in the pool. Let's look at flow in the Campbell River to see how 2022 flows compared to previous years. 
+
+```{r plot3bprint,  echo = FALSE}
 suppressWarnings(print(plot3))  
 ```
 
@@ -1016,7 +1050,7 @@ suppressWarnings(print(plot5))
 
 `r fig_nums("plot5", "Relationship between river flow and fish capture")`
 
-`r fig_nums("plot5", display = "cite")` shows a strong negative relationship between discharge and the number of fish that are captured. This is what you would expect, that fish will hold in the pool while flows are low and that they will move into the river when flows are higher and they can safely navigate upstream. However, the fishery occurs during the late summer, when flows are typically low and it is possible that the timing of the fishery has contributed to observed trends. 
+`r fig_nums("plot5", display = "cite")` shows a strong negative relationship between discharge and the number of fish that are captured. This is what you would expect, that fish will hold in the pool while flows are low and that they will move into the river when flows are higher and they can safely navigate upstream. However, the fishery occurs during the late summer, when flows are typically low so it's somewhat of a chicken and egg situation....  
 
 OK, well there is a relationship (that could be due to a number of things). Lets have a look at some of the older data. 
 
