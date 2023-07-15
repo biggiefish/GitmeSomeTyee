@@ -534,7 +534,10 @@ suppressWarnings(print(daily.decadal.catch.plot))
 
 **`r fig_nums("daily.decadal.catch", "Total fish captured by date and decade")`**
 
-HEY! Who let someone register a Tyee in the first week of July!? This plot will become a lot more interesting once I can get my hands on some historical data. 
+HEY! Who let someone register a Tyee in the first week of July!? This plot will become a lot more interesting once I can get my hands on some historical data. But for now, we can see:
+  +   People either do not fish, or do not catch fish before late July/early August.
+  +   Peak catches occur in mid to late August. 
+  
 
 
 
