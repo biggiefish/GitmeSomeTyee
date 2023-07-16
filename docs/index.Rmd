@@ -62,6 +62,7 @@ list.of.packages <- c("tidyverse",
     library(lubridate)
     library(reshape2)
     library(ggplot2)
+    library(scales)
     library(readxl)
     library(downloadthis)
     library(knitr)
@@ -184,6 +185,19 @@ list.of.packages <- c("tidyverse",
                                      Species        =  as.factor(SPECIES)) %>%
                                select(Year, Waterbody, Species, esc_count, Esc_Scaled, Esc_Mean, Esc_MeanScaled)
         
+                ## Prepare dataset for CR Escapement 
+        crQ_esc <- esc_data %>% filter(GAZETTED_NAME == c("CAMPBELL RIVER","QUINSAM RIVER"),                 # only show data for CR
+                                      #ANALYSIS_YR >=2002) %>% # data for same time period as tyee catch data
+                                      ANALYSIS_YR >=1990) %>% # data from prior to tyee catch data so we can predict tyee returns.    
+                               mutate(Year          =  as.numeric(ANALYSIS_YR),
+                                     Waterbody      =  as.factor(GAZETTED_NAME),
+                                     esc_count      =  as.numeric(MAX_ESTIMATE),
+                                     Esc_Scaled     =  as.numeric(MAX_ESTIMATE/25),
+                                     Esc_Mean       =  as.numeric(mean(MAX_ESTIMATE)),
+                                     Esc_MeanScaled =  as.numeric(mean(MAX_ESTIMATE/25)),
+                                     Species        =  as.factor(SPECIES)) %>%
+                               select(Year, Waterbody, Species, esc_count, Esc_Scaled, Esc_Mean, Esc_MeanScaled)
+        
         
         
 ## * 4. Flow Data (Tyee Season) ----
@@ -262,9 +276,12 @@ This analysis uses the following publicly available data:
 1) Annual catch records from the [Tyee Club](https://www.tyeeclub.org/catch-records/>). 
 2) Discharge data collected on the Campbell River by the [Water Survey of Canada](https://wateroffice.ec.gc.ca/index_e.html).
 3) Annual Chinook Salmon escapement data available in the [DFO NuSEDS database](https://open.canada.ca/data/en/dataset/c48669a3-045b-400d-b730-48aafe8c5ee6).
-4) Annual catch statistics from the [North Pacific Anadromous Fish Commission](https://npafc.org/statistics/)
+4) Annual catch statistics from the [North Pacific Anadromous Fish Commission](https://npafc.org/statistics/).
 5) Area based commercial catch statistics from DFO are [available from 2001 to 2016](https://www.pac.dfo-mpo.gc.ca/stats/smon/index-eng.html) 
-6) Straight of Georgia herring [spawn](https://www.pac.dfo-mpo.gc.ca/science/species-especes/pelagic-pelagique/herring-hareng/herspawn/tabsfram-eng.html) and [catch](https://www.pac.dfo-mpo.gc.ca/science/species-especes/pelagic-pelagique/herring-hareng/herspawn/tabcfram-eng.html) data 
+6) Straight of Georgia herring [spawn](https://www.pac.dfo-mpo.gc.ca/science/species-especes/pelagic-pelagique/herring-hareng/herspawn/tabsfram-eng.html) and [catch](https://www.pac.dfo-mpo.gc.ca/science/species-especes/pelagic-pelagique/herring-hareng/herspawn/tabcfram-eng.html) data. 
+7) Southeast Alaska commercial catch data from [North Pacific Anadromous Fish Commission](https://npafc.org/statistics/).
+8) Hatchery release statistics from [North Pacific Anadromous Fish Commission](https://npafc.org/statistics/).
+9) [Known ocean ranges of Pacific Salmon and Steelhead stocks](https://npafc.org/wp-content/uploads/2017/08/192USA.pdf) 
 
 
 This is certainly an interesting dataset, especially given it is the Tyee Club centenary,  but it has its limitations. For example, there is no information on effort (# boats per day) and biological data is limited (e.g. size, girth and age of tyees or number of undersized fish captured). 
@@ -282,6 +299,10 @@ This is certainly an interesting dataset, especially given it is the Tyee Club c
 
 There has been a lot of information collected on Campbell River Chinook Salmon, including from Tyee Salmon captured in the Tyee Pool, however, most of this data is not readily available online. Data that is available (and that I have found) is summarized below. 
 
+**2.1.0 Quinsam vs. Campbell **
+
+  +   The vast majority of Chinook Salmon returning to the Campbell River system are from the Quinsam River. Based on available escapement data for both systems, a mean of 12.5% Chinook returning to the system are from the Campbell River (varies from 6% to 25% between 1991 and 2019).
+
 **2.1.1 Spawn Timing**
 
   +   Chinook spawning occurs from late September through early November and peaks in mid-October and that spawners reside in the river for ~12 days. 
@@ -294,7 +315,8 @@ There has been a lot of information collected on Campbell River Chinook Salmon, 
     
 **2.1.3 Size-at-Age**
 
-  +   I have not found any measures of individual fish. But binned data from [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf) shows that Age-4 fish generally range in size from 550-949 mm (mean ~ 780 mm) and age-5 fish range from 700-949 mm (mean ~ 840 mm). Age-6 fish were identified, but accounted for less than 1% of all fish in the Campbell (n = 1 fish, 930 mm) and Quinsam rivers  
+  +   I have not found any measures of individual fish. But binned data from [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf) (see Table 1) shows that Age-3 fish were between 500 mm and 699 mm (mean = 595 mm), Age-4 fish generally range in size from 550-949 mm (mean ~ 780 mm) and age-5 fish range from 700-949 mm (mean ~ 840 mm). Age-6 fish were identified, but accounted for less than 1% of all fish in the Campbell (n = 1 fish, 930 mm). 
+  +  Fish in the Quinsam River are comparable in size to those in the Campbell, though hatchery fish generally return at a smaller size than their wild counterparts in the Campbell and Quinsam. Sturham et al. (1999) data suggest Age-4 and Age-5 wild fish may exceed 900 mm, while only Age-5 hatchery fish are likely to exceed 900 mm. 
 
 **2.1.4 Fecundity**
 
@@ -321,6 +343,13 @@ There has been a lot of information collected on Campbell River Chinook Salmon, 
   that 56% of the otoliths examined from the 2012 return showed no signs of hatchery marking and are assumed wild. The
   remaining 44% are presumed to have originated from instream incubators (31%), seapen released smolts (4%) and Quinsam River
   released smolts (9%). 
+  +   Assuming data presented by [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf) is representative of the overall Quinsam population, we can assume hatchery origin fish make up `r (76/(76+46))*100`% of Age-3 fish, `r (225/(225+114)*100)`% of Age-4 fish, `r (73/(73+40)*100)` of Age-5 fish and 50% of Age-6 fish. 
+  
+**2.1.9 Exploitation Rates **
+
+  +   Approximately [20% of fish released by the Quinsam hatchery](https://www.mccpacific.org/wp-content/uploads/2022/01/10Jan2022-SEAK-Catch-of-BC-Salmon-Technical-Report-Part-3-Chinook-Salmon-V1.pdf) are intercepted in Southeast Alaska commercial net (4.99%) and troll fisheries (11.95%), as well as an additional 1.84% that are intercepted in sport fisheries. Interestingly, a [court ruling in May 2023](https://www.documentcloud.org/documents/23795630-jones-order) almost shut down the SE Alaska troll fishery this year. Unfortunately for those aspiring to join the Tyee Club (and Orcas), that decision was [reversed](https://www.documentcloud.org/documents/23855199-panel-decision) in late June, 2023 and the fishery occurred from July 1 to 12, 2023. 
+  
+
 
 ```{r table1prep, include = FALSE}
 ## Prepare data for table
@@ -341,15 +370,37 @@ age_table1 <- age_data %>% select(Waterbody, Age, n, bin_min, bin_max, meanFL, S
                                 select(Waterbody, Age, n, '% of Total',size_range, mean, )
                                 
   
-table1 <- knitr::kable(age_table1, col.names = c("Waterbody", "Age", "n", "% of Total", "Size Range <br>(mm)", "Mean Lenght <br>(mm)"),
-             digits = 1,  align=rep('c', 5),
-             caption = "Table 1. Size at age of Chinook Salmon captured in Campbell River watershed from [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf)")
+
 ```
 
 ```{r table1, echo = FALSE}
-table1
+knitr::kable(age_table1, col.names = c("Waterbody", "Age", "n", "% of Total", "Size Range <br>(mm)", "Mean Lenght <br>(mm)"),
+             digits = 1,  align=rep('c', 5),
+             caption = "Table 1. Size at age of Chinook Salmon captured in Campbell River watershed from [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf)")
 ```
    
+   
+```{r, CampbellEscapement.prep, include = FALSE}
+crQ_esc <- crQ_esc %>% rename(Escapement = esc_count)
+
+crq_esc.plot <- ggplot(crQ_esc) +
+                    geom_col(aes(x=Year, y = Escapement, fill = Waterbody)) + 
+                    labs(x = "", y = "Escapement") + 
+                    scale_y_continuous(label = comma, breaks = seq(0,15000,2500)) + 
+                    scale_x_continuous(breaks = seq(1991, 2022, 2)) +
+                    theme_bw() + 
+                    theme(legend.position = "bottom")
+
+```
+
+```{r plot_crQ_escapement, echo = FALSE, fig.width=8, fig.height=5}
+
+suppressWarnings(ggplotly(crq_esc.plot))
+```
+
+**`r fig_nums("crq_esc.plot", "Chinook Salmon escpaement in the Campbell and Quinsam rivers from 1991 to 2021.")`**
+
+
 ## 2.2 What else do we know about current Chinook Salmon trends?
 
 **2.2.1 They are decreasing in size and age at maturity** 
