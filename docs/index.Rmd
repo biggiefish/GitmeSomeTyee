@@ -80,6 +80,8 @@ list.of.packages <- c("tidyverse",
     #1. Catch Data
     catch.dat <- "Data/TyeeCatchData.xlsx"
     
+    catch.records <- "Data/TyeeCatch_RecordBook.xlsx"
+    
     #2. Escapement Data
     esc.dat <- "Data/Area13Escapement.xlsx"
     
@@ -114,10 +116,10 @@ list.of.packages <- c("tidyverse",
                 filter(between(Month,7,9))
 
 ## * 2. Tyee Catch Data ----
-    raw_catch  <- read_excel(catch.dat) # Date, time and size of capture
+    raw_catch.data  <- read_excel(catch.dat) # Date, time and size of capture
 
         ## Format Catch Data Dates ##
-        raw_catch <- raw_catch %>% mutate(Date = as.Date(raw_catch$RawDate),
+        raw_catch <- raw_catch.data %>% mutate(Date = as.Date(RawDate),
                                           catch_binary = 1) %>%
                                    group_by(Date) %>%
                                    summarise(catch_binary = sum(catch_binary))
@@ -186,18 +188,19 @@ list.of.packages <- c("tidyverse",
                                      Species        =  as.factor(SPECIES)) %>%
                                select(Year, Waterbody, Species, esc_count, Esc_Scaled, Esc_Mean, Esc_MeanScaled)
         
-                ## Prepare dataset of Escapement in CR and Quinsam Rivers 
-        crQ_esc <- esc_data %>% filter(GAZETTED_NAME == c("CAMPBELL RIVER","QUINSAM RIVER"),                 # only show data for CR
-                                      #ANALYSIS_YR >=2002) %>% # data for same time period as tyee catch data
-                                      ANALYSIS_YR >=1990) %>% # data from prior to tyee catch data so we can predict tyee returns.    
-                                     mutate(Year          =  as.numeric(ANALYSIS_YR),
-                                            Waterbody      =  as.factor(GAZETTED_NAME),
-                                            esc_count      =  as.numeric(MAX_ESTIMATE),
-                                            Species        =  as.factor(SPECIES)) %>%
-                                     group_by(Waterbody, Year) %>%
-                                     mutate(Esc_Mean       =  as.numeric(mean(MAX_ESTIMATE))) %>%
-                               select(Year, Waterbody, Species, esc_count, Esc_Mean)
-        
+        crQ_esc <- read_excel(all.esc.data) %>% 
+                          filter(WATERBODY == c("CAMPBELL RIVER","QUINSAM RIVER"),                 # only show data for CR
+                                 ANALYSIS_YR >=1990,
+                                 SPECIES == "Chinook") %>% # data from prior to tyee catch data so we can predict tyee returns.    
+                          mutate(Year          =  as.numeric(ANALYSIS_YR),
+                                 Waterbody      =  as.factor(WATERBODY),
+                                 esc_count      =  as.numeric(TotalReturns),
+                                 Species        =  as.factor(SPECIES)) %>%
+                          group_by(Waterbody, Year) %>%
+                          summarize(esc_count = sum(esc_count),
+                                    Esc_Mean =  mean(esc_count))
+                                             
+                      
         
         
 ## * 4. Flow Data (Tyee Season) ----
@@ -294,7 +297,6 @@ This analysis uses the following publicly available data:
 This is certainly an interesting dataset, especially given it is the Tyee Club centenary,  but it has its limitations. For example, there is no information on effort (# boats per day) and biological data is limited (e.g. size, girth and age of tyees or number of undersized fish captured). 
 
 
-
 # 2. Chinook Salmon
 
 
@@ -351,7 +353,7 @@ There has been a lot of information collected on Campbell River Chinook Salmon, 
 
 **2.1.9 Ocean Range **
 
-  +   Tagging studies have shown that maturing Chinook of BC origin are frequently located in [Southeast Alaska, the west coast of Haida Gwaii and west and north coasts of Vancouver Island](images/BC.CN.oceanranges.jpg). 
++   Tagging studies have shown that maturing Chinook of BC origin are frequently located in [Southeast Alaska, the west coast of Haida Gwaii and west and north coasts of Vancouver Island](https://npafc.org/wp-content/uploads/2017/08/192USA.pdf) or [screenshot of map](images/BC.CN.oceanranges.jpg). 
 
 **2.1.9 Exploitation Rates **
 
@@ -394,7 +396,7 @@ crq_esc.plot <- ggplot(crQ_esc) +
                     geom_col(aes(x=Year, y = Escapement, fill = Waterbody)) + 
                     labs(x = "", y = "Escapement") + 
                     scale_y_continuous(label = comma, breaks = seq(0,15000,2500)) + 
-                    scale_x_continuous(breaks = seq(1991, 2022, 2)) +
+                    scale_x_continuous(breaks = seq(1990, 2022, 2)) +
                     theme_bw() + 
                     theme(legend.position = "bottom")
 
@@ -434,7 +436,16 @@ suppressWarnings(ggplotly(crq_esc.plot))
 
 
 # 3. Let's look at the Tyee catch data!
-So, let's begin by having a look at the catch data from the Tyee pool and seeing how catches fluctuate relative to Chinook Salmon escapement in the Campbell River.
+There are lots of ways to look at this data. I am most curious about three things:
+
+1) How total catches vary among years, and if they fluctuate relative to escapement.
+
+2) When fish are most frequently captured.
+
+3) How the size of fish changes within and across seasons. 
+
+
+##3.1 How catches vary among years.
 ```{r plot1_prep_tyeecatch, include=FALSE}
 ## Prepare Plot
 catch.data.yearly <- catch_data %>% 
@@ -537,8 +548,6 @@ suppressWarnings(print(plot2))
 
 **`r fig_nums("plot2", "Trends in Tyee Salmon captures and Campbell River Chinook Salmon escapement.")`**
 
-
-
 A quick look at Tyee catches (blue vertical bars) in `r fig_nums("plot2", display = "cite")` shows:
 
 1) There is a fairly clear 4-year cycle of relatively higher catches (highlighted with shading). Which is interesting, and raises lots of questions...
@@ -553,6 +562,9 @@ If we look at Escapement data (blue line) shown in `r fig_nums("plot2", display 
 
 Now, lets see when fish are most frequently captured throughout the season, and if there has been a change over time.
 
+## 3.2 When fish are most frequently captured.
+
+The Tyee season runs from July 15 to September 15. I need to pick my battles with my wife and boss. Let's see which days I should be fighting for!? 
 
 ```{r daily.decadal.tyee.prep, include = FALSE}
 colnames(catch_data)
@@ -580,6 +592,7 @@ daily.decadal.catch.plot <- ggplot(daily.decadal.catch) +
                                 theme(axis.text.x = element_text(angle = 45, vjust = 1.1, hjust = 1)) 
 
 ```
+
 ```{r daily.decadal.tyee.plot, echo=FALSE}
 
 ## ggplot figure
@@ -597,7 +610,43 @@ Hey! Who let someone register a Tyee in the first week of July!? This plot will 
   +   Peak catches occur in mid to late August. 
   
 
-Ok, well now we know not to bother fishing until early August, that I should book the off the last 3 weeks of August and that adds are that 2023 is not going to set a new record for most Tyee's captured. But who knows. Anyhow, lets see what might be contributing to variability in the number of Tyee captured per year.
+Ok, well now we know not to bother fishing until early August, that I should book the off the last 3 weeks of August and that adds are that 2023 is not going to set a new record for most Tyee's captured. But who knows. 
+
+## 3.3 Does fish size vary within or between seasons?
+```{r fish.size.prep, include = false}
+colnames(raw_catch.data)
+
+str(raw_catch.data)
+fish.size <- raw_catch.data %>% mutate(weight = as.numeric(Weight2),
+                                       Date   = as.Date(RawDate),
+                                       decade   = format(floor_date(Date, years(10)), '%Y'),  ) %>%
+                                group_by(Year) %>%
+                                mutate(wt.yr.mean = mean(Weight2),
+                                          wt.yr.n    = n(),
+                                          wt.yr.sd   = sd(Weight2),
+                                          wt.yr.se   = sd(Weight2)/sqrt(n()))
+
+summary(fish.size$wt.yr.mean)
+
+wt.plot <- ggplot(fish.size, aes(x = Year)) +
+                geom_col(aes(x= Year, y = wt.yr.mean, fill = Cycle)) +
+                geom_errorbar(aes(ymin = wt.yr.mean-wt.yr.se, ymax = wt.yr.mean+wt.yr.se), width = 0.2) +
+                labs(x = "", y = "Mean Weight (g)") +
+                scale_x_continuous(breaks = seq(2002, 2022, 2)) +
+                theme_bw()
+
+
+```
+
+```{r wt.plots, echo=FALSE}
+
+## ggplot figure
+suppressWarnings(print(wt.plot))
+
+ 
+```
+
+Anyhow, lets see what might be contributing to variability in the number of Tyee captured per year.
 
 Might also be fun to look at daily catches in each year. Given speculation that high flows contributed to record low catches in 2022 lets include some measures of flow.
 
