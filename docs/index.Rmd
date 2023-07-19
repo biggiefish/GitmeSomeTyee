@@ -281,7 +281,7 @@ list.of.packages <- c("tidyverse",
 
 ##    1.1 The data
 
-This analysis uses the following publicly available data:
+I have compiled the following datasets to use in this analysis. Whether they are all incorporated is yet to be seen.
 
 1) Annual catch records from the [Tyee Club](https://www.tyeeclub.org/catch-records/>). 
 2) Discharge data collected on the Campbell River by the [Water Survey of Canada](https://wateroffice.ec.gc.ca/index_e.html).
@@ -294,7 +294,7 @@ This analysis uses the following publicly available data:
 9) [Known ocean ranges of Pacific Salmon and Steelhead stocks](https://npafc.org/wp-content/uploads/2017/08/192USA.pdf) 
 
 
-This is certainly an interesting dataset, especially given it is the Tyee Club centenary,  but it has its limitations. For example, there is no information on effort (# boats per day) and biological data is limited (e.g. size, girth and age of tyees or number of undersized fish captured). 
+This is certainly an interesting dataset, especially given it is the centenary of the Tyee Club,  but it has its limitations. For example, there is no accessible information on effort (# boats per day), biological data (e.g. size, girth and age of tyees) or numbers of non-tyee salmon captured in the pool. 
 
 # 2. Let's look at the Tyee catch data!
 There are lots of ways to look at this data. I am most curious about three things:
@@ -604,7 +604,9 @@ plot4 <-    ggplot(flow.catch.recent) +
 ```
 
 ```{r, allcatches, echo=FALSE, fig.width = 8, fig.height = 28}
+
 suppressWarnings(print(plot4))
+
 ```
 
 **`r fig_nums("daily.decadal.catch", "Total fish captured by date and decade")`**
