@@ -296,156 +296,17 @@ This analysis uses the following publicly available data:
 
 This is certainly an interesting dataset, especially given it is the Tyee Club centenary,  but it has its limitations. For example, there is no information on effort (# boats per day) and biological data is limited (e.g. size, girth and age of tyees or number of undersized fish captured). 
 
-
-# 2. Chinook Salmon
-
-
-## 2.1 What we* know about Campbell River Chinook? 
-
-
-(* more like what have other learned about Campbell River Chinook Salmon, I don't know much).
-
-
-There has been a lot of information collected on Campbell River Chinook Salmon, including from Tyee Salmon captured in the Tyee Pool, however, most of this data is not readily available online. Data that is available (and that I have found) is summarized below. 
-
-**2.1.0 Quinsam vs. Campbell **
-
-  +   The vast majority of Chinook Salmon returning to the Campbell River system are from the Quinsam River. Based on available escapement data for both systems, a mean of 12.5% Chinook returning to the system are from the Campbell River (varies from 6% to 25% between 1991 and 2019).
-
-**2.1.1 Spawn Timing**
-
-  +   Chinook spawning occurs from late September through early November and peaks in mid-October and that spawners reside in the river for ~12 days. 
-
-**2.1.2 Age Class Structure**
-
-  +   A roughly equal proportion of spawners return to the Campbell River as age-4 and age-5 fish (see Table 1) [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf). 
-    
-  +   However, [Ewart & Anderson,2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf) report that Age-5 fish were dominant in 2012 (61%), with Age-4's accounting for only 37% of the run, and age-3's representing only 2%.
-    
-**2.1.3 Size-at-Age**
-
-  +   I have not found any measures of individual fish. But binned data from [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf) (see Table 1) shows that Age-3 fish were between 500 mm and 699 mm (mean = 595 mm), Age-4 fish generally range in size from 550-949 mm (mean ~ 780 mm) and age-5 fish range from 700-949 mm (mean ~ 840 mm). Age-6 fish were identified, but accounted for less than 1% of all fish in the Campbell (n = 1 fish, 930 mm). 
-  +  Fish in the Quinsam River are comparable in size to those in the Campbell, though hatchery fish generally return at a smaller size than their wild counterparts in the Campbell and Quinsam. Sturham et al. (1999) data suggest Age-4 and Age-5 wild fish may exceed 900 mm, while only Age-5 hatchery fish are likely to exceed 900 mm. 
-
-**2.1.4 Fecundity**
-
-  +   [Ewart & Anderson, 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf) 
-  report that female Chinook in the Campbell River in 2012 carried roughly ~5,700, a decrease from the roughly 6,000 eggs 
-  typically carried.  
-
-**2.1.5 Juvenile Life History**
-
-  +   Juvenile Chinook Salmon in the Campbell River have been studied intensively since 2015 (e.g. [Thornton et al. 2022](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf). These data suggests fry emerge in February-March and that nearly all Campbell River Chinook out migrate as Age-0+ juveniles from March through July. Smaller recently emerged Age-0+ fry are dominant and typically captured from March through early May (37 to 52 m). Larger Age-0+ smolts are less common and move out from May through July (64 to 88 mm).
-    
-**2.1.6 Estimated Juvenile Production**
-
-  +   Estimates of juvenile Chinook production based on numbers of observed spawners have generally been less than numbers 
-  trapped  throughout the outmigration period ([Thornton et al. 2022](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf), which may be due to increased juvenile survival or inaccurate/coarse estimates of fecundity. 
-
-**2.1.7 Estimates of Marine Survival**
-
-  +   Marine survival of unfed fry released from the Quinsam hatchery range from 0.2% to 0.4% (yes, that is less than 1%) ([Ewart & Anderson 2013]( http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf)).  
-
-**2.1.8 Hatchery Influence and Population Status**
-
-  +   [Ewart & Anderson 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf) report that 56% of the otoliths examined from the 2012 return showed no signs of hatchery marking and are assumed wild. The remaining 44% are presumed to have originated from instream incubators (31%), seapen released smolts (4%) and Quinsam River released smolts (9%). 
-  +   Assuming data presented by [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf) is representative of the overall Quinsam population, we can assume hatchery origin fish make up `r (76/(76+46))*100`% of Age-3 fish, `r (225/(225+114)*100)`% of Age-4 fish, `r (73/(73+40)*100)` of Age-5 fish and 50% of Age-6 fish. 
-
-**2.1.9 Ocean Range **
-
-+   Tagging studies have shown that maturing Chinook of BC origin are frequently located in [Southeast Alaska, the west coast of Haida Gwaii and west and north coasts of Vancouver Island](https://npafc.org/wp-content/uploads/2017/08/192USA.pdf) or [screenshot of map](images/BC.CN.oceanranges.jpg). 
-
-**2.1.9 Exploitation Rates **
-
-  +   Approximately [20% of fish released by the Quinsam hatchery](https://www.mccpacific.org/wp-content/uploads/2022/01/10Jan2022-SEAK-Catch-of-BC-Salmon-Technical-Report-Part-3-Chinook-Salmon-V1.pdf) are intercepted in Southeast Alaska commercial net (4.99%) and troll fisheries (11.95%), as well as an additional 1.84% that are intercepted in sport fisheries. Interestingly, a [court ruling in May 2023](https://www.documentcloud.org/documents/23795630-jones-order) almost shut down the SE Alaska troll fishery this year. Unfortunately for those aspiring to join the Tyee Club (and Orcas), that decision was [reversed](https://www.documentcloud.org/documents/23855199-panel-decision) in late June, 2023 and the fishery occurred from July 1 to 12, 2023, not sure whether it will resume again at a later date. 
-  +   I have not found any data indicating exploitation rates of Campbell/Quinsam Chinook within BC commercial and sport fisheries, however, I am assuming there is interception in North Coast Vancouver Island fisheries given their ocean range and presumed migration routes. 
-  
-```{r table1prep, include = FALSE}
-## Prepare data for table
-age_table1 <- age_data %>% select(Waterbody, Age, n, bin_min, bin_max, meanFL, SD, SE) %>%
-                           #filter(Waterbody == "Campbell River") %>%
-                           mutate(Age = as.factor(Age),
-                                  meanFL = as.numeric(meanFL),
-                                  bin_min = as.numeric(bin_min),
-                                  bin_max = as.numeric(bin_max))
-
-  age_table1 <- age_table1 %>% dplyr::group_by(Waterbody, Age) %>%
-                                summarize(n = sum(n),
-                                          bin_min = min(bin_min),
-                                          bin_max = max(bin_max),
-                                          mean = mean(meanFL)) %>%
-                                mutate('% of Total' = prop.table(n)*100,
-                                       size_range = paste(bin_min, "-", bin_max)) %>%
-                                select(Waterbody, Age, n, '% of Total',size_range, mean, )
-                                
-  
-
-```
-
-```{r table1, echo = FALSE}
-knitr::kable(age_table1, col.names = c("Waterbody", "Age", "n", "% of Total", "Size Range <br>(mm)", "Mean Lenght <br>(mm)"),
-             digits = 1,  align=rep('c', 5),
-             caption = "Table 1. Size at age of Chinook Salmon captured in Campbell River watershed from [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf)")
-```
-   
-   
-```{r, CampbellEscapement.prep, include = FALSE}
-crQ_esc <- crQ_esc %>% rename(Escapement = esc_count)
-
-crq_esc.plot <- ggplot(crQ_esc) +
-                    geom_col(aes(x=Year, y = Escapement, fill = Waterbody)) + 
-                    labs(x = "", y = "Escapement") + 
-                    scale_y_continuous(label = comma, breaks = seq(0,15000,2500)) + 
-                    scale_x_continuous(breaks = seq(1990, 2022, 2)) +
-                    theme_bw() + 
-                    theme(legend.position = "bottom")
-
-```
-
-```{r plot_crQ_escapement, echo = FALSE, fig.width=8, fig.height=5}
-
-suppressWarnings(ggplotly(crq_esc.plot))
-```
-
-**`r fig_nums("crq_esc.plot", "Chinook Salmon escpaement in the Campbell and Quinsam rivers from 1991 to 2021.")`**
-
-
-## 2.2 What else do we know about current Chinook Salmon trends?
-
-**2.2.1 They are decreasing in size and age at maturity** 
-
-  +   [Ohlberger et al. 2018](https://onlinelibrary.wiley.com/doi/full/10.1111/faf.12272) have shown that there is a reduction in the proportion of older age classes throughout most regions of the East Pacific and that length-at-age of older fish has decreased while length-at-age of smaller fish has increased.
-  +   [Malick et al. 2023](https://onlinelibrary.wiley.com/doi/abs/10.1111/faf.12738) compiled 3 decades worth of broodstock data from 43 hatcheries to examine trends in fecundity. They found significant changes in both fecundity and length, with the greatest drop in fecundity occurring over the past decade. Interestingly, they also estimate that a 1 mm reduction in length results in ~7.8 few eggs per female.   
-  +   [Oke et al. 2020](https://www.nature.com/articles/s41467-020-17726-z) state that relative to salmon maturing before 1990, adult Chinook salmon now produce 16% fewer eggs, transport 28% less nutrients and have lost 21% of their fisheries value.  
-
-   
-**2.2.2 Survival rates have collapsed and returns are decreasing**
-
-  +   [Welch et al. 2018](https://onlinelibrary.wiley.com/doi/epdf/10.1111/faf.12514) used coded-wire tag data to look at large scale patterns of Chinook salmon survival. This data demonstrates that survival collapsed over the past half century by a factor of ~3 and is currently ~1% in many regions (consistent with estimates available for the Campbell). Survival in relatively pristine and undeveloped regions (e.g. Northern BC and Alaska) was comparable to areas with extensive water management and land development that were previously considered to have poorest survival (e.g. Columbia River). The authors suggest the widespread trends in survival may be evidence that marine conditions are more influential than local factors (e.g. freshwater habitat). 
-  
-  +   Similar trends have been observed in other species. For example, [Price et al. 2021](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/1365-2664.13835) found a 69% reduction in wild Sockeye salmon returns (though overall returns are comparable to historic levels due to intensive enhancement); that population diversity has decreased by ~70%, and; that life history diversity has shifted with populations now migrating from freshwater earlier and remaining at sea for longer. 
-    
-**2.2.3 Enhancement levels have never been higher**
-
-  +   [Ruggerone & Irvine 2018](https://afspubs.onlinelibrary.wiley.com/doi/full/10.1002/mcf2.10023) show that intensive enhancement has resulted in the greatest abundance of salmon in the ocean than ever before (specifically pink, sockeye and chum) and that marine carrying capacity may have been reached within recent decades.         
-  +   [Nelson et al. 2019](https://esajournals.onlinelibrary.wiley.com/doi/full/10.1002/ecs2.2922) present evidence that hatchery practices have altered size and time that juveniles are released and have reduced diversity of life history traits (e.g. size, age and timing of smoltification). The authors argue that current enhancement practices may release fish at a time and size that is preferred by predators (e.g. all fish being released at same time and size and are easy pickings for large aggregations of predators).
-    
-**2.2.4 I am not the only person who doesn't understand what is going on **
-
-  +   [Beamish 2022](https://academic.oup.com/icesjms/article/79/4/1005/6550345) emphasizes that due to the large number of juvenile salmon in the ocean and overall poor survival, any small change in survival can results in major changes in adult abundance. Unfortunately, we don't understand what is causing those small changes in survival in the marine environment and need a better understanding of biologically based mechanisms linking climate change to salmon abundance.
-
-
-# 3. Let's look at the Tyee catch data!
+# 2. Let's look at the Tyee catch data!
 There are lots of ways to look at this data. I am most curious about three things:
 
-1) How total catches vary among years, and if they fluctuate relative to escapement.
+1) How total catches vary among years and if they fluctuate relative to escapement.
 
-2) When fish are most frequently captured.
+2) When are Tyees most frequently captured?
 
-3) How the size of fish changes within and across seasons. 
+3) Has fish size changed across seasons? Does fish size vary within seasons? 
 
 
-##3.1 How catches vary among years.
+## 2.1 How catches vary among years.
 ```{r plot1_prep_tyeecatch, include=FALSE}
 ## Prepare Plot
 catch.data.yearly <- catch_data %>% 
@@ -562,7 +423,7 @@ If we look at Escapement data (blue line) shown in `r fig_nums("plot2", display 
 
 Now, lets see when fish are most frequently captured throughout the season, and if there has been a change over time.
 
-## 3.2 When fish are most frequently captured.
+## 2.2 When fish are most frequently captured.
 
 The Tyee season runs from July 15 to September 15. I need to pick my battles with my wife and boss. Let's see which days I should be fighting for!? 
 
@@ -612,8 +473,8 @@ Hey! Who let someone register a Tyee in the first week of July!? This plot will 
 
 Ok, well now we know not to bother fishing until early August, that I should book the off the last 3 weeks of August and that adds are that 2023 is not going to set a new record for most Tyee's captured. But who knows. 
 
-## 3.3 Does fish size vary within or between seasons?
-```{r fish.size.prep, include = false}
+## 2.3 Does fish size vary within or between seasons?
+```{r fish.size.prep, include = FALSE}
 colnames(raw_catch.data)
 
 str(raw_catch.data)
@@ -621,108 +482,202 @@ fish.size <- raw_catch.data %>% mutate(weight = as.numeric(Weight2),
                                        Date   = as.Date(RawDate),
                                        decade   = format(floor_date(Date, years(10)), '%Y'),  ) %>%
                                 group_by(Year) %>%
-                                mutate(wt.yr.mean = mean(Weight2),
+                                summarize(wt.yr.mean = mean(Weight2),
                                           wt.yr.n    = n(),
                                           wt.yr.sd   = sd(Weight2),
-                                          wt.yr.se   = sd(Weight2)/sqrt(n()))
+                                          wt.yr.se   = sd(Weight2)/sqrt(n())) %>%
+                                mutate(Tyee.Cycle4 = as.numeric(rep(1:4, length.out = length(Year))),
+                                       wt.yr.mean  = as.numeric(wt.yr.mean, digits = 2),
+                                       wt.yr.se    = as.numeric(wt.yr.se, digits = 2))
 
 summary(fish.size$wt.yr.mean)
 
 wt.plot <- ggplot(fish.size, aes(x = Year)) +
-                geom_col(aes(x= Year, y = wt.yr.mean, fill = Cycle)) +
-                geom_errorbar(aes(ymin = wt.yr.mean-wt.yr.se, ymax = wt.yr.mean+wt.yr.se), width = 0.2) +
+                geom_col(aes(x= Year, y = wt.yr.mean, fill = Tyee.Cycle4)) +
+                geom_errorbar(aes(ymin = wt.yr.mean - wt.yr.se, ymax = wt.yr.mean + wt.yr.se), width = 0.2) +
                 labs(x = "", y = "Mean Weight (g)") +
                 scale_x_continuous(breaks = seq(2002, 2022, 2)) +
+                guides(fill = "none") +
                 theme_bw()
 
 
 ```
 
-```{r wt.plots, echo=FALSE}
+```{r wt.plots, include=FALSE}
 
 ## ggplot figure
-suppressWarnings(print(wt.plot))
+suppressWarnings(ggplotly(wt.plot))
 
  
 ```
 
-Anyhow, lets see what might be contributing to variability in the number of Tyee captured per year.
+**`r fig_nums("wt.plot", "Mean annual weight of Tyee Salmon captured since 2002.")`**
 
-Might also be fun to look at daily catches in each year. Given speculation that high flows contributed to record low catches in 2022 lets include some measures of flow.
+Well that's interesting. Overall mean fish size is relatively consistent across years. That's good news, but maybe there are better ways to look at this data. Bar plots can be deceptive.
 
-```{r plot3-4prepA, include = FALSE}
-    catch_data <- catch_data %>% mutate(Year = format(Date, '%Y'),
-                                        Month = format(Date, '%m'),
-                                        Weeknum = format(Date, '%V'))    
+```{r wt boxplot}
 
-    flow.catch <- left_join(flow.data.tyee, catch_data, by = c("Year","Month","Weeknum","Date"))
+wt.box <- ggplot(raw_catch.data) +
+              geom_boxplot(aes(x = Year, y = Weight2, group = Year, fill = Cycle), outlier.shape = NA) +
+              geom_jitter(aes(x = Year, y = Weight2), width=0.1,alpha=0.2) + 
+              labs(y = "Weight (lb)", x = "") +
+              scale_x_continuous(breaks = seq(2002, 2022, 2)) +
+              scale_y_continuous(breaks = seq(30, 65, 5)) +
+              guides(fill = "none")  +
+          theme_bw()
+wt.box
 
-    
-    ## Reduce to past 5 years only.                          
-    flow.catch <- flow.catch %>%  
-                  mutate(catch_scaled    = catch_binary * 7, 
-                         q.daily.scaled  = q.daily/20,
-                         q.5yr.rm.scaled = q.5yr.roll.mean/20,
-                         q.5y.rse.scaled = q.5y.roll.se/20,
-                         date.std = case_when(year(Date) >= 0 ~ 'year<-'(Date, 2021),TRUE ~ Date)) ## Set all dates to same year
-                                                
-    
-    flow.catch.2022 <- flow.catch %>% filter(between(date.std, as.Date("2021-07-15"), as.Date("2021-09-15")),
-                                               Year  >= 2019,
-                                               PARAM == 1)
-    
-    flow.catch.recent <- flow.catch %>% filter(between(date.std, as.Date("2021-07-15"), as.Date("2021-09-15")),
-                                               Year >2006,
-                                               PARAM == 1)
-    
-# Plot of # Tyee per day, relative to flow. From 2016 to 2022.
-plot3 <-    ggplot(flow.catch.2022) +
-                 geom_bar(aes(x = date.std, y = catch_scaled, fill = PARAM), stat= "identity", color = "Navy") +
-                 geom_line(aes(x = date.std, y = q.daily, linetype = "dashed", color = "Daily")) +
-                 geom_line(aes(x = date.std, y = q.5yr.roll.mean, linetype = "twodashed", color = "5-yr Mean")) +
-                 geom_text(aes(x = as.Date("2021-07-20"), y = 10, label = str_c("Total Catch = ",catch_yr.total), size = 8))+
-                 labs(x = "Date", y = "Discharge") +
-                 scale_x_date(date_breaks = "5 days", date_labels = "%m-%d", minor_breaks = "1 day") +
-                 scale_y_continuous(breaks = seq(0, 75, 13),
-                                    sec.axis = sec_axis(~./7, name = "Number of Fish")) +  #scale secondary access by x25
-                 guides(fill = guide_legend(title = "# Tyee", label = FALSE),
-                        linetype = "none",
-                        color = guide_legend(title = "Discharge (cms)", label = TRUE),
-                        size = "none") +
-                 facet_grid(Year~.) +
-                 theme_bw() +
-                 theme(legend.position = "bottom") 
+```
+```{r wt.boxplots, echo=FALSE}
 
-#str(flow.catch.recent)
-# Plot of # Tyee per day relative to flow, from 2002 to 2022.
-plot4 <-    ggplot(flow.catch.recent) +
-                 geom_bar(aes(x = date.std, y = catch_scaled, fill = PARAM), stat= "identity", color = "Navy") +
-                 geom_line(aes(x = date.std, y = q.daily, linetype = "dashed", color = "Daily")) +
-                 geom_line(aes(x = date.std, y = q.5yr.roll.mean, linetype = "twodashed", color = "5-yr Mean")) +
-                 geom_text(aes(x = as.Date("2021-07-20"), y = 13, label = str_c("Total Catch = ",catch_yr.total), size = 8)) +
-                 labs(x = "Date", y = "Discharge (cms)") +
-                 scale_x_date(date_breaks = "5 days", date_labels = "%m-%d", minor_breaks = "1 day") +
-                 scale_y_continuous(breaks = seq(0, 130, 10),
-                                    sec.axis = sec_axis(~./7, name = "Number of Fish")) +  #scale secondary access by x25
-                 guides(fill = guide_legend(title = "# Tyee", label = FALSE),
-                        linetype = "none",
-                        color = guide_legend(title = "Discharge (cms)", label = TRUE),
-                        size = "none") +
-                 facet_grid(Year~.) +
-                 theme_bw() +
-                 theme(legend.position = "bottom")  
+## ggplot figure
+suppressWarnings(ggplotly(wt.box))
 
 ```
 
+Well that is a bit better. The overall mean size of Tyee has stayed relatively stable across years, which makes sense given there is a minimum size limit for Tyee - but there also appears to fewer bigger fish being captured each year.  
 
-```{r plot3printA,  echo = FALSE}
 
-suppressWarnings(print(plot3))  
+We will change gears now and start looking at what may be contributing to observed patterns in catches and size. But first, lets look review what is known about Chinook in the Campbell and in general.
+
+
+# 3. Chinook Salmon
+
+
+## 3.1 What we* know about Campbell River Chinook? 
+
+
+(* more like what have other learned about Campbell River Chinook Salmon, I don't know much).
+
+
+There has been a lot of information collected on Campbell River Chinook Salmon, including from Tyee Salmon captured in the Tyee Pool, however, most of this data is not readily available online. Data that is available (and that I have found) is summarized below. 
+
+**2.1.0 Quinsam vs. Campbell **
+
+  +   The vast majority of Chinook Salmon returning to the Campbell River system are from the Quinsam River. Based on available escapement data for both systems, a mean of 12.5% Chinook returning to the system are from the Campbell River (varies from 6% to 25% between 1991 and 2019).
+
+**2.1.1 Spawn Timing**
+
+  +   Chinook spawning occurs from late September through early November and peaks in mid-October and that spawners reside in the river for ~12 days. 
+
+**2.1.2 Age Class Structure**
+
+  +   A roughly equal proportion of spawners return to the Campbell River as age-4 and age-5 fish (see Table 1) [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf). 
+    
+  +   However, [Ewart & Anderson,2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf) report that Age-5 fish were dominant in 2012 (61%), with Age-4's accounting for only 37% of the run, and age-3's representing only 2%.
+    
+**2.1.3 Size-at-Age**
+
+  +   I have not found any measures of individual fish. But binned data from [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf) (see Table 1) shows that Age-3 fish were between 500 mm and 699 mm (mean = 595 mm), Age-4 fish generally range in size from 550-949 mm (mean ~ 780 mm) and age-5 fish range from 700-949 mm (mean ~ 840 mm). Age-6 fish were identified, but accounted for less than 1% of all fish in the Campbell (n = 1 fish, 930 mm). 
+  +  Fish in the Quinsam River are comparable in size to those in the Campbell, though hatchery fish generally return at a smaller size than their wild counterparts in the Campbell and Quinsam. Sturham et al. (1999) data suggest Age-4 and Age-5 wild fish may exceed 900 mm, while only Age-5 hatchery fish are likely to exceed 900 mm. 
+
+**2.1.4 Fecundity**
+
+  +   [Ewart & Anderson, 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf) 
+  report that female Chinook in the Campbell River in 2012 carried roughly ~5,700, a decrease from the roughly 6,000 eggs 
+  typically carried.  
+
+**2.1.5 Juvenile Life History**
+
+  +   Juvenile Chinook Salmon in the Campbell River have been studied intensively since 2015 (e.g. [Thornton et al. 2022](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf). These data suggests fry emerge in February-March and that nearly all Campbell River Chinook out migrate as Age-0+ juveniles from March through July. Smaller recently emerged Age-0+ fry are dominant and typically captured from March through early May (37 to 52 m). Larger Age-0+ smolts are less common and move out from May through July (64 to 88 mm).
+    
+**2.1.6 Estimated Juvenile Production**
+
+  +   Estimates of juvenile Chinook production based on numbers of observed spawners have generally been less than numbers 
+  trapped  throughout the outmigration period ([Thornton et al. 2022](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf), which may be due to increased juvenile survival or inaccurate/coarse estimates of fecundity. 
+
+**2.1.7 Estimates of Marine Survival**
+
+  +   Marine survival of unfed fry released from the Quinsam hatchery range from 0.2% to 0.4% (yes, that is less than 1%) ([Ewart & Anderson 2013]( http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf)).  
+
+**2.1.8 Hatchery Influence and Population Status**
+
+  +   [Ewart & Anderson 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf) report that 56% of the otoliths examined from the 2012 return showed no signs of hatchery marking and are assumed wild. The remaining 44% are presumed to have originated from instream incubators (31%), seapen released smolts (4%) and Quinsam River released smolts (9%). 
+  +   Assuming data presented by [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf) is representative of the overall Quinsam population, we can assume hatchery origin fish make up `r (76/(76+46))*100`% of Age-3 fish, `r (225/(225+114)*100)`% of Age-4 fish, `r (73/(73+40)*100)` of Age-5 fish and 50% of Age-6 fish. 
+
+**2.1.9 Ocean Range **
+
++   Tagging studies have shown that maturing Chinook of BC origin are frequently located in [Southeast Alaska, the west coast of Haida Gwaii and west and north coasts of Vancouver Island](https://npafc.org/wp-content/uploads/2017/08/192USA.pdf) or [screenshot of map](images/BC.CN.oceanranges.jpg). 
+
+**2.1.9 Exploitation Rates **
+
+  +   Approximately [20% of fish released by the Quinsam hatchery](https://www.mccpacific.org/wp-content/uploads/2022/01/10Jan2022-SEAK-Catch-of-BC-Salmon-Technical-Report-Part-3-Chinook-Salmon-V1.pdf) are intercepted in Southeast Alaska commercial net (4.99%) and troll fisheries (11.95%), as well as an additional 1.84% that are intercepted in sport fisheries. Interestingly, a [court ruling in May 2023](https://www.documentcloud.org/documents/23795630-jones-order) almost shut down the SE Alaska troll fishery this year. Unfortunately for those aspiring to join the Tyee Club (and Orcas), that decision was [reversed](https://www.documentcloud.org/documents/23855199-panel-decision) in late June, 2023 and the fishery occurred from July 1 to 12, 2023, not sure whether it will resume again at a later date. 
+  +   I have not found any data indicating exploitation rates of Campbell/Quinsam Chinook within BC commercial and sport fisheries, however, I am assuming there is interception in North Coast Vancouver Island fisheries given their ocean range and presumed migration routes. 
+  
+```{r table1prep, include = FALSE}
+## Prepare data for table
+age_table1 <- age_data %>% select(Waterbody, Age, n, bin_min, bin_max, meanFL, SD, SE) %>%
+                           #filter(Waterbody == "Campbell River") %>%
+                           mutate(Age = as.factor(Age),
+                                  meanFL = as.numeric(meanFL),
+                                  bin_min = as.numeric(bin_min),
+                                  bin_max = as.numeric(bin_max))
+
+  age_table1 <- age_table1 %>% dplyr::group_by(Waterbody, Age) %>%
+                                summarize(n = sum(n),
+                                          bin_min = min(bin_min),
+                                          bin_max = max(bin_max),
+                                          mean = mean(meanFL)) %>%
+                                mutate('% of Total' = prop.table(n)*100,
+                                       size_range = paste(bin_min, "-", bin_max)) %>%
+                                select(Waterbody, Age, n, '% of Total',size_range, mean, )
+                                
+  
+
 ```
-**`r fig_nums("plot3", "Catches of Tyee Salmon since 2016 relative to flow in the Campebll River.")`**
+
+```{r table1, echo = FALSE}
+knitr::kable(age_table1, col.names = c("Waterbody", "Age", "n", "% of Total", "Size Range <br>(mm)", "Mean Lenght <br>(mm)"),
+             digits = 1,  align=rep('c', 5),
+             caption = "Table 1. Size at age of Chinook Salmon captured in Campbell River watershed from [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf)")
+```
+   
+   
+```{r, CampbellEscapement.prep, include = FALSE}
+crQ_esc <- crQ_esc %>% rename(Escapement = esc_count)
+
+crq_esc.plot <- ggplot(crQ_esc) +
+                    geom_col(aes(x=Year, y = Escapement, fill = Waterbody)) + 
+                    labs(x = "", y = "Escapement") + 
+                    scale_y_continuous(label = comma, breaks = seq(0,15000,2500)) + 
+                    scale_x_continuous(breaks = seq(1990, 2022, 2)) +
+                    theme_bw() + 
+                    theme(legend.position = "bottom")
+
+```
+
+```{r plot_crQ_escapement, echo = FALSE, fig.width=8, fig.height=5}
+
+suppressWarnings(ggplotly(crq_esc.plot))
+```
+
+**`r fig_nums("crq_esc.plot", "Chinook Salmon escpaement in the Campbell and Quinsam rivers from 1991 to 2021.")`**
 
 
-Well, it's clear that flows in 2022 were higher than past years and higher than mean flows over the past 5-years. But this doesn't mean that is why fewer fish were captured. 
+## 3.2 What else do we know about current Chinook Salmon trends?
+
+**2.2.1 They are decreasing in size and age at maturity** 
+
+  +   [Ohlberger et al. 2018](https://onlinelibrary.wiley.com/doi/full/10.1111/faf.12272) have shown that there is a reduction in the proportion of older age classes throughout most regions of the East Pacific and that length-at-age of older fish has decreased while length-at-age of smaller fish has increased.
+  +   [Malick et al. 2023](https://onlinelibrary.wiley.com/doi/abs/10.1111/faf.12738) compiled 3 decades worth of broodstock data from 43 hatcheries to examine trends in fecundity. They found significant changes in both fecundity and length, with the greatest drop in fecundity occurring over the past decade. Interestingly, they also estimate that a 1 mm reduction in length results in ~7.8 few eggs per female.   
+  +   [Oke et al. 2020](https://www.nature.com/articles/s41467-020-17726-z) state that relative to salmon maturing before 1990, adult Chinook salmon now produce 16% fewer eggs, transport 28% less nutrients and have lost 21% of their fisheries value.  
+
+   
+**2.2.2 Survival rates have collapsed and returns are decreasing**
+
+  +   [Welch et al. 2018](https://onlinelibrary.wiley.com/doi/epdf/10.1111/faf.12514) used coded-wire tag data to look at large scale patterns of Chinook salmon survival. This data demonstrates that survival collapsed over the past half century by a factor of ~3 and is currently ~1% in many regions (consistent with estimates available for the Campbell). Survival in relatively pristine and undeveloped regions (e.g. Northern BC and Alaska) was comparable to areas with extensive water management and land development that were previously considered to have poorest survival (e.g. Columbia River). The authors suggest the widespread trends in survival may be evidence that marine conditions are more influential than local factors (e.g. freshwater habitat). 
+  
+  +   Similar trends have been observed in other species. For example, [Price et al. 2021](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/1365-2664.13835) found a 69% reduction in wild Sockeye salmon returns (though overall returns are comparable to historic levels due to intensive enhancement); that population diversity has decreased by ~70%, and; that life history diversity has shifted with populations now migrating from freshwater earlier and remaining at sea for longer. 
+    
+**2.2.3 Enhancement levels have never been higher**
+
+  +   [Ruggerone & Irvine 2018](https://afspubs.onlinelibrary.wiley.com/doi/full/10.1002/mcf2.10023) show that intensive enhancement has resulted in the greatest abundance of salmon in the ocean than ever before (specifically pink, sockeye and chum) and that marine carrying capacity may have been reached within recent decades.         
+  +   [Nelson et al. 2019](https://esajournals.onlinelibrary.wiley.com/doi/full/10.1002/ecs2.2922) present evidence that hatchery practices have altered size and time that juveniles are released and have reduced diversity of life history traits (e.g. size, age and timing of smoltification). The authors argue that current enhancement practices may release fish at a time and size that is preferred by predators (e.g. all fish being released at same time and size and are easy pickings for large aggregations of predators).
+    
+**2.2.4 I am not the only person who doesn't understand what is going on **
+
+  +   [Beamish 2022](https://academic.oup.com/icesjms/article/79/4/1005/6550345) emphasizes that due to the large number of juvenile salmon in the ocean and overall poor survival, any small change in survival can results in major changes in adult abundance. Unfortunately, we don't understand what is causing those small changes in survival in the marine environment and need a better understanding of biologically based mechanisms linking climate change to salmon abundance.
+
 
 
 
@@ -1096,6 +1051,82 @@ Relative to 2013, abundance in all plotted west coast streams was slightly reduc
 
 ## 5.3 How conditions may affect the number of fish that are captured.
 ### 5.3.1 Influence of river flow on catches
+
+```{r plot3-4prepA, include = FALSE}
+    catch_data <- catch_data %>% mutate(Year = format(Date, '%Y'),
+                                        Month = format(Date, '%m'),
+                                        Weeknum = format(Date, '%V'))    
+
+    flow.catch <- left_join(flow.data.tyee, catch_data, by = c("Year","Month","Weeknum","Date"))
+
+    
+    ## Reduce to past 5 years only.                          
+    flow.catch <- flow.catch %>%  
+                  mutate(catch_scaled    = catch_binary * 7, 
+                         q.daily.scaled  = q.daily/20,
+                         q.5yr.rm.scaled = q.5yr.roll.mean/20,
+                         q.5y.rse.scaled = q.5y.roll.se/20,
+                         date.std = case_when(year(Date) >= 0 ~ 'year<-'(Date, 2021),TRUE ~ Date)) ## Set all dates to same year
+                                                
+    
+    flow.catch.2022 <- flow.catch %>% filter(between(date.std, as.Date("2021-07-15"), as.Date("2021-09-15")),
+                                               Year  >= 2019,
+                                               PARAM == 1)
+    
+    flow.catch.recent <- flow.catch %>% filter(between(date.std, as.Date("2021-07-15"), as.Date("2021-09-15")),
+                                               Year >2006,
+                                               PARAM == 1)
+    
+# Plot of # Tyee per day, relative to flow. From 2016 to 2022.
+plot3 <-    ggplot(flow.catch.2022) +
+                 geom_bar(aes(x = date.std, y = catch_scaled, fill = PARAM), stat= "identity", color = "Navy") +
+                 geom_line(aes(x = date.std, y = q.daily, linetype = "dashed", color = "Daily")) +
+                 geom_line(aes(x = date.std, y = q.5yr.roll.mean, linetype = "twodashed", color = "5-yr Mean")) +
+                 geom_text(aes(x = as.Date("2021-07-20"), y = 10, label = str_c("Total Catch = ",catch_yr.total), size = 8))+
+                 labs(x = "Date", y = "Discharge") +
+                 scale_x_date(date_breaks = "5 days", date_labels = "%m-%d", minor_breaks = "1 day") +
+                 scale_y_continuous(breaks = seq(0, 75, 13),
+                                    sec.axis = sec_axis(~./7, name = "Number of Fish")) +  #scale secondary access by x25
+                 guides(fill = guide_legend(title = "# Tyee", label = FALSE),
+                        linetype = "none",
+                        color = guide_legend(title = "Discharge (cms)", label = TRUE),
+                        size = "none") +
+                 facet_grid(Year~.) +
+                 theme_bw() +
+                 theme(legend.position = "bottom") 
+
+#str(flow.catch.recent)
+# Plot of # Tyee per day relative to flow, from 2002 to 2022.
+plot4 <-    ggplot(flow.catch.recent) +
+                 geom_bar(aes(x = date.std, y = catch_scaled, fill = PARAM), stat= "identity", color = "Navy") +
+                 geom_line(aes(x = date.std, y = q.daily, linetype = "dashed", color = "Daily")) +
+                 geom_line(aes(x = date.std, y = q.5yr.roll.mean, linetype = "twodashed", color = "5-yr Mean")) +
+                 geom_text(aes(x = as.Date("2021-07-20"), y = 13, label = str_c("Total Catch = ",catch_yr.total), size = 8)) +
+                 labs(x = "Date", y = "Discharge (cms)") +
+                 scale_x_date(date_breaks = "5 days", date_labels = "%m-%d", minor_breaks = "1 day") +
+                 scale_y_continuous(breaks = seq(0, 130, 10),
+                                    sec.axis = sec_axis(~./7, name = "Number of Fish")) +  #scale secondary access by x25
+                 guides(fill = guide_legend(title = "# Tyee", label = FALSE),
+                        linetype = "none",
+                        color = guide_legend(title = "Discharge (cms)", label = TRUE),
+                        size = "none") +
+                 facet_grid(Year~.) +
+                 theme_bw() +
+                 theme(legend.position = "bottom")  
+
+```
+
+
+```{r plot3printA,  echo = FALSE}
+
+suppressWarnings(print(plot3))  
+```
+
+**`r fig_nums("plot3", "Catches of Tyee Salmon since 2016 relative to flow in the Campebll River.")`**
+
+
+Well, it's clear that flows in 2022 were higher than past years and higher than mean flows over the past 5-years. But this doesn't mean that is why fewer fish were captured. 
+
 Last year there was a lot of speculation that high flows in the Campbell River may have caused fish to move directly into the river rather than staging in the pool. Let's look at flow in the Campbell River to see how 2022 flows compared to previous years. 
 
 ```{r plot3bprint,  echo = FALSE}
