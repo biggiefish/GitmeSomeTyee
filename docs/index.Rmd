@@ -9,6 +9,9 @@ output:
     code_folding: "show"
     toc: true
     toc_float: true
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: scroll  
   
 ---
 
@@ -471,7 +474,7 @@ Hey! Who let someone register a Tyee in the first week of July!? This plot will 
   +   Peak catches occur in mid to late August. 
   
 
-Ok, well now we know not to bother fishing until early August, that I should book the off the last 3 weeks of August and that adds are that 2023 is not going to set a new record for most Tyee's captured. But who knows. 
+Ok, well now we know not to bother fishing until early August, that I should book the off the last 3 weeks of August and that odds are that 2023 is not going to set a new record for most Tyee's captured. But who knows. 
 
 ## 2.3 Does fish size vary within or between seasons?
 ```{r fish.size.prep, include = FALSE}
@@ -488,23 +491,32 @@ fish.size <- raw_catch.data %>% mutate(weight = as.numeric(Weight2),
                                           wt.yr.se   = sd(Weight2)/sqrt(n())) %>%
                                 mutate(Tyee.Cycle4 = as.numeric(rep(1:4, length.out = length(Year))),
                                        wt.yr.mean  = as.numeric(wt.yr.mean, digits = 2),
-                                       wt.yr.se    = as.numeric(wt.yr.se, digits = 2))
+                                       wt.yr.se    = as.numeric(wt.yr.se, digits = 2)) %>%
+                                ungroup() %>%
+                                mutate(mean.wt.overall = mean(wt.yr.mean))
+
+
+
 
 summary(fish.size$wt.yr.mean)
-
+library(scales)
 wt.plot <- ggplot(fish.size, aes(x = Year)) +
                 geom_col(aes(x= Year, y = wt.yr.mean, fill = Tyee.Cycle4)) +
                 geom_errorbar(aes(ymin = wt.yr.mean - wt.yr.se, ymax = wt.yr.mean + wt.yr.se), width = 0.2) +
+                geom_hline(aes(yintercept = mean.wt.overall, color = 'Overall Mean'), linetype = 'twodash', color = 'red', linewidth = 1) +
                 labs(x = "", y = "Mean Weight (g)") +
+                scale_y_continuous(limits = c(30,40), oob = rescale_none, breaks = seq(30, 40, 2)) +
                 scale_x_continuous(breaks = seq(2002, 2022, 2)) +
-                guides(fill = "none") +
-                theme_bw()
+                theme_bw() +
+                guides(fill = "none",
+                       color = guide_legend(title = "Overall Mean Weight")) 
 
 
+wt.plot
 ```
 
-```{r wt.plots, include=FALSE}
 
+```{r wt.plots, echo=FALSE}
 ## ggplot figure
 suppressWarnings(ggplotly(wt.plot))
 
@@ -515,9 +527,9 @@ suppressWarnings(ggplotly(wt.plot))
 
 Well that's interesting. Overall mean fish size is relatively consistent across years. That's good news, but maybe there are better ways to look at this data. Bar plots can be deceptive.
 
-```{r wt boxplot}
+```{r wt boxplot, include=FALSE}
 
-wt.box <- ggplot(raw_catch.data) +
+wt.box2 <- ggplot(raw_catch.data) +
               geom_boxplot(aes(x = Year, y = Weight2, group = Year, fill = Cycle), outlier.shape = NA) +
               geom_jitter(aes(x = Year, y = Weight2), width=0.1,alpha=0.2) + 
               labs(y = "Weight (lb)", x = "") +
@@ -531,8 +543,10 @@ wt.box <- ggplot(raw_catch.data) +
 ```{r wt.boxplots, echo=FALSE}
 
 ## ggplot figure
-suppressWarnings(ggplotly(wt.box))
+suppressWarnings(ggplotly(wt.box2))
 ```
+
+**`r fig_nums("wt.plot", "Mean annual weight of Tyee Salmon captured since 2002.")`**
 
 Well that is a bit better. The overall mean size of Tyee has stayed relatively stable across years, which makes sense given there is a minimum size limit for Tyee - but there also appears to fewer bigger fish being captured each year.  
 
@@ -603,7 +617,7 @@ plot4 <-    ggplot(flow.catch.recent) +
 
 ```
 
-```{r, allcatches, echo=FALSE, fig.width = 8, fig.height = 28}
+```{r, allcatches, echo=FALSE, fig.width = 10, fig.height = 35}
 
 suppressWarnings(print(plot4))
 
@@ -612,8 +626,7 @@ suppressWarnings(print(plot4))
 **`r fig_nums("daily.decadal.catch", "Total fish captured by date and decade")`**
 
 
-We will change gears now and start looking at what may be contributing to observed patterns in catches and size. But first, lets look review what is known about Chinook in the Campbell and in general.
-
+Without additional data there is not much else to look at. So let's change gears and start poking around at what may be contributing to observed patterns in catches and size.
 
 # 3. Chinook Salmon
 
@@ -658,7 +671,7 @@ There has been a lot of information collected on Campbell River Chinook Salmon, 
 **3.1.6 Estimated Juvenile Production**
 
   +   Estimates of juvenile Chinook production based on numbers of observed spawners have generally been less than numbers 
-  trapped  throughout the outmigration period ([Thornton et al. 2022](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf), which may be due to increased juvenile survival or inaccurate/coarse estimates of fecundity. 
+  trapped  throughout the out-migration period ([Thornton et al. 2022](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf), which may be due to increased juvenile survival or inaccurate/coarse estimates of fecundity. 
 
 **3.1.7 Estimates of Marine Survival**
 
@@ -695,8 +708,6 @@ age_table1 <- age_data %>% select(Waterbody, Age, n, bin_min, bin_max, meanFL, S
                                 mutate('% of Total' = prop.table(n)*100,
                                        size_range = paste(bin_min, "-", bin_max)) %>%
                                 select(Waterbody, Age, n, '% of Total',size_range, mean, )
-                                
-  
 
 ```
 
@@ -728,7 +739,6 @@ suppressWarnings(ggplotly(crq_esc.plot))
 **`r fig_nums("crq_esc.plot", "Chinook Salmon escpaement in the Campbell and Quinsam rivers from 1991 to 2021.")`**
 
 
-## 3.2 What else do we know about current Chinook Salmon trends?
 
 **2.2.1 They are decreasing in size and age at maturity** 
 
