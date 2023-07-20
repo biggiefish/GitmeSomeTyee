@@ -20,7 +20,7 @@ output:
 "https://biggiefish.github.io/GitmeSomeTyee/"
 ```
 
-# 1. What is this?
+## 1. What is this?
 A high-level, very casual, and often self-deprecating look at trends in catches of Tyee salmon in Campbell River's legendary [Tyee Pool](https://goo.gl/maps/4Nb4etqRVjoSSfqSA). All data exploration is being completed for [fun](https://i.giphy.com/media/Cz6TlrRVVyv9S/giphy.webp) and to learn some new tools (namely [R Markdown](https://rmarkdown.rstudio.com/) and [plotly](https://plotly.com/r/)). 
 
 There are far more technical ways of examining this data, but they aren't as much fun - and are frankly hard. This analysis is living and will evolve over time. All results and interpretation are purely speculative and should be considered nothing more than ramblings of a fish nerd. 
@@ -282,7 +282,7 @@ list.of.packages <- c("tidyverse",
 ```
 
 
-##    1.1 The data
+###    1.1 The data
 
 I have compiled the following datasets to use in this analysis. Whether they are all incorporated is yet to be seen.
 
@@ -299,7 +299,7 @@ I have compiled the following datasets to use in this analysis. Whether they are
 
 This is certainly an interesting dataset, especially given it is the centenary of the Tyee Club,  but it has its limitations. For example, there is no accessible information on effort (# boats per day), biological data (e.g. size, girth and age of tyees) or numbers of non-tyee salmon captured in the pool. 
 
-# 2. Let's look at the Tyee catch data!
+## 2. Let's look at the Tyee catch data!
 There are lots of ways to look at this data. I am most curious about three things:
 
 1) How total catches vary among years and if they fluctuate relative to escapement.
@@ -309,7 +309,7 @@ There are lots of ways to look at this data. I am most curious about three thing
 3) Has fish size changed across seasons? Does fish size vary within seasons? 
 
 
-## 2.1 How catches vary among years.
+### 2.1 How catches vary among years.
 ```{r plot1_prep_tyeecatch, include=FALSE}
 ## Prepare Plot
 catch.data.yearly <- catch_data %>% 
@@ -426,7 +426,7 @@ If we look at Escapement data (blue line) shown in `r fig_nums("plot2", display 
 
 Now, lets see when fish are most frequently captured throughout the season, and if there has been a change over time.
 
-## 2.2 When fish are most frequently captured.
+### 2.2 When fish are most frequently captured.
 
 The Tyee season runs from July 15 to September 15. I need to pick my battles with my wife and boss. Let's see which days I should be fighting for!? 
 
@@ -476,7 +476,7 @@ Hey! Who let someone register a Tyee in the first week of July!? This plot will 
 
 Ok, well now we know not to bother fishing until early August, that I should book the off the last 3 weeks of August and that odds are that 2023 is not going to set a new record for most Tyee's captured. But who knows. 
 
-## 2.3 Does fish size vary within or between seasons?
+### 2.3 Does fish size vary within or between seasons?
 ```{r fish.size.prep, include = FALSE}
 colnames(raw_catch.data)
 
@@ -550,7 +550,7 @@ suppressWarnings(ggplotly(wt.box2))
 
 Well that is a bit better. The overall mean size of Tyee has stayed relatively stable across years, which makes sense given there is a minimum size limit for Tyee - but there also appears to fewer bigger fish being captured each year.  
 
-## 2.4 Daily catches per year.
+### 2.4 Daily catches per year.
 To round this out, let's just have a look at the total number of fish caught per day over the past 20 years. I have included mean daily discharge.
 
 ```{r, all.catches.preps, echo = FALSE}
@@ -628,10 +628,10 @@ suppressWarnings(print(plot4))
 
 Without additional data there is not much else to look at. So let's change gears and start poking around at what may be contributing to observed patterns in catches and size.
 
-# 3. Chinook Salmon
+## 3. Chinook Salmon
 
 
-## 3.1 What we* know about Campbell River Chinook? 
+### 3.1 What we* know about Campbell River Chinook? 
 
 
 (* more like what have others learned about Chinook in the Campbell, I don't know much).
@@ -639,54 +639,54 @@ Without additional data there is not much else to look at. So let's change gears
 
 There has been a lot of information collected on Campbell River Chinook Salmon, including from Tyee Salmon captured in the Tyee Pool, however, most of this data is not readily available online. Data that is available (and that I have found) is summarized below. 
 
-**3.1.0 Quinsam vs. Campbell **
+#### 3.1.0 Quinsam vs. Campbell
 
   +   The vast majority of Chinook Salmon returning to the Campbell River system are from the Quinsam River. Based on available escapement data for both systems, a mean of 12.5% Chinook returning to the system are from the Campbell River (varies from 6% to 25% between 1991 and 2019).
 
-**3.1.1 Spawn Timing**
+#### 3.1.1 Spawn Timing
 
   +   Chinook spawning occurs from late September through early November and peaks in mid-October and that spawners reside in the river for ~12 days. 
 
-**3.1.2 Age Class Structure**
+#### 3.1.2 Age Class Structure
 
   +   A roughly equal proportion of spawners return to the Campbell River as age-4 and age-5 fish (see Table 1) [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf). 
     
   +   However, [Ewart & Anderson,2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf) report that Age-5 fish were dominant in 2012 (61%), with Age-4's accounting for only 37% of the run, and age-3's representing only 2%.
     
-**3.1.3 Size-at-Age**
+#### 3.1.3 Size-at-Age
 
   +   I have not found any measures of individual fish. But binned data from [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf) (see Table 1) shows that Age-3 fish were between 500 mm and 699 mm (mean = 595 mm), Age-4 fish generally range in size from 550-949 mm (mean ~ 780 mm) and age-5 fish range from 700-949 mm (mean ~ 840 mm). Age-6 fish were identified, but accounted for less than 1% of all fish in the Campbell (n = 1 fish, 930 mm). 
   +  Fish in the Quinsam River are comparable in size to those in the Campbell, though hatchery fish generally return at a smaller size than their wild counterparts in the Campbell and Quinsam. Sturham et al. (1999) data suggest Age-4 and Age-5 wild fish may exceed 900 mm, while only Age-5 hatchery fish are likely to exceed 900 mm. 
 
-**3.1.4 Fecundity**
+#### 3.1.4 Fecundity
 
   +   [Ewart & Anderson, 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf) 
   report that female Chinook in the Campbell River in 2012 carried roughly ~5,700, a decrease from the roughly 6,000 eggs 
   typically carried.  
 
-**3.1.5 Juvenile Life History**
+#### 3.1.5 Juvenile Life History
 
   +   Juvenile Chinook Salmon in the Campbell River have been studied intensively since 2015 (e.g. [Thornton et al. 2022](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf). These data suggests fry emerge in February-March and that nearly all Campbell River Chinook out migrate as Age-0+ juveniles from March through July. Smaller recently emerged Age-0+ fry are dominant and typically captured from March through early May (37 to 52 m). Larger Age-0+ smolts are less common and move out from May through July (64 to 88 mm).
     
-**3.1.6 Estimated Juvenile Production**
+**3.1.6 Estimated Juvenile Production
 
   +   Estimates of juvenile Chinook production based on numbers of observed spawners have generally been less than numbers 
   trapped  throughout the out-migration period ([Thornton et al. 2022](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf), which may be due to increased juvenile survival or inaccurate/coarse estimates of fecundity. 
 
-**3.1.7 Estimates of Marine Survival**
+#### 3.1.7 Estimates of Marine Survival
 
   +   Marine survival of unfed fry released from the Quinsam hatchery range from 0.2% to 0.4% (yes, that is less than 1%) ([Ewart & Anderson 2013]( http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf)).  
 
-**3.1.8 Hatchery Influence and Population Status**
+#### 3.1.8 Hatchery Influence and Population Status
 
   +   [Ewart & Anderson 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf) report that 56% of the otoliths examined from the 2012 return showed no signs of hatchery marking and are assumed wild. The remaining 44% are presumed to have originated from instream incubators (31%), seapen released smolts (4%) and Quinsam River released smolts (9%). 
   +   Assuming data presented by [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf) is representative of the overall Quinsam population, we can assume hatchery origin fish make up `r (76/(76+46))*100`% of Age-3 fish, `r (225/(225+114)*100)`% of Age-4 fish, `r (73/(73+40)*100)` of Age-5 fish and 50% of Age-6 fish. 
 
-**3.1.9 Ocean Range **
+#### 3.1.9 Ocean Range
 
 +   Tagging studies have shown that maturing Chinook of BC origin are frequently located in [Southeast Alaska, the west coast of Haida Gwaii and west and north coasts of Vancouver Island](https://npafc.org/wp-content/uploads/2017/08/192USA.pdf) or [screenshot of map](images/BC.CN.oceanranges.jpg). 
 
-**3.1.9 Exploitation Rates **
+#### 3.1.9 Exploitation Rates
 
   +   Approximately [20% of fish released by the Quinsam hatchery](https://www.mccpacific.org/wp-content/uploads/2022/01/10Jan2022-SEAK-Catch-of-BC-Salmon-Technical-Report-Part-3-Chinook-Salmon-V1.pdf) are intercepted in Southeast Alaska commercial net (4.99%) and troll fisheries (11.95%), as well as an additional 1.84% that are intercepted in sport fisheries. Interestingly, a [court ruling in May 2023](https://www.documentcloud.org/documents/23795630-jones-order) almost shut down the SE Alaska troll fishery this year. Unfortunately for those aspiring to join the Tyee Club (and Orcas), that decision was [reversed](https://www.documentcloud.org/documents/23855199-panel-decision) in late June, 2023 and the fishery occurred from July 1 to 12, 2023, not sure whether it will resume again at a later date. 
   +   I have not found any data indicating exploitation rates of Campbell/Quinsam Chinook within BC commercial and sport fisheries, however, I am assuming there is interception in North Coast Vancouver Island fisheries given their ocean range and presumed migration routes. 
@@ -739,54 +739,52 @@ suppressWarnings(ggplotly(crq_esc.plot))
 **`r fig_nums("crq_esc.plot", "Chinook Salmon escpaement in the Campbell and Quinsam rivers from 1991 to 2021.")`**
 
 
-
-**2.2.1 They are decreasing in size and age at maturity** 
+### 3.2 What we know about Chinook salmon in general.
+#### 3.2.1 They are decreasing in size and age at maturity
 
   +   [Ohlberger et al. 2018](https://onlinelibrary.wiley.com/doi/full/10.1111/faf.12272) have shown that there is a reduction in the proportion of older age classes throughout most regions of the East Pacific and that length-at-age of older fish has decreased while length-at-age of smaller fish has increased.
   +   [Malick et al. 2023](https://onlinelibrary.wiley.com/doi/abs/10.1111/faf.12738) compiled 3 decades worth of broodstock data from 43 hatcheries to examine trends in fecundity. They found significant changes in both fecundity and length, with the greatest drop in fecundity occurring over the past decade. Interestingly, they also estimate that a 1 mm reduction in length results in ~7.8 few eggs per female.   
   +   [Oke et al. 2020](https://www.nature.com/articles/s41467-020-17726-z) state that relative to salmon maturing before 1990, adult Chinook salmon now produce 16% fewer eggs, transport 28% less nutrients and have lost 21% of their fisheries value.  
 
    
-**2.2.2 Survival rates have collapsed and returns are decreasing**
+#### 3.2.2 Survival rates have collapsed and returns are decreasing
 
   +   [Welch et al. 2018](https://onlinelibrary.wiley.com/doi/epdf/10.1111/faf.12514) used coded-wire tag data to look at large scale patterns of Chinook salmon survival. This data demonstrates that survival collapsed over the past half century by a factor of ~3 and is currently ~1% in many regions (consistent with estimates available for the Campbell). Survival in relatively pristine and undeveloped regions (e.g. Northern BC and Alaska) was comparable to areas with extensive water management and land development that were previously considered to have poorest survival (e.g. Columbia River). The authors suggest the widespread trends in survival may be evidence that marine conditions are more influential than local factors (e.g. freshwater habitat). 
   
   +   Similar trends have been observed in other species. For example, [Price et al. 2021](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/1365-2664.13835) found a 69% reduction in wild Sockeye salmon returns (though overall returns are comparable to historic levels due to intensive enhancement); that population diversity has decreased by ~70%, and; that life history diversity has shifted with populations now migrating from freshwater earlier and remaining at sea for longer. 
     
-**2.2.3 Enhancement levels have never been higher**
+#### 3.2.3 Enhancement levels have never been higher
 
   +   [Ruggerone & Irvine 2018](https://afspubs.onlinelibrary.wiley.com/doi/full/10.1002/mcf2.10023) show that intensive enhancement has resulted in the greatest abundance of salmon in the ocean than ever before (specifically pink, sockeye and chum) and that marine carrying capacity may have been reached within recent decades.         
   +   [Nelson et al. 2019](https://esajournals.onlinelibrary.wiley.com/doi/full/10.1002/ecs2.2922) present evidence that hatchery practices have altered size and time that juveniles are released and have reduced diversity of life history traits (e.g. size, age and timing of smoltification). The authors argue that current enhancement practices may release fish at a time and size that is preferred by predators (e.g. all fish being released at same time and size and are easy pickings for large aggregations of predators).
     
-**2.2.4 I am not the only person who doesn't understand what is going on **
+####3.2.4 I am not the only person who doesn't understand what is going on
 
   +   [Beamish 2022](https://academic.oup.com/icesjms/article/79/4/1005/6550345) emphasizes that due to the large number of juvenile salmon in the ocean and overall poor survival, any small change in survival can results in major changes in adult abundance. Unfortunately, we don't understand what is causing those small changes in survival in the marine environment and need a better understanding of biologically based mechanisms linking climate change to salmon abundance.
 
 
-
-
-# 4. What could be affecting returns and catches?
+## 4. What could be affecting returns and catches?
 At it's most basic level, there are four things that are likely affecting catches of Tyee salmon (in reality, there are many many many many many more.
 
 
-#### 4.1. Juvenile recruitment
+### 4.1. Juvenile recruitment
 
 * This is determined by the number of eggs that are deposited (for easy math, lets say females account for 50% of escapement, that each one deposits 4000 eggs and that egg to fry survival is 10%). We will assume that fish that survive to fry will enter the sea. Hydrometric data on the Campbell is available back to 1949 and it is likely that extreme high or low flow events (e.g. greater than 300 cms, less than ??50 cms??) during the incubation/rearing periods (maybe November through March) will reduce juvenile recruitment.
 
-#### 4.2. Marine survival and productivity
+### 4.2. Marine survival and productivity
 
 * This is way too complicated for right now. Let's feel warm and fuzzy by assuming survival and productivity are stable (side note, they arent!). But if we don't do this we can't assume that proportions calculated from Sturham et al. are representative of current returns (unfortunately recent evidence shows this assumption is wrong and that fish are decreasing in size, so there are likely fewer Tyee returning now than in previous years). 
   
-#### 4.3. Fishing effort and catchability
+### 4.3. Fishing effort and catchability
 
   * For now, I am going to assume effort (# of boats fishing per tide/day) is constant and that catchability (percent of Tyees present that are captured) are stable. In reality, effort has likely decreased over time (especially since 2014) and catchability has likely increased as peoples knowledge, skill and fishing technology have improved over time (not everyone though, I still suck). Either way, without some hard data it is hard to much with this.
 
-#### 4.4. Fishing Conditions
+### 4.4. Fishing Conditions
 
   * No question that fewer fish will be captured during seasons with poor fishing conditions (e.g. very windy, lots of rain). It is also possible that fish behaviour will change in response to river conditions. Certainly there was a lot of speculation that high flows during the 2022 Tyee season contributed to record low catches.  
   
   
-# 5. So, what can we look at? 
+## 5. So, what can we look at? 
 
 Off the top of my head there are two ways we can approach this:
 
@@ -797,7 +795,7 @@ Off the top of my head there are two ways we can approach this:
   
 3.) We can look at what factors influenced how returning fish were captured (i.e. conditions during the fishing season)
 
-## 5.1 How many fish should come back?
+### 5.1 How many fish should come back?
 
 ```{r predicted.returns.data.prep0.1fry, include= FALSE}
 ## Define assumptions
@@ -871,18 +869,18 @@ pred.returns2 <- pred.returns %>%
 
 We can ***VERY CRUDELY*** estimate the number of salmon that should return to the Campbell River if we make a couple of big assumptions:
 
-  +   Fecundity is ~5,700 eggs per female ([Ewart & Anderson, 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf) 
-  +   Sex ratios are 60:40 female to male using [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf)) data for Campbell River)
+  +   Fecundity is ~5,700 eggs per female ([Ewart & Anderson, 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf)) 
+  +   Sex ratios are 60:40 female to male using ([Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf)) data for Campbell River.
   
   +   Egg-to-fry survival is approximately 0.1, can't recall where this number came from but its commonly used as a measure of egg-to-fry survival of wild fish (compared to 0.9 for hatchery reared fish). Give results from [Thornton et al. 2022](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf) it is likely that egg-to-fry survival in the Campbell is higher.
   
-  +   Marine survival (smolt to adult)  is approximately 0.003 ([Ewart & Anderson, 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf)
+  +   Marine survival (smolt to adult)  is approximately 0.003 ([Ewart & Anderson, 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf))
   
   +   7.9% of fish will return as Age-3, 44.7% of fish will return as Age-4 fish, 46.1% will return as Age-5 fish and 1.3% will return as Age-6 fish.
   
 We can expand this to estimate the number of Tyee salmon that will return if we make even more assumptions! 
   
-  +   For fun, let's assume all fish > 900 mm are Tyee Salmon (I know girth is important too, but I dont have girth data) and using the [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf)) data as a rough guide I will assume that `r 100*Tyee.Age4m.prop`% of Age-4 male adults are >900 mm, `r 100*Tyee.Age5mf.prop`% of Age-5 fish (males and females) are >900 mm and `r 100*Tyee.Age6mf.prop`% of Age-6 fish are >900 mm.
+  +   For fun, let's assume all fish > 900 mm are Tyee Salmon (I know girth is important too, but I dont have girth data) and using the ([Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf)) data as a rough guide I will assume that `r 100*Tyee.Age4m.prop`% of Age-4 male adults are >900 mm, `r 100*Tyee.Age5mf.prop`% of Age-5 fish (males and females) are >900 mm and `r 100*Tyee.Age6mf.prop`% of Age-6 fish are >900 mm.
   
 If we run these numbers, each female will generate `r format(fecundity * egg.to.fry * marine.surv, digits = 2)` offspring, of which `r format((fecundity * egg.to.fry * marine.surv * Age3), digits = 2)` will be Age-3, `r format((fecundity * egg.to.fry * marine.surv * Age4), digits = 2)` will be Age-4, `r format((fecundity * egg.to.fry * marine.surv * Age5), digits = 2)` will be Age-5 and `r format((fecundity * egg.to.fry * marine.surv * Age6), digits = 2)` will be Age-6. Furthermore, each female will produce `r format(((fecundity * egg.to.fry * marine.surv * Age4 * perc.male * Tyee.Age4m.prop) + (fecundity * egg.to.fry * marine.surv * Age5 * Tyee.Age5mf.prop) + (fecundity * egg.to.fry * marine.surv * Age6 * Tyee.Age6mf.prop)),digits = 2)`  Tyee salmon. *Let's take a moment to remember that these assumptions are terrible. Larger fish are more likely to produce larger fish, so in reality some fish will produce a decent number of Tyee and others will produce none. But let's keep it simple for now and assume every fish is able to make an equal number of Tyees*
 
@@ -994,7 +992,7 @@ Well that's interesting. There are periods when my predicted returns closely ali
   +   There are number of years where something appears to have happened and fish simply did not return (2005, 2011, 2014).
   +   There are also years where something positive appears to have happened and far more fish than expected returned to the river (1999 to 2001, 2020).
 
-## 5.2 How many tyee should be returning?
+### 5.2 How many tyee should be returning?
 Let's look at little closer at how many Tyee salmon may be returning in a given year.If all Tyee salmon were captured each year, we would be actively selecting against large fish, so we would expect to see a rapid and continuous decline in the total number of Tyees returning each year (which I suppose we are). But, I have had the opportunity to snorkel the Campbell River canyon a number of times and have seen spawning Tyee, and last year there were lots of Tyee captured in the river... though not sure what their fate was. Aynways, all this to say that its unlikely every Tyee is captured in the pool, and the actual number returning to the pool should be at least equal to or higher than the number captured. 
 
 Reminder of key assumptions in the plot:
@@ -1123,18 +1121,18 @@ suppressWarnings(ggplotly(plot.esc))
 **`r fig_nums("plot.esc", "Chinook Salmon escapement from rivers on East and West Coast of Vancouver Island.")`**
 
 
-Well, that figure sucks. But it shows how variable escapement is between years. On the East Coast of the Island, abundance increased in 'r format(3/7*100, digits = 2)`% of plotted streams and decreased in all others. Decreases  
+Well, that figure sucks. But it shows how variable escapement is between years. On the East Coast of the Island, abundance increased in `r format(3/7*100, digits = 2)`% of plotted streams and decreased in all others. Decreases  
 
 Relative to 2013, abundance in all plotted west coast streams was slightly reduced in 2014. There was a major crash in the Burnam River, but this is exaggerated by unusually high returns in 2013, 2015 and 2016. 
 
-## 5.2 How Historic Conditions Influenced Captures
+### 5.2 How Historic Conditions Influenced Captures
 
 ### MAYBE RERUN ESCAPEMENT PLOT USING ALL ESCPAEMENT DATA!? FACET BY AREA?
 
 ### ADD METRIC THAT STANDARDIZES ESCAPEMENT. E.G. total annual returns vs mean annual returns.
 
-## 5.3 How conditions may affect the number of fish that are captured.
-### 5.3.1 Influence of river flow on catches
+### 5.3 How conditions may affect the number of fish that are captured.
+#### 5.3.1 Influence of river flow on catches
 
 ```{r plot3-4prepA, include = FALSE}
     catch_data <- catch_data %>% mutate(Year = format(Date, '%Y'),
