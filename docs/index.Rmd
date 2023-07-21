@@ -175,7 +175,7 @@ list.of.packages <- c("tidyverse",
 ## * 3. Escapement Data ----
         ## Load Data      
         esc_data <- read_excel(esc.dat)
-        
+
         esc.dat2 <- filter(esc_data, ANALYSIS_YR > 2010)
     
         ## Prepare dataset for CR Escapement 
@@ -191,8 +191,10 @@ list.of.packages <- c("tidyverse",
                                      Species        =  as.factor(SPECIES)) %>%
                                select(Year, Waterbody, Species, esc_count, Esc_Scaled, Esc_Mean, Esc_MeanScaled)
         
-        crQ_esc <- read_excel(all.esc.data) %>% 
-                          filter(WATERBODY == c("CAMPBELL RIVER","QUINSAM RIVER"),                 # only show data for CR
+        all_esc <- read_excel(all.esc.data)
+        
+        ## All escapement data for Quinsam and Campbell Rivers
+        crQ_esc %>% all_esc %>% filter(WATERBODY == c("CAMPBELL RIVER","QUINSAM RIVER"),            # only show data for CR
                                  ANALYSIS_YR >=1990,
                                  SPECIES == "Chinook") %>% # data from prior to tyee catch data so we can predict tyee returns.    
                           mutate(Year          =  as.numeric(ANALYSIS_YR),
@@ -202,6 +204,29 @@ list.of.packages <- c("tidyverse",
                           group_by(Waterbody, Year) %>%
                           summarize(esc_count = sum(esc_count),
                                     Esc_Mean =  mean(esc_count))
+        
+        ## All escapement.
+        colnames(all_esc)
+        
+        all.esc.prop <- all_esc %>% 
+                  filter(SPECIES == "Chinook") %>%
+                  group_by(ANALYSIS_YR) %>%
+                      mutate(yr.total.esc = sum(TotalReturns)) %>% # Total escapement per year.
+                  ungroup(ANALYSIS_YR) %>%
+                      mutate(yr.mean.total.esc = mean(yr.total.esc)) %>%
+                  group_by(ANALYSIS_YR) %>%
+                      mutate(yr.relative.prop = yr.total.esc/yr.mean.total.esc) %>%
+                  group_by(ANALYSIS_YR, AREA) %>%
+                      mutate(yr.area.total.esc = sum(TotalReturns), # Total escapement in each area by
+                             yr.area.prop.esc  = yr.area.total.esc/yr.total.esc) %>% # Proportion of total escapement.
+                      rename(Waterbody = WATERBODY,
+                             Year      = ANALYSIS_YR,
+                             Area      = AREA) %>%
+                      select(Waterbody, Year, Area, TotalReturns, yr.total.esc, 
+                             yr.mean.total.esc, yr.relative.prop, yr.area.total.esc, yr.area.prop.esc)
+        
+        
+                             
                                              
                       
         
@@ -223,8 +248,6 @@ list.of.packages <- c("tidyverse",
                                      test.data = as.numeric(1))   
 
     ## Flow Data Through Tyee Season(July 1 to Sept 30. 2000 to 2022)
-      str(flow.data.all)
-
     flow.data.tyee <- flow.data.all %>% 
                         filter(between(Month,7,9)) %>%
                         mutate(q.daily         = as.numeric(Value),
@@ -258,7 +281,8 @@ list.of.packages <- c("tidyverse",
                                      q.wk.se    = sd(Value, na.rm = TRUE)/sqrt(n())) %>%
                               ungroup() %>%
                         mutate(q.5yr.roll.mean = rollmean(q.daily, k = 455, align = "right", fill=NA), # 5yr running flow
-                               q.5y.roll.se    = rollapply(q.daily, width = 455, FUN = sd, align = "right", fill = NA)/sqrt(455)) %>%
+                               q.5y.roll.se    = rollapply(q.daily, width = 455, FUN = sd, align = "right", 
+                                                           fill = NA)/sqrt(455)) %>%
                         filter(Year > 2001)
 
 ## 5. Add age data
