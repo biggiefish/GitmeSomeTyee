@@ -25,7 +25,7 @@ A high-level, very casual, and often self-deprecating look at trends in catches 
 
 There are far more technical ways of examining this data, but they aren't as much fun - and are frankly hard. This analysis is living and will evolve over time. All results and interpretation are purely speculative and should be considered nothing more than ramblings of a fish nerd. 
 
-Normally this is where I would put pictures of all the beauty Tyee I have captured, but that hasn't happened yet. So far, these are the [best things](images/IMG_2815.v2.jpg) I have managed to get in my boat. 
+Normally this is where I would put pictures of all the beautiful Tyee I have captured, but that hasn't happened yet. So far, these are the ![best things](images/IMG_2815.v2.jpg) I have managed to get in my boat. 
 
 
 ```{r setup, include=FALSE}
@@ -89,7 +89,7 @@ list.of.packages <- c("tidyverse",
     esc.dat <- "Data/Area13Escapement.xlsx"
     
     #3. All Areas Escapement Data
-    all.esc.data <- "Data/Escapement_AllAreas.xlsx"
+    all.esc.data <- "Data/Escapement_AllAreas_Prepped.xlsx"
     
     #4. Flow Data
     q.dat <- "Data/CR_Discharge_1949-2023.xlsx" 
@@ -98,7 +98,7 @@ list.of.packages <- c("tidyverse",
     age.dat <- "Data/CR_AgeClass.xlsx"
     
     #6. Commercial Catch data
-    comm.catch.dat <- "Data/NPAFC_CommercialCatch_21June2022.xlsx"
+    comm.catch.data <- "Data/NPAFC_CommercialCatch_21June2022.xlsx"
     
 
 ## Define Output Locations
@@ -194,40 +194,41 @@ list.of.packages <- c("tidyverse",
         all_esc <- read_excel(all.esc.data)
         
         ## All escapement data for Quinsam and Campbell Rivers
-        crQ_esc %>% all_esc %>% filter(WATERBODY == c("CAMPBELL RIVER","QUINSAM RIVER"),            # only show data for CR
-                                 ANALYSIS_YR >=1990,
-                                 SPECIES == "Chinook") %>% # data from prior to tyee catch data so we can predict tyee returns.    
-                          mutate(Year          =  as.numeric(ANALYSIS_YR),
-                                 Waterbody      =  as.factor(WATERBODY),
+        colnames(all_esc)
+        crQ_esc <-all_esc %>% filter(Waterbody == c("CAMPBELL RIVER","QUINSAM RIVER"),            # only show data for CR
+                                 Year >=1990,
+                                 Species == "Chinook") %>% # data from prior to tyee catch data so we can predict tyee returns.    
+                          mutate(Year          =  as.numeric(Year),
+                                 Waterbody      =  as.factor(Waterbody),
                                  esc_count      =  as.numeric(TotalReturns),
-                                 Species        =  as.factor(SPECIES)) %>%
+                                 Species        =  as.factor(Species)) %>%
                           group_by(Waterbody, Year) %>%
                           summarize(esc_count = sum(esc_count),
                                     Esc_Mean =  mean(esc_count))
         
-        ## All escapement.
-        colnames(all_esc)
-        
-        all.esc.prop <- all_esc %>% 
-                  filter(SPECIES == "Chinook") %>%
-                  group_by(ANALYSIS_YR) %>%
-                      mutate(yr.total.esc = sum(TotalReturns)) %>% # Total escapement per year.
-                  ungroup(ANALYSIS_YR) %>%
-                      mutate(yr.mean.total.esc = mean(yr.total.esc)) %>%
-                  group_by(ANALYSIS_YR) %>%
-                      mutate(yr.relative.prop = yr.total.esc/yr.mean.total.esc) %>%
-                  group_by(ANALYSIS_YR, AREA) %>%
-                      mutate(yr.area.total.esc = sum(TotalReturns), # Total escapement in each area by
-                             yr.area.prop.esc  = yr.area.total.esc/yr.total.esc) %>% # Proportion of total escapement.
-                      rename(Waterbody = WATERBODY,
-                             Year      = ANALYSIS_YR,
-                             Area      = AREA) %>%
-                      select(Waterbody, Year, Area, TotalReturns, yr.total.esc, 
-                             yr.mean.total.esc, yr.relative.prop, yr.area.total.esc, yr.area.prop.esc)
-        
-        
-                             
-                                             
+      ## All escapement.
+      colnames(all_esc)
+      
+      all.esc.prop <- all_esc %>% 
+                filter(Species == "Chinook") %>%
+                group_by(Year) %>%
+                    mutate(yr.total.esc = sum(TotalReturns)) %>% # Total escapement per year.
+                ungroup(Year) %>%
+                    mutate(yr.mean.total.esc = mean(yr.total.esc)) %>%
+                group_by(Year) %>%
+                    mutate(yr.relative.prop = yr.total.esc/yr.mean.total.esc) %>%
+                group_by(Year, Area) %>%
+                    mutate(yr.Area.total.esc = sum(TotalReturns), # Total escapement in each Area by
+                           yr.Area.prop.esc  = yr.Area.total.esc/yr.total.esc) %>% # Proportion of total escapement.
+                    rename(Waterbody = Waterbody,
+                           Year      = Year,
+                           Area      = Area) %>%
+                    select(Waterbody, Year, Area, TotalReturns, yr.total.esc, 
+                           yr.mean.total.esc, yr.relative.prop, yr.Area.total.esc, yr.Area.prop.esc)
+      
+      
+                           
+                                           
                       
         
         
@@ -289,7 +290,7 @@ list.of.packages <- c("tidyverse",
     age_data <- read_excel(age.dat)
     
 ## 6. Salmon Catch Data
-    comm.catch.dat <- read_excel(comm.catch.dat) 
+    comm.catch.dat <- read_excel(comm.catch.data) 
 
     comm.catch <- comm.catch.dat %>% 
                         pivot_longer(cols = c(7:103),
@@ -492,13 +493,13 @@ daily.decadal.catch.plot <- ggplot(daily.decadal.catch) +
 
 **`r fig_nums("daily.decadal.catch", "Total fish captured by date and decade")`**
 
-Hey! Who let someone register a Tyee in the first week of July!? This plot will become a lot more interesting once I can get my hands on some historical data. But for now, we can see:
+This plot will become a lot more interesting once I can get my hands on some historical data. But for now, we can see:
 
   +   People either do not fish, or do not catch fish before late July/early August. Given the way catches increase through August I am thinking it is the latter.
   +   Peak catches occur in mid to late August. 
   
 
-Ok, well now we know not to bother fishing until early August, that I should book the off the last 3 weeks of August and that odds are that 2023 is not going to set a new record for most Tyee's captured. But who knows. 
+OK, well now we know not to bother fishing until early August, that I should book the off the last 3 weeks of August and that odds are that 2023 is not going to set a new record for most Tyee's captured. But who knows. 
 
 ### 2.3 Does fish size vary within or between seasons?
 ```{r fish.size.prep, include = FALSE}
@@ -528,7 +529,7 @@ wt.plot <- ggplot(fish.size, aes(x = Year)) +
                 geom_col(aes(x= Year, y = wt.yr.mean, fill = Tyee.Cycle4)) +
                 geom_errorbar(aes(ymin = wt.yr.mean - wt.yr.se, ymax = wt.yr.mean + wt.yr.se), width = 0.2) +
                 geom_hline(aes(yintercept = mean.wt.overall, color = 'Overall Mean'), linetype = 'twodash', color = 'red', linewidth = 1) +
-                labs(x = "", y = "Mean Weight (g)") +
+                labs(x = "", y = "Mean Weight (lb)") +
                 scale_y_continuous(limits = c(30,40), oob = rescale_none, breaks = seq(30, 40, 2)) +
                 scale_x_continuous(breaks = seq(2002, 2022, 2)) +
                 theme_bw() +
@@ -549,7 +550,7 @@ suppressWarnings(ggplotly(wt.plot))
 
 **`r fig_nums("wt.plot", "Mean annual weight of Tyee Salmon captured since 2002.")`**
 
-Well that's interesting. Overall mean fish size is relatively consistent across years. That's good news, but maybe there are better ways to look at this data. Bar plots can be deceptive.
+So overall mean fish size is relatively consistent across years. That's good news, but maybe there are better ways to look at this data. Bar plots can be deceptive.
 
 ```{r wt boxplot, include=FALSE}
 
@@ -564,6 +565,8 @@ wt.box2 <- ggplot(raw_catch.data) +
 
 
 ```
+
+
 ```{r wt.boxplots, echo=FALSE}
 
 ## ggplot figure
@@ -574,8 +577,34 @@ suppressWarnings(ggplotly(wt.box2))
 
 Well that is a bit better. The overall mean size of Tyee has stayed relatively stable across years, which makes sense given there is a minimum size limit for Tyee - but there also appears to fewer bigger fish being captured each year.  
 
+
+
+```{r fish size by date, include = FALSE}
+colnames(raw_catch.data)
+str(raw_catch.data)
+min(raw_catch.data$DateStandard)
+max(raw_catch.data$DateStandard)
+raw_catch.data <- raw_catch.data %>% mutate(DateStandard = as.Date(DateStandard))
+
+wt.scatter <- ggplot(raw_catch.data) +
+              geom_point(aes(x= DateStandard, y=Weight2, color = Year)) +
+              scale_x_date(date_breaks = "5 days", date_labels = "%m-%d", minor_breaks = "1 day") +
+              labs(x = "", y = "Weight (lb)") +
+              theme_bw() +
+              guides(color = guide_colourbar(barwidth = 15, barheight= 0.5, direction = "horizontal")) +
+              theme(legend.position = c(0.7, 0.9),
+                    legend.background = element_rect(fill = "lightgrey", color="black", size = 0.5))  
+
+```
+```{r wt.scatter.plot, echo = FALSE}
+suppressWarnings(ggplotly(wt.scatter))
+```
+**`r fig_nums("wt.scatter", "Weight of Tyee salmon caught per day since 2002.")`**
+
+What a mess. Pretty hard to identify any relationships from that figure. 
+
 ### 2.4 Daily catches per year.
-To round this out, let's just have a look at the total number of fish caught per day over the past 20 years. I have included mean daily discharge.
+To round this out, let's just have a look at the total number of fish caught per day over the past 20 years. 
 
 ```{r, all.catches.preps, echo = FALSE}
 catch_data <- catch_data %>% mutate(Year = format(Date, '%Y'),
@@ -605,8 +634,8 @@ catch_data <- catch_data %>% mutate(Year = format(Date, '%Y'),
 # Plot of # Tyee per day, relative to flow. From 2016 to 2022.
 plot3 <-    ggplot(flow.catch.2022) +
                  geom_bar(aes(x = date.std, y = catch_scaled, fill = PARAM), stat= "identity", color = "Navy") +
-                 geom_line(aes(x = date.std, y = q.daily, linetype = "dashed", color = "Daily")) +
-                 geom_line(aes(x = date.std, y = q.5yr.roll.mean, linetype = "twodashed", color = "5-yr Mean")) +
+                 #geom_line(aes(x = date.std, y = q.daily, linetype = "dashed", color = "Daily")) +
+                 #geom_line(aes(x = date.std, y = q.5yr.roll.mean, linetype = "twodashed", color = "5-yr Mean")) +
                  geom_text(aes(x = as.Date("2021-07-20"), y = 10, label = str_c("Total Catch = ",catch_yr.total), size = 8))+
                  labs(x = "Date", y = "Discharge") +
                  scale_x_date(date_breaks = "5 days", date_labels = "%m-%d", minor_breaks = "1 day") +
@@ -624,8 +653,8 @@ plot3 <-    ggplot(flow.catch.2022) +
 # Plot of # Tyee per day relative to flow, from 2002 to 2022.
 plot4 <-    ggplot(flow.catch.recent) +
                  geom_bar(aes(x = date.std, y = catch_scaled, fill = PARAM), stat= "identity", color = "Navy") +
-                 geom_line(aes(x = date.std, y = q.daily, linetype = "dashed", color = "Daily")) +
-                 geom_line(aes(x = date.std, y = q.5yr.roll.mean, linetype = "twodashed", color = "5-yr Mean Discharge")) +
+                 #geom_line(aes(x = date.std, y = q.daily, linetype = "dashed", color = "Daily")) +
+                 #geom_line(aes(x = date.std, y = q.5yr.roll.mean, linetype = "twodashed", color = "5-yr Mean Discharge")) +
                  geom_text(aes(x = as.Date("2021-07-20"), y = 13, label = str_c("Total Catch = ",catch_yr.total), size = 8)) +
                  labs(x = "", y = "Discharge (cms)") +
                  scale_x_date(date_breaks = "5 days", date_labels = "%m-%d", minor_breaks = "1 day") +
@@ -666,6 +695,27 @@ There has been a lot of information collected on Campbell River Chinook Salmon, 
 #### 3.1.0 Quinsam vs. Campbell
 
   +   The vast majority of Chinook Salmon returning to the Campbell River system are from the Quinsam River. Based on available escapement data for both systems, a mean of 12.5% Chinook returning to the system are from the Campbell River (varies from 6% to 25% between 1991 and 2019).
+  
+     
+```{r, CampbellEscapement.prep, include = FALSE}
+crQ_esc <- crQ_esc %>% rename(Escapement = esc_count)
+
+crq_esc.plot <- ggplot(crQ_esc) +
+                    geom_col(aes(x=Year, y = Escapement, fill = Waterbody)) + 
+                    labs(x = "", y = "Escapement") + 
+                    scale_y_continuous(label = comma, breaks = seq(0,15000,2500)) + 
+                    scale_x_continuous(breaks = seq(1990, 2022, 2)) +
+                    theme_bw() + 
+                    theme(legend.position = "bottom")
+
+```
+
+```{r plot_crQ_escapement, echo = FALSE, fig.width=8, fig.height=5}
+
+suppressWarnings(ggplotly(crq_esc.plot))
+```
+
+**`r fig_nums("crq_esc.plot", "Chinook Salmon escpaement in the Campbell and Quinsam rivers from 1991 to 2021.")`**
 
 #### 3.1.1 Spawn Timing
 
@@ -684,31 +734,28 @@ There has been a lot of information collected on Campbell River Chinook Salmon, 
 
 #### 3.1.4 Fecundity
 
-  +   [Ewart & Anderson, 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf) 
-  report that female Chinook in the Campbell River in 2012 carried roughly ~5,700, a decrease from the roughly 6,000 eggs 
-  typically carried.  
+  +   [Ewart & Anderson, 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf) report that female Chinook in the Campbell River in 2012 carried roughly ~5,700, a decrease from the roughly 6,000 eggs typically carried.  
 
 #### 3.1.5 Juvenile Life History
 
   +   Juvenile Chinook Salmon in the Campbell River have been studied intensively since 2015 (e.g. [Thornton et al. 2022](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf). These data suggests fry emerge in February-March and that nearly all Campbell River Chinook out migrate as Age-0+ juveniles from March through July. Smaller recently emerged Age-0+ fry are dominant and typically captured from March through early May (37 to 52 m). Larger Age-0+ smolts are less common and move out from May through July (64 to 88 mm).
     
-**3.1.6 Estimated Juvenile Production
+#### 3.1.6 Estimated Juvenile Production
 
-  +   Estimates of juvenile Chinook production based on numbers of observed spawners have generally been less than numbers 
-  trapped  throughout the out-migration period ([Thornton et al. 2022](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf), which may be due to increased juvenile survival or inaccurate/coarse estimates of fecundity. 
+  +   Estimates of juvenile Chinook production based on numbers of observed spawners have generally been less than numbers trapped  throughout the out-migration period ([Thornton et al. 2022](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf), which may be due to juvenile survival rates that are relatively higher than typical (e.g. >10%), inaccurate estimates of fecundity. 
 
 #### 3.1.7 Estimates of Marine Survival
 
-  +   Marine survival of unfed fry released from the Quinsam hatchery range from 0.2% to 0.4% (yes, that is less than 1%) ([Ewart & Anderson 2013]( http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf)).  
+  +   Marine survival of unfed fry released from the Quinsam hatchery range from 0.2% to 0.4% (yes, that is less than 1%) ([Ewart & Anderson 2013]( http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf)). 
 
 #### 3.1.8 Hatchery Influence and Population Status
 
-  +   [Ewart & Anderson 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf) report that 56% of the otoliths examined from the 2012 return showed no signs of hatchery marking and are assumed wild. The remaining 44% are presumed to have originated from instream incubators (31%), seapen released smolts (4%) and Quinsam River released smolts (9%). 
+  +   [Ewart & Anderson 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf) report that 56% of the otoliths examined from 2012 spawners showed no signs of hatchery marking and are assumed wild. The remaining 44% are presumed to have originated from instream incubators (31%), seapen released smolts (4%) and Quinsam River released smolts (9%). 
   +   Assuming data presented by [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf) is representative of the overall Quinsam population, we can assume hatchery origin fish make up `r (76/(76+46))*100`% of Age-3 fish, `r (225/(225+114)*100)`% of Age-4 fish, `r (73/(73+40)*100)` of Age-5 fish and 50% of Age-6 fish. 
 
 #### 3.1.9 Ocean Range
 
-+   Tagging studies have shown that maturing Chinook of BC origin are frequently located in [Southeast Alaska, the west coast of Haida Gwaii and west and north coasts of Vancouver Island](https://npafc.org/wp-content/uploads/2017/08/192USA.pdf) or [screenshot of map](images/BC.CN.oceanranges.jpg). 
++   Tagging studies have shown that maturing Chinook of BC origin are frequently located in [Southeast Alaska, the west coast of Haida Gwaii and west and north coasts of Vancouver Island](https://npafc.org/wp-content/uploads/2017/08/192USA.pdf) or ![screenshot of map](images/BC.CN.oceanranges.jpg). 
 
 #### 3.1.9 Exploitation Rates
 
@@ -741,27 +788,6 @@ knitr::kable(age_table1, col.names = c("Waterbody", "Age", "n", "% of Total", "S
              caption = "Table 1. Size at age of Chinook Salmon captured in Campbell River watershed from [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf)")
 ```
    
-   
-```{r, CampbellEscapement.prep, include = FALSE}
-crQ_esc <- crQ_esc %>% rename(Escapement = esc_count)
-
-crq_esc.plot <- ggplot(crQ_esc) +
-                    geom_col(aes(x=Year, y = Escapement, fill = Waterbody)) + 
-                    labs(x = "", y = "Escapement") + 
-                    scale_y_continuous(label = comma, breaks = seq(0,15000,2500)) + 
-                    scale_x_continuous(breaks = seq(1990, 2022, 2)) +
-                    theme_bw() + 
-                    theme(legend.position = "bottom")
-
-```
-
-```{r plot_crQ_escapement, echo = FALSE, fig.width=8, fig.height=5}
-
-suppressWarnings(ggplotly(crq_esc.plot))
-```
-
-**`r fig_nums("crq_esc.plot", "Chinook Salmon escpaement in the Campbell and Quinsam rivers from 1991 to 2021.")`**
-
 
 ### 3.2 What we know about Chinook salmon in general.
 #### 3.2.1 They are decreasing in size and age at maturity
@@ -782,46 +808,28 @@ suppressWarnings(ggplotly(crq_esc.plot))
   +   [Ruggerone & Irvine 2018](https://afspubs.onlinelibrary.wiley.com/doi/full/10.1002/mcf2.10023) show that intensive enhancement has resulted in the greatest abundance of salmon in the ocean than ever before (specifically pink, sockeye and chum) and that marine carrying capacity may have been reached within recent decades.         
   +   [Nelson et al. 2019](https://esajournals.onlinelibrary.wiley.com/doi/full/10.1002/ecs2.2922) present evidence that hatchery practices have altered size and time that juveniles are released and have reduced diversity of life history traits (e.g. size, age and timing of smoltification). The authors argue that current enhancement practices may release fish at a time and size that is preferred by predators (e.g. all fish being released at same time and size and are easy pickings for large aggregations of predators).
     
-####3.2.4 I am not the only person who doesn't understand what is going on
+#### 3.2.4 I am not the only person who doesn't understand what is going on
 
   +   [Beamish 2022](https://academic.oup.com/icesjms/article/79/4/1005/6550345) emphasizes that due to the large number of juvenile salmon in the ocean and overall poor survival, any small change in survival can results in major changes in adult abundance. Unfortunately, we don't understand what is causing those small changes in survival in the marine environment and need a better understanding of biologically based mechanisms linking climate change to salmon abundance.
 
 
 ## 4. What could be affecting returns and catches?
-At it's most basic level, there are four things that are likely affecting catches of Tyee salmon (in reality, there are many many many many many more.
+Off the top of my head, there are four things that are most likely to be affecting catches of Tyee salmon (in reality, there are many, many more. But for now let's start with this).
 
 
 ### 4.1. Juvenile recruitment
 
-* This is determined by the number of eggs that are deposited (for easy math, lets say females account for 50% of escapement, that each one deposits 4000 eggs and that egg to fry survival is 10%). We will assume that fish that survive to fry will enter the sea. Hydrometric data on the Campbell is available back to 1949 and it is likely that extreme high or low flow events (e.g. greater than 300 cms, less than ??50 cms??) during the incubation/rearing periods (maybe November through March) will reduce juvenile recruitment.
+Generally, juvenile recruitment refers to the process of small fish transitioning to an older life stage (e.g., an egg hatching into an alevin, a fry becoming a parr or smolt,  a smolt maturing into an adult...). According to [Thornton et al. 2022](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf) Campbell River Chinook fry emerge in February-March and out migrate as Age-0+ juveniles from March through July. Smaller recently emerged Age-0+ fry are dominant and typically captured from March through early May (37 to 52 m) While larger Age-0+ smolts are less common and move out from May through July (64 to 88 mm). Given that Chinook move to the estuary as fry, lets figure out how many fish should be produced each year. To do this, we need to know:
 
-### 4.2. Marine survival and productivity
-
-* This is way too complicated for right now. Let's feel warm and fuzzy by assuming survival and productivity are stable (side note, they arent!). But if we don't do this we can't assume that proportions calculated from Sturham et al. are representative of current returns (unfortunately recent evidence shows this assumption is wrong and that fish are decreasing in size, so there are likely fewer Tyee returning now than in previous years). 
-  
-### 4.3. Fishing effort and catchability
-
-  * For now, I am going to assume effort (# of boats fishing per tide/day) is constant and that catchability (percent of Tyees present that are captured) are stable. In reality, effort has likely decreased over time (especially since 2014) and catchability has likely increased as peoples knowledge, skill and fishing technology have improved over time (not everyone though, I still suck). Either way, without some hard data it is hard to much with this.
-
-### 4.4. Fishing Conditions
-
-  * No question that fewer fish will be captured during seasons with poor fishing conditions (e.g. very windy, lots of rain). It is also possible that fish behaviour will change in response to river conditions. Certainly there was a lot of speculation that high flows during the 2022 Tyee season contributed to record low catches.  
+  +   The number of females that return to spawn. [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf)) report that ~60% of Chinook returning to the Campbell River are female. So multiplying the annual escapement values by 0.6 will give us total number females per year. 
+    +   The number of eggs that each female deposits, which according to ([Ewart & Anderson, 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf)) has been close to 6,000 eggs-per-female, but now may be closer to 5,700 eggs-per-female.
+  +   The number of females that spawn successfully. I have no data, so lets assume 100% of females that make it to the river will spawn.
+  +   The number of eggs that hatch and the number of alevin that survive and emerge from gravel as fry. For ease, we will assume that 10% of eggs will survive the egg-to-fry stage. 
   
   
-## 5. So, what can we look at? 
-
-Off the top of my head there are two ways we can approach this:
-
-1.) How many fish should come back based on past on escapement counts and available biological data.
-
-2.) We can look at what factors influenced how many fish were available for capture in the Tyee pool (i.e. how historic 
-  conditions may have contributed to observed captures), and/or;
   
-3.) We can look at what factors influenced how returning fish were captured (i.e. conditions during the fishing season)
 
-### 5.1 How many fish should come back?
-
-```{r predicted.returns.data.prep0.1fry, include= FALSE}
+```{r fry production, include = FALSE}
 ## Define assumptions
       fecundity <- 5700 # typically around 6000 for CR, http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf
       perc.female <- 0.6  # 60% of fish are females
@@ -843,7 +851,158 @@ Off the top of my head there are two ways we can approach this:
       ratio.Age5.tyee <- Age5 * Tyee.Age5mf.prop # multiply this by annual escapement to calculate # Age-5 fish that are tyees.
       ratio.Age5.tyee <- Age6 * Tyee.Age6mf.prop # multiply this by annual escapement to calculate # Age-5 fish that are tyees.
 
-      
+
+## Calculate how many fry should be produced each year.
+fry.prod <- cr_esc %>% mutate(total.fry = esc_count * perc.female * fecundity * egg.to.fry)
+
+## Calculate max flow throughout spawning and incubation periods.
+fry.flow <- flow_data %>% filter(Year >= 1985) %>%
+                          mutate(life.period = recode(as.factor(Month),
+                                                      "1"  = "Incubation",
+                                                      "2"  = "Incubation",
+                                                      "3"  = "Incubation",
+                                                      "4"  = "NA",
+                                                      "5"  = "NA",
+                                                      "6"  = "NA",
+                                                      "7"  = "NA",
+                                                      "8"  = "NA",
+                                                      "9"  = "Spawn",
+                                                      "10" = "Spawn",
+                                                      "11" = "Spawn",
+                                                      "12" = "Incubation"),
+                                 incub.year = ifelse(Month <=3,Year-1,Year)) %>% # want previous year to continue into March of next year.
+                          group_by(incub.year, life.period) %>%
+                          summarize(max.flows = max(Value, na.rm = TRUE)) %>%
+                          filter(life.period == "Incubation")
+
+## Merge fry dataset with max flows dataset.
+fry.flow.dat <- fry.prod %>% inner_join(fry.flow, 
+                                        by = c('Year' = 'incub.year')) %>%  # merge 'Year' in fry.prod with 'incub.year' in fry.flow data
+                              mutate(reduced.fry = ifelse(max.flows >= 350, 0.1*total.fry, total.fry)) %>%
+                              filter(Year >= 1991)
+  
+fry.flow.plot <- ggplot(fry.flow.dat) +
+                    geom_col(aes(x = Year, y = total.fry, fill = 'lightblue')) +
+                    geom_col(aes(x = Year, y = reduced.fry, fill = "red")) +
+                    geom_line(aes(x = Year, y = (max.flows*3750), color = life.period)) +
+                    geom_hline(aes(yintercept = 1250000, linetype = 'twodash'), color = "red") +
+                    labs(x = "", y = "Number of Fry") +
+                    scale_x_continuous(breaks = seq(1991,2021,2)) +
+                    scale_y_continuous(labels = comma, limits = c(0,2200000),
+                                       sec.axis = sec_axis(~./3750, name = "Discharge (cms)")) +
+                    scale_color_manual(values = c("blue", "red")) +
+                    scale_fill_manual(values = c("red", "lightblue")) +
+                    guides(fill = 'none',
+                           color = guide_legend(title = "Max. flow during \nincubation period", 
+                                                label = FALSE),
+                           linetype = guide_legend(title = "Flow \nthreshold", 
+                                                   label = FALSE)) +
+                    theme_bw() + 
+                    theme(legend.position = "bottom")
+
+```
+                   
+So under normal conditions we could expect to see annual fry production ranging from `r formatC(min(fry.flow.dat$total.fry), format = "d", big.mark = ",")` to `r formatC(max(fry.flow.dat$total.fry), format = "d", big.mark = ",")`, with a mean of `r formatC(mean(fry.flow.dat$total.fry), format = "d", big.mark = ",")` fry. 
+
+But abnormal is the new normal. Extremely high flows through the incubation period can greatly reduce survival by scouring away gravel and eggs. [Thornton et al. 2022](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf) observed this in 2016 when very Chinook (or other salmon) fry out migrated following a large spill event in November 2016 (and to a lesser extent in 2014).  
+
+If we assume that flows over 375 cms reduce fry out migration by 90% we see that fry production in years with high flow events is greatly reduced, which will have significant effects on future returns (*Note that I have no idea what flows are required to scour gravels in the Campbell or what associated mortality would be, this is purely speculative*). 
+
+```{r, fry.flow.plot.plot, echo = FALSE}
+suppressWarnings(print(fry.flow.plot))
+```
+
+**`r fig_nums("fry.flow.plot", "Estimated annual Chinook Salmon fry production in the Campbell River, peak flows during incubation period and estimated impacts of high flow events throughout the incubation period.")`**
+
+Well, I am already going out on a limb here. Key takeaway here is that high flow events during sensitive spawning and incubation periods are likely to have a detrimental effect on juvenile survival, which in turn will contribute to a reduction in the number of Tyee that I fail to catch.
+
+### 4.2. Marine survival and productivity
+
+[Ewart & Anderson, 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf) estimate the marine survival in the Campbell River system is approximately 0.003. This stuff is all way more complicated than I want to get into, so for now I will pretend that marine survival and productivity are stable (*spoiler, they are not).
+
+### 4.3. Fishing effort and catchability
+
+For now, I am going to assume effort (# of boats fishing per tide/day) is constant and that catchability (percent of Tyees present that are captured) is stable. In reality, I would guess that effort has likely decreased over time and catchability has likely increased as peoples knowledge, skill and fishing technology have improved over time (not everyone though, I still suck). Either way, without some hard data it is hard to do much with this.
+  
+### 4.4. Environmental Conditions
+
+Tyee fishermen may be among the toughest of tough (*cough, cough*), but even so, windy, wet seasons are likely to result in lower effort and fewer fish than relatively drier, calmer seasons. It is also possible that fish behaviour will change in response to river conditions. Certainly there was a lot of speculation that high flows during the 2022 Tyee season contributed to record low catches.  
+
+For now, I have little interest in combing through historic weather data. But, I already have flow data. So let's see how river flows have varied between seasons.
+  
+```{r flow.catch.plot}
+colnames(flow.catch.recent)
+
+flow.catch.dat2 <- flow.catch.recent %>% 
+                      group_by(Year, tyee_cycle4) %>%
+                      summarize(total.catch = sum(catch_binary),
+                                q.yr.mean = mean(q.daily, na.rm = TRUE),
+                                q.yr.max  = max(q.daily, na.rm = TRUE),
+                                q.yr.min  = min(q.daily, na.rm = TRUE))
+
+
+str(flow.catch.dat2)
+flow.catch.plt <- ggplot(flow.catch.dat2) +
+                      geom_line(aes(x = Year, y = q.yr.min, color = "red")) +
+                      geom_col(aes(x = Year, y = total.catch, fill = tyee_cycle4)) 
+                      
+  
+  mean(flow.catch.dat2$q.yr.mean)
+str(flow.catch.recent)
+
+# flow.catch.plot <-    ggplot(flow.catch.recent) +
+#                          geom_col(aes(x = Year, y = catch_yr.total, fill = tyee_cycle4)) +
+#                          geom_line(aes(x = Year, y = q.yrm, linetype = "dashed"), color = "Daily") +
+#                          geom_line(aes(x = Year, y = q.5yr.roll.mean, linetype = "twodashed", 
+#                                        color = "5-yr Mean Discharge")) +
+#                          geom_text(aes(x = as.Date("2021-07-20"), y = 13, 
+#                                        label = str_c("Total Catch = ",catch_yr.total), size = 8)) +
+#                          labs(x = "", y = "Discharge (cms)") +
+#                          # scale_x_continuous(= "5 days", date_labels = "%m-%d", 
+#                          #                    minor_breaks = "1 day") +
+#                          scale_y_continuous(breaks = seq(0, 130, 10),
+#                                             sec.axis = sec_axis(~./7, name = "Number of Fish")) +  #scale secondary access by x25
+#                          guides(fill = guide_legend(title = "# Tyee", label = FALSE),
+#                                 linetype = "none",
+#                                 color = guide_legend(title = "Discharge (cms)", label = TRUE),
+#                                 size = "none") +
+#                          facet_grid(fct_rev(Year)~.) +
+#                          theme_bw() +
+#                          theme(legend.position = "bottom")  
+```
+  
+  
+  
+  +   7.9% of fish will return as Age-3, 44.7% of fish will return as Age-4 fish, 46.1% will return as Age-5 fish and 1.3% will return as Age-6 fish ([Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf)).
+  
+  +   All fish captured in the Tyee pool are actually from the Campbell system. 
+  
+We can expand this to estimate the number of Tyee salmon that will return if we make even more assumptions! 
+  
+  +   For fun, let's assume all fish > 900 mm are Tyee Salmon (I know girth is important too, but I dont have girth data) and using the ([Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf)) data as a rough guide I will assume that `r 100*Tyee.Age4m.prop`% of Age-4 male adults are >900 mm, `r 100*Tyee.Age5mf.prop`% of Age-5 fish (males and females) are >900 mm and `r 100*Tyee.Age6mf.prop`% of Age-6 fish are >900 mm.
+
+ 
+  
+
+
+
+  
+  
+## 5. So, what can we look at? 
+
+Off the top of my head there are two ways we can approach this:
+
+1.) How many fish should come back based on past on escapement counts and available biological data.
+
+2.) We can look at what factors influenced how many fish were available for capture in the Tyee pool (i.e. how historic 
+  conditions may have contributed to observed captures), and/or;
+  
+3.) We can look at what factors influenced how returning fish were captured (i.e. conditions during the fishing season)
+
+### 5.1 How many fish should come back?
+
+```{r predicted.returns.data.prep0.1fry, include= FALSE}
+
 ## Estimate number of fish predicted to return from each age class based on historic escapement.       
 pred.fish <- cr_esc %>% mutate(brood.yr     = Year,
                                pred.fish    = esc_count * perc.female *fecundity *          # total number of fish that will be produced based on 
