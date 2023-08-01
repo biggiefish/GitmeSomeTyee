@@ -801,7 +801,7 @@ suppressWarnings(ggplotly(surv.plotly))
 
 ```
 
-**`r fig_nums("surv.plot", "Survival of coded wire tagged Chinook sub-yearlings (unfed fry) released from hatcheries throughout the Strait of Georgia, including the Quinsam River. Note that y-axis is log transformed to better see range of values (labels are actual values). Figure prepared using data prepared by [Welch et al. 2020](https://onlinelibrary.wiley.com/doi/epdf/10.1111/faf.12514) ")`**
+**`r fig_nums("surv.plot", "Survival of coded wire tagged Chinook sub-yearlings (Age-0 upon release) released from hatcheries throughout the Strait of Georgia, including the Quinsam River. Note that y-axis is log transformed to better see range of values (labels are actual values). Figure prepared using data prepared by [Welch et al. 2020](https://onlinelibrary.wiley.com/doi/epdf/10.1111/faf.12514) ")`**
   
   
   
