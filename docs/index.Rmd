@@ -25,7 +25,7 @@ A high-level, very casual, and often self-deprecating look at trends in catches 
 
 There are far more technical ways of examining this data, but they aren't as much fun - and are frankly hard. This analysis is living and will evolve over time. All results and interpretation are purely speculative and should be considered nothing more than ramblings of a fish nerd. 
 
-Normally this is where I would put pictures of all the beautiful Tyee I have captured, but that hasn't happened yet. So far, these are the ![best things](images/IMG_2815.v2.jpg) I have managed to get in my boat. 
+Normally this is where I would put pictures of all the beautiful Tyee I have captured, but that hasn't happened yet. So far, these are the best things I have managed to get in my boat![](images/IMG_2815.v2.jpg)  
 
 
 ```{r setup, include=FALSE}
@@ -102,6 +102,9 @@ list.of.packages <- c("tidyverse",
     
     #7. Survival Data
     surv.data <- "Data/Welch Survival Data/Welch_2020_Review_of_Coastwide_Decline_SAR_Data.xlsx"
+    
+    #8. Zooplankton Biomass Data
+    biomass.data <- "Data/Perry et al. 2021/pone.0245941.s002.xlsx"
 
 ## Define Output Locations
     plot.output <- "Plots/"
@@ -463,6 +466,50 @@ Now, lets see when fish are most frequently captured throughout the season, and 
 
 The Tyee season runs from July 15 to September 15. I need to pick my battles with my wife and boss. Let's see which days I should be fighting for!? 
 
+#### 2.2.1 First Tyee of the Year
+```{r, first.catch.prep, include = FALSE}
+colnames(catch_data)
+
+first.catch <- catch_data %>% mutate(date.std = case_when(year(Date) >= 0 ~ 'year<-'(Date, 2021))) %>%    #Set all dates to same year)
+                              filter(catch_binary > 0) %>%
+                              group_by(Year) %>%
+                              mutate(first.fish     = min(Date)) %>%
+                              ungroup() %>%
+                              group_by(Year, first.fish) %>%
+                              mutate(total.catch = if_else(first.fish == Date, catch_binary,0),
+                                     binary.catch = 1) %>%
+                              filter(total.catch != 0)
+colnames(first.catch)
+
+
+first.catch.plot <- ggplot(first.catch) +
+                          geom_bar(aes(x = date.std, y = total.catch, fill = Year), stat = "identity") +
+                          scale_x_date(date_minor_breaks = "1 day", 
+                                       date_breaks = '1 week', 
+                                       date_labels = '%b-%d', 
+                                       limits = c(as.Date("2021-07-25"), as.Date("2021-08-15"))) +
+                          labs(x = "Date of First Capture", y = "Frequency") +
+                          theme_bw()
+    
+
+```
+
+Let's see when the first Tyee are most frequently captured each season. Alright, looks like I should have fished tonight (August 1) and need to fish August 6. Note that values for August 2 and August 7 are somewhat misleading as the plot is showing the number of fish captured on opening day. 
+
+
+```{r first.catch.plot, echo=FALSE}
+
+## plotly figure
+    suppressWarnings(ggplotly(first.catch.plot))   
+```
+
+**`r fig_nums("first.catch.plot", "Number of Tyee captured on date when first Tyee is registered.")`**
+
+ 
+ 
+
+#### 2.2.2 When the most Tyee's are captured each year.
+
 ```{r daily.decadal.tyee.prep, include = FALSE}
 colnames(catch_data)
 str(catch_data)
@@ -505,8 +552,9 @@ This plot will become a lot more interesting once I can get my hands on some his
 
   +   People either do not fish, or do not catch fish before late July/early August. Given the way catches increase through August I am thinking it is the latter.
   +   Peak catches occur in mid to late August. 
+  +   August 18-19 is a must fish kind of day.
+  +   Good luck on July 30.
   
-
 OK, well now we know not to bother fishing until early August, that I should book the off the last 3 weeks of August and that odds are that 2023 is not going to set a new record for most Tyee's captured. But who knows. 
 
 ### 2.3 Does fish size vary within or between seasons?
@@ -661,8 +709,8 @@ plot3 <-    ggplot(flow.catch.2022) +
 # Plot of # Tyee per day relative to flow, from 2002 to 2022.
 plot4 <-    ggplot(flow.catch.recent) +
                  geom_bar(aes(x = date.std, y = catch_scaled, fill = PARAM), stat= "identity", color = "Navy") +
-                 #geom_line(aes(x = date.std, y = q.daily, linetype = "dashed", color = "Daily")) +
-                 #geom_line(aes(x = date.std, y = q.5yr.roll.mean, linetype = "twodashed", color = "5-yr Mean Discharge")) +
+                 geom_line(aes(x = date.std, y = q.daily, linetype = "dashed", color = "Daily")) +
+                 geom_line(aes(x = date.std, y = q.5yr.roll.mean, linetype = "twodashed", color = "5-yr Mean Discharge")) +
                  geom_text(aes(x = as.Date("2021-07-20"), y = 13, label = str_c("Total Catch = ",catch_yr.total), size = 8)) +
                  labs(x = "", y = "Discharge (cms)") +
                  scale_x_date(date_breaks = "5 days", date_labels = "%m-%d", minor_breaks = "1 day") +
@@ -740,6 +788,13 @@ suppressWarnings(ggplotly(crq_esc.plot))
 
   +   I have not found any measures of individual fish. But binned data from [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf) (see Table 1) shows that Age-3 fish were between 500 mm and 699 mm (mean = 595 mm), Age-4 fish generally range in size from 550-949 mm (mean ~ 780 mm) and age-5 fish range from 700-949 mm (mean ~ 840 mm). Age-6 fish were identified, but accounted for less than 1% of all fish in the Campbell (n = 1 fish, 930 mm). 
   +  Fish in the Quinsam River are comparable in size to those in the Campbell, though hatchery fish generally return at a smaller size than their wild counterparts in the Campbell and Quinsam. Sturham et al. (1999) data suggest Age-4 and Age-5 wild fish may exceed 900 mm, while only Age-5 hatchery fish are likely to exceed 900 mm. 
+  
+Interesting side notes on fish size.
+
+  +   [Ohlberger et al. 2018](https://onlinelibrary.wiley.com/doi/full/10.1111/faf.12272) have shown that there is a reduction in the proportion of older age classes throughout most regions of the East Pacific and that length-at-age of older fish has decreased while length-at-age of smaller fish has increased.
+  +   [Malick et al. 2023](https://onlinelibrary.wiley.com/doi/abs/10.1111/faf.12738) compiled 3 decades worth of broodstock data from 43 hatcheries to examine trends in fecundity. They found significant changes in both fecundity and length, with the greatest drop in fecundity occurring over the past decade. Interestingly, they also estimate that a 1 mm reduction in length results in ~7.8 few eggs per female.   
+  +   [Oke et al. 2020](https://www.nature.com/articles/s41467-020-17726-z) state that relative to salmon maturing before 1990, adult Chinook salmon now produce 16% fewer eggs, transport 28% less nutrients and have lost 21% of their fisheries value.  
+
 
 #### 3.1.4 Fecundity
 
@@ -802,30 +857,24 @@ suppressWarnings(ggplotly(surv.plotly))
 ```
 
 **`r fig_nums("surv.plot", "Survival of coded wire tagged Chinook sub-yearlings (Age-0 upon release) released from hatcheries throughout the Strait of Georgia, including the Quinsam River. Note that y-axis is log transformed to better see range of values (labels are actual values). Figure prepared using data prepared by [Welch et al. 2020](https://onlinelibrary.wiley.com/doi/epdf/10.1111/faf.12514) ")`**
-  
-  
-  
+
   +   [Welch et al. 2018](https://onlinelibrary.wiley.com/doi/epdf/10.1111/faf.12514) used coded-wire tag data to look at large scale patterns of Chinook salmon survival. This data demonstrates that survival collapsed over the past half century by a factor of ~3 and is currently ~1% in many regions (consistent with estimates available for the Campbell). Survival in relatively pristine and undeveloped regions (e.g. Northern BC and Alaska) was comparable to areas with extensive water management and land development that were previously considered to have poorest survival (e.g. Columbia River). The authors suggest the widespread trends in survival may be evidence that marine conditions are more influential than local factors (e.g. freshwater habitat). 
   
   +   Similar trends have been observed in other species. For example, [Price et al. 2021](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/1365-2664.13835) found a 69% reduction in wild Sockeye salmon returns (though overall returns are comparable to historic levels due to intensive enhancement); that population diversity has decreased by ~70%, and; that life history diversity has shifted with populations now migrating from freshwater earlier and remaining at sea for longer. 
-    
-  
-  Which is lower than average, but comparable to survival reported by other hatcheries within the Strait of Georgia releasing sub-yearling fish and across the west coast of North America (see screenshot of Figure 2, below, from [Welch et al. 2020](https://onlinelibrary.wiley.com/doi/epdf/10.1111/faf.12514))
-  
-  ![](images/Welch et al. 2020 - Figure 2.jpg)
 
-```{r}
-
-```
-
-
-
+  #![](images/Welch et al. 2020 - Figure 2.jpg)
 
 
 #### 3.1.8 Hatchery Influence and Population Status
 
   +   [Ewart & Anderson 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf) report that 56% of the otoliths examined from 2012 spawners showed no signs of hatchery marking and are assumed wild. The remaining 44% are presumed to have originated from instream incubators (31%), seapen released smolts (4%) and Quinsam River released smolts (9%). 
   +   Assuming data presented by [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf) is representative of the overall Quinsam population, we can assume hatchery origin fish make up `r format((76/(76+46))*100, digits = 2)`% of Age-3 fish, `r format((225/(225+114)*100),digits = 2)`% of Age-4 fish, `r format((73/(73+40)*100), digits = 2)` of Age-5 fish and 50% of Age-6 fish. 
+  
+Interestingly, hatchery releases have never been higher
+
+  +   [Ruggerone & Irvine 2018](https://afspubs.onlinelibrary.wiley.com/doi/full/10.1002/mcf2.10023) show that intensive enhancement has resulted in the greatest abundance of salmon in the ocean than ever before (specifically pink, sockeye and chum) and that marine carrying capacity may have been reached within recent decades.         
+  +   [Nelson et al. 2019](https://esajournals.onlinelibrary.wiley.com/doi/full/10.1002/ecs2.2922) present evidence that hatchery practices have altered size and time that juveniles are released and have reduced diversity of life history traits (e.g. size, age and timing of smoltification). The authors argue that current enhancement practices may release fish at a time and size that is preferred by predators (e.g. all fish being released at same time and size and are easy pickings for large aggregations of predators).
+    
 
 #### 3.1.9 Ocean Range
 
@@ -862,30 +911,6 @@ knitr::kable(age_table1, col.names = c("Waterbody", "Age", "n", "% of Total", "S
              caption = "Table 1. Size at age of Chinook Salmon captured in Campbell River watershed from [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf)")
 ```
    
-
-### 3.2 What we know about Chinook salmon in general.
-#### 3.2.1 They are decreasing in size and age at maturity
-
-  +   [Ohlberger et al. 2018](https://onlinelibrary.wiley.com/doi/full/10.1111/faf.12272) have shown that there is a reduction in the proportion of older age classes throughout most regions of the East Pacific and that length-at-age of older fish has decreased while length-at-age of smaller fish has increased.
-  +   [Malick et al. 2023](https://onlinelibrary.wiley.com/doi/abs/10.1111/faf.12738) compiled 3 decades worth of broodstock data from 43 hatcheries to examine trends in fecundity. They found significant changes in both fecundity and length, with the greatest drop in fecundity occurring over the past decade. Interestingly, they also estimate that a 1 mm reduction in length results in ~7.8 few eggs per female.   
-  +   [Oke et al. 2020](https://www.nature.com/articles/s41467-020-17726-z) state that relative to salmon maturing before 1990, adult Chinook salmon now produce 16% fewer eggs, transport 28% less nutrients and have lost 21% of their fisheries value.  
-
-   
-#### 3.2.2 Survival rates have collapsed and returns are decreasing
-
-  +   [Welch et al. 2018](https://onlinelibrary.wiley.com/doi/epdf/10.1111/faf.12514) used coded-wire tag data to look at large scale patterns of Chinook salmon survival. This data demonstrates that survival collapsed over the past half century by a factor of ~3 and is currently ~1% in many regions (consistent with estimates available for the Campbell). Survival in relatively pristine and undeveloped regions (e.g. Northern BC and Alaska) was comparable to areas with extensive water management and land development that were previously considered to have poorest survival (e.g. Columbia River). The authors suggest the widespread trends in survival may be evidence that marine conditions are more influential than local factors (e.g. freshwater habitat). 
-  
-  +   Similar trends have been observed in other species. For example, [Price et al. 2021](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/1365-2664.13835) found a 69% reduction in wild Sockeye salmon returns (though overall returns are comparable to historic levels due to intensive enhancement); that population diversity has decreased by ~70%, and; that life history diversity has shifted with populations now migrating from freshwater earlier and remaining at sea for longer. 
-    
-#### 3.2.3 Enhancement levels have never been higher
-
-  +   [Ruggerone & Irvine 2018](https://afspubs.onlinelibrary.wiley.com/doi/full/10.1002/mcf2.10023) show that intensive enhancement has resulted in the greatest abundance of salmon in the ocean than ever before (specifically pink, sockeye and chum) and that marine carrying capacity may have been reached within recent decades.         
-  +   [Nelson et al. 2019](https://esajournals.onlinelibrary.wiley.com/doi/full/10.1002/ecs2.2922) present evidence that hatchery practices have altered size and time that juveniles are released and have reduced diversity of life history traits (e.g. size, age and timing of smoltification). The authors argue that current enhancement practices may release fish at a time and size that is preferred by predators (e.g. all fish being released at same time and size and are easy pickings for large aggregations of predators).
-    
-#### 3.2.4 I am not the only person who doesn't understand what is going on
-
-  +   [Beamish 2022](https://academic.oup.com/icesjms/article/79/4/1005/6550345) emphasizes that due to the large number of juvenile salmon in the ocean and overall poor survival, any small change in survival can results in major changes in adult abundance. Unfortunately, we don't understand what is causing those small changes in survival in the marine environment and need a better understanding of biologically based mechanisms linking climate change to salmon abundance.
-
 
 ## 4. What could be affecting returns and catches?
 Off the top of my head, there are four things that are most likely to be affecting catches of Tyee salmon (in reality, there are many, many more. But for now let's start with this).
@@ -1061,11 +1086,9 @@ We can expand this to estimate the number of Tyee salmon that will return if we 
  
   
 
-
-
-  
-  
 ## 5. So, what can we look at? 
+
+*Note, this is where shit is going to get weird.  At this point I am mostly just making shots in the dark and everything should be considered very skeptically.*
 
 Off the top of my head there are two ways we can approach this:
 
@@ -1387,14 +1410,17 @@ Well, that figure sucks. But it shows how variable escapement is between years. 
 
 Relative to 2013, abundance in all plotted west coast streams was slightly reduced in 2014. There was a major crash in the Burnam River, but this is exaggerated by unusually high returns in 2013, 2015 and 2016. 
 
-### 5.2 How Historic Conditions Influenced Captures
+### EVERYTHING FROM HERE ON DOWN IS JUST SCRIBBLES
 
+### 5.2 How Historic Conditions Influenced Captures
+```{r scribbles, include = FALSE}
 ### MAYBE RERUN ESCAPEMENT PLOT USING ALL ESCPAEMENT DATA!? FACET BY AREA?
 
 ### ADD METRIC THAT STANDARDIZES ESCAPEMENT. E.G. total annual returns vs mean annual returns.
 
 ### 5.3 How conditions may affect the number of fish that are captured.
 #### 5.3.1 Influence of river flow on catches
+```
 
 ```{r plot3-4prepA, include = FALSE}
     catch_data <- catch_data %>% mutate(Year = format(Date, '%Y'),
@@ -1473,14 +1499,7 @@ Well, it's clear that flows in 2022 were higher than past years and higher than 
 
 Last year there was a lot of speculation that high flows in the Campbell River may have caused fish to move directly into the river rather than staging in the pool. Let's look at flow in the Campbell River to see how 2022 flows compared to previous years. 
 
-```{r plot3bprint,  echo = FALSE}
-suppressWarnings(print(plot3))  
-```
 
-**`r fig_nums("plot3", "Catches of Tyee Salmon since 2016 relative to flow in the Campebll River.")`**
-
-
-Well, it's clear that flows in 2022 were higher than past years and higher than mean flows over the past 5-years. But this doesn't mean that is why fewer fish were captured. Either way let's take a closer look at the correlation between flow and capture.
 
 ```{r prepare scatter plot, include = FALSE}
 ## Scatter plots examining relationship between flow and number of fish captured.
@@ -1532,7 +1551,7 @@ suppressWarnings(print(plot5))
 
 `r fig_nums("plot5", "Relationship between river flow and fish capture")`
 
-`r fig_nums("plot5", display = "cite")` shows a strong negative relationship between discharge and the number of fish that are captured. This is what you would expect, that fish will hold in the pool while flows are low and that they will move into the river when flows are higher and they can safely navigate upstream. However, the fishery occurs during the late summer, when flows are typically low so it's somewhat of a chicken and egg situation....  
+`r fig_nums("plot5", display = "cite")` suggests flows below ~ 25 cms are favourable and that higher flows will result in fewer fish, As one would expect. Fish are more likely to remain within the pool while flows are low and will move into the river when flows are higher and they can safely navigate upstream. However, the fishery occurs during the late summer, when flows are typically low. So it's somewhat of a chicken and egg situation....  
 
 OK, well there is a relationship (that could be due to a number of things). Lets have a look at some of the older data. 
 
@@ -1540,13 +1559,10 @@ OK, well there is a relationship (that could be due to a number of things). Lets
 suppressWarnings(print(plot4))
 ```
 
-`r fig_nums("plot4", "Catches of Tyee Salmon since 2007 relative to flow in the Campebll River.")`
-
-
-
+#### 5.3 Commercial Catches
 Let's look at commercial catches. Maybe there is a fishery that could be intercepting a large number of Tyees.
 
-```{r}
+```{r, include = FALSE}
 can.catch <- comm.catch %>% rename(Catch.Type = 'Catch Type',
                                    Data.Type  = 'Data Type') %>%
                             mutate(Area         = as.factor(Area),
@@ -1557,8 +1573,7 @@ can.catch <- comm.catch %>% rename(Catch.Type = 'Catch Type',
                                    Year      >= 1997,
                                    Data.Type == "Number (000's)")
 
-can.catch.cn <- can.catch %>% filter(Species   == "Chinook",
-                                     Area      == "Whole country")
+can.catch.cn <- can.catch %>% filter(Species   == "Chinook")
 
       CN.catch.plot <- ggplot(can.catch.cn) +
                               geom_line(aes(x = Year, y = Total.Catch, color = Catch.Type)) +
