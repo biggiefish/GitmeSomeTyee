@@ -925,8 +925,6 @@ Generally, juvenile recruitment refers to the process of small fish transitionin
   +   The number of females that spawn successfully. I have no data, so lets assume 100% of females that make it to the river will spawn.
   +   The number of eggs that hatch and the number of alevin that survive and emerge from gravel as fry. For ease, we will assume that 10% of eggs will survive the egg-to-fry stage. 
   
-  
-  
 
 ```{r fry production, include = FALSE}
 ## Define assumptions
@@ -957,22 +955,22 @@ fry.prod <- cr_esc %>% mutate(total.fry = esc_count * perc.female * fecundity * 
 ## Calculate max flow throughout spawning and incubation periods.
 fry.flow <- flow_data %>% filter(Year >= 1985) %>%
                           mutate(life.period = recode(as.factor(Month),
-                                                      "1"  = "Incubation",
-                                                      "2"  = "Incubation",
-                                                      "3"  = "Incubation",
+                                                      "1"  = "Sensitive",       #Incubation
+                                                      "2"  = "Sensitive",       #Incubation
+                                                      "3"  = "Sensitive",       #Incubation
                                                       "4"  = "NA",
                                                       "5"  = "NA",
                                                       "6"  = "NA",
                                                       "7"  = "NA",
                                                       "8"  = "NA",
-                                                      "9"  = "Spawn",
-                                                      "10" = "Spawn",
-                                                      "11" = "Spawn",
-                                                      "12" = "Incubation"),
+                                                      "9"  = "Sensitive",        #Spawn
+                                                      "10" = "Sensitive",        #Spawn
+                                                      "11" = "Sensitive",        #Spawn
+                                                      "12" = "Sensitive"),       #Incubation
                                  incub.year = ifelse(Month <=3,Year-1,Year)) %>% # want previous year to continue into March of next year.
                           group_by(incub.year, life.period) %>%
                           summarize(max.flows = max(Value, na.rm = TRUE)) %>%
-                          filter(life.period == "Incubation")
+                          filter(life.period == "Sensitive")
 
 ## Merge fry dataset with max flows dataset.
 fry.flow.dat <- fry.prod %>% inner_join(fry.flow, 
@@ -987,7 +985,7 @@ fry.flow.plot <- ggplot(fry.flow.dat) +
                     geom_hline(aes(yintercept = 1250000, linetype = 'twodash'), color = "red") +
                     labs(x = "", y = "Number of Fry") +
                     scale_x_continuous(breaks = seq(1991,2021,2)) +
-                    scale_y_continuous(labels = comma, limits = c(0,2200000),
+                    scale_y_continuous(labels = comma, limits = c(0,2400000),
                                        sec.axis = sec_axis(~./3750, name = "Discharge (cms)")) +
                     scale_color_manual(values = c("blue", "red")) +
                     scale_fill_manual(values = c("red", "lightblue")) +
@@ -1003,7 +1001,7 @@ fry.flow.plot <- ggplot(fry.flow.dat) +
                    
 So under normal conditions we could expect to see annual fry production ranging from `r formatC(min(fry.flow.dat$total.fry), format = "d", big.mark = ",")` to `r formatC(max(fry.flow.dat$total.fry), format = "d", big.mark = ",")`, with a mean of `r formatC(mean(fry.flow.dat$total.fry), format = "d", big.mark = ",")` fry. 
 
-But abnormal is the new normal, so let's look at the extremes. High flows through the incubation period can greatly reduce survival by scouring away gravel and eggs. [Thornton et al. 2022](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf) observed this in 2016 when very Chinook (or other salmon) fry out migrated following a large spill event in November 2016 (and to a lesser extent in 2014).  
+But abnormal is the new normal, so let's look at the extremes. High flows through the incubation period can greatly reduce survival by scouring away gravel and eggs. [Thornton et al. 2022](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf) observed this in 2016 when very few Chinook (or other salmon) fry out migrated following a large spill event in November 2016 (and to a lesser extent in 2014).  
 
 If we assume that flows over 375 cms reduce fry out migration by 90% we see that fry production in years with high flow events is greatly reduced, which will have significant effects on future returns (*Note that I have no idea what flows are required to scour gravels in the Campbell or what associated mortality would be, this is purely speculative*). A major flow event that reduces egg-to-fry survival will reduce escapement, however, the age structure of Campbell River Chinook suggests the resulting reduction in escapement will not be catastrophic as it will be spread across multiple years. Arguably, this is a great example of bet-hedging. If all fish returned as Age-5 fish (which would be advantageous biologically since larger fish produce more eggs), then a high flow event could essentially wipe out a full cohort. Having a population returning at different ages ensures that fish return each year, even if something reduces survival of a single age-class or cohort. 
 
