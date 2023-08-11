@@ -737,18 +737,13 @@ suppressWarnings(print(plot4))
 
 Without additional data there is not much else to look at. So let's change gears and start poking around at what may be contributing to observed patterns in catches and size.
 
-## 3. Chinook Salmon
-
-
-### 3.1 What we* know about Campbell River Chinook? 
-
+## 3. What do we know about CR Chinook?
 
 (* more like what have others learned about Chinook in the Campbell, I don't know much).
 
+There has been a lot of information collected on Campbell River Chinook Salmon, including from Tyee Salmon captured in the Tyee Pool, however, most of this data is not readily available online. Data that is available (and that I have found) is summarized below. Data and study results from other systems have also been included for comparison and emphasis. 
 
-There has been a lot of information collected on Campbell River Chinook Salmon, including from Tyee Salmon captured in the Tyee Pool, however, most of this data is not readily available online. Data that is available (and that I have found) is summarized below. 
-
-#### 3.1.0 Quinsam vs. Campbell
+### 3.1. Quinsam vs. Campbell
 
   +   The vast majority of Chinook Salmon returning to the Campbell River system are from the Quinsam River. Based on available escapement data for both systems, a mean of 12.5% Chinook returning to the system are from the Campbell River (varies from 6% to 25% between 1991 and 2019).
   
@@ -773,28 +768,40 @@ suppressWarnings(ggplotly(crq_esc.plot))
 
 **`r fig_nums("crq_esc.plot", "Chinook Salmon escpaement in the Campbell and Quinsam rivers from 1991 to 2021.")`**
 
-#### 3.1.1 Spawn Timing
+### 3.2 Tyee Club Data (presented by Campbell River Salmon Foundation)
+
+  +   The origin of fish captured in the tyee pool was determined by examining coded wire tags in adipose clipped fish and otoliths in non-clipped fish captured between 2015-2018 [CRSF 2018](https://www.tyeeclub.org/wp-content/uploads/2021/10/CRSF-Infographic-Poster-Tyee-Club-Heads.pdf). This data suggests the majority of captured fish in the pool (including undersize) are from the Quinsam Hatchery (mean = 61% across all years), followed by the Discovery Passage Seapens (mean = 17% across all years). The remaining 6% of fish are intercepted on route to natal streams (e.g. Big Qualicum, Nitinat, Washington State hatcheries).
+  
+  +   Despite 79% of all captured fish having an adipose fin, only 16% were actually wild and not of hatchery origin. Meaning most hatchery fish were not visually marked (but did have thermal otolith marking), which is not surprising given resources required for fin clipping.  
+  
+  +   Ages calculated from a subset of otoliths of fish captured in the tyee pool between 2015-2018 (n = 48) shows that the majority of fish are Age-4 (overall mean = 75%), followed by Age-5 (17%) and Age-3 (8%). No Age-6 fish were identified in the sub-sample of heads that were aged.
+  
+  +   Of the 350 fish captured in the Tyee pool between 2015 and 2018, 26% were Tyee salmon (n = 90). However, this varied between years with Tyee representing 18% to 32% of all fish captured between years. 
+  
+  
+### 3.2 Spawn Timing
 
   +   Chinook spawning occurs from late September through early November and peaks in mid-October. Spawners typically reside in the river for ~12 days. 
 
-#### 3.1.2 Age Class Structure
+### 3.3 Age Class Structure
 
   +   A roughly equal proportion of spawners return to the Campbell River as age-4 and age-5 fish (see Table 1) [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf). Very few fish return as Age-6 (`r format((1/99)*100, digits = 2)`% (1 of 99 fish) of Campbell River fish in Sturham dataset.
 
   +   However, [Ewart & Anderson,2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf) report that Age-5 fish were dominant in 2012 (61%), with Age-4's accounting for only 37% of the run, and age-3's representing only 2%. Age-6 fish were absent from the 2013 dataset. 
   
 
-#### 3.1.3 Size-at-Age
+  
+```{r}
+catch_data %>% filter(Year >=2015, Year <=2018) %>% 
+               group_by(Year) %>%
+               summarize(total.catch = sum(catch_binary))          
+```
+
+
+### 3.4 Size-at-Age
 
   +   I have not found any measures of individual fish. But binned data from [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf) (see Table 1) shows that Age-3 fish were between 500 mm and 699 mm (mean = 595 mm), Age-4 fish generally range in size from 550-949 mm (mean ~ 780 mm) and age-5 fish range from 700-949 mm (mean ~ 840 mm). Age-6 fish were identified, but accounted for less than 1% of all fish in the Campbell (n = 1 fish, 930 mm). 
   +  Fish in the Quinsam River are comparable in size to those in the Campbell, though hatchery fish generally return at a smaller size than their wild counterparts in the Campbell and Quinsam. Sturham et al. (1999) data suggest Age-4 and Age-5 wild fish may exceed 900 mm, while only Age-5 hatchery fish are likely to exceed 900 mm. 
-  
-Interesting side notes on fish size.
-
-  +   [Ohlberger et al. 2018](https://onlinelibrary.wiley.com/doi/full/10.1111/faf.12272) have shown that there is a reduction in the proportion of older age classes throughout most regions of the East Pacific and that length-at-age of older fish has decreased while length-at-age of smaller fish has increased.
-  +   [Malick et al. 2023](https://onlinelibrary.wiley.com/doi/abs/10.1111/faf.12738) compiled 3 decades worth of broodstock data from 43 hatcheries to examine trends in fecundity. They found significant changes in both fecundity and length, with the greatest drop in fecundity occurring over the past decade. Interestingly, they also estimate that a 1 mm reduction in length results in ~7.8 few eggs per female.   
-  +   [Oke et al. 2020](https://www.nature.com/articles/s41467-020-17726-z) state that relative to salmon maturing before 1990, adult Chinook salmon now produce 16% fewer eggs, transport 28% less nutrients and have lost 21% of their fisheries value.  
-  + [Lewis et al. 2015](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0130184) observed a similar trend of decreasing size and age of Chinook returning to Alaska over the past 30-years and speculate that size-selective fisheries may be driving earlier maturation and declines in size (*emphasis on speculate*, they also point out that marine conditions and competition could produce similar results).
   
    
 ```{r table1prep, include = FALSE}
@@ -823,20 +830,33 @@ knitr::kable(age_table1, col.names = c("Waterbody", "Age", "n", "% of Total", "S
              digits = 1,  align=rep('c', 5),
              caption = "Table 1. Size at age of Chinook Salmon captured in Campbell River watershed from [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf)")
 ```
+
+  
+Interesting side notes on recent studies examining trends in size of Chinook salmon.
+
+  +   [Lewis et al. 2015](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0130184) report that the size and age of Chinook returning to Alaska over the past 30-years has been decreasing and speculate that size-selective fisheries may be driving earlier maturation and declines in size (*emphasis on speculate*, they also point out that marine conditions and competition could produce similar results).
+  +   [Ohlberger et al. 2018](https://onlinelibrary.wiley.com/doi/full/10.1111/faf.12272) built on this work and showed that there has been a reduction in the proportion of older Chinook age classes throughout most regions of the East Pacific and that length-at-age of older fish has decreased while length-at-age of smaller fish has increased.
+  +   [Oke et al. 2020](https://www.nature.com/articles/s41467-020-17726-z) state that relative to salmon maturing before 1990, adult Chinook salmon now produce 16% fewer eggs, transport 28% less nutrients and have lost 21% of their fisheries value. 
+  +   [Malick et al. 2023](https://onlinelibrary.wiley.com/doi/abs/10.1111/faf.12738) reviewed 25 years of  broodstock data from 43 hatcheries and found evidence of a significant reduction in length (and fecundity).
+
    
-#### 3.1.4 Fecundity
+### 3.5 Fecundity
 
-  +   [Ewart & Anderson, 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf) report that female Chinook in the Campbell River in 2012 carried roughly ~5,700, a decrease from the roughly 6,000 eggs typically carried.  
+  +   According to [Ewart & Anderson (2013)](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf), female Chinook returning to the Campbell River in 2012 carried roughly ~5,700, a decrease from the roughly 6,000 eggs typically carried.  
+  
+  +   Decreasing fecundity rates have also been reported in larger studies. For example, [Malick et al. 2023](https://onlinelibrary.wiley.com/doi/abs/10.1111/faf.12738) compiled 2.5 decades worth of broodstock data from 43 hatcheries to examine trends in fecundity. They found significant declines in fecundity (and length), with the greatest drop in fecundity occurring over the past decade. This reduction in fecundity was primarily explained by a reduction in the size of spawners. Not particularly relevant, but they also estimate that a 1 mm reduction in length results in ~7.8 few eggs per female
 
-#### 3.1.5 Juvenile Life History
+### 3.6 Juvenile Life History
 
-  +   Juvenile Chinook Salmon in the Campbell River have been studied intensively since 2015 (e.g. [Thornton et al. 2022](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf). These data suggest fry emerge in February-March and that nearly all Campbell River Chinook out migrate as Age-0+ juveniles from March through July. Smaller recently emerged Age-0+ fry are dominant and typically captured from March through early May (37 to 52 m). Larger Age-0+ smolts are less common and move out from May through July (64 to 88 mm).
+  +   Juvenile Chinook Salmon in the Campbell River have been studied intensively since 2015 (e.g. [Thornton et al. 2022](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf). These data suggest fry emerge in February-March and that nearly all Campbell River Chinook out migrate as Age-0+ juveniles from March through July. Smaller recently emerged Age-0+ fry are dominant and typically captured from March through early May (37 to 52 m). The remaining fish emigrate as slightly larger Age-0+ smolts (~64 to 88 mm) from May through July.
     
-#### 3.1.6 Estimated Juvenile Production
+### 3.7 Estimated Juvenile Production
 
   +   Estimates of juvenile Chinook production based on numbers of observed spawners have generally been less than numbers trapped  throughout the out-migration period ([Thornton et al. 2022](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf)), suggesting juvenile survival rates may be above average (e.g. >10%). 
+  
+  +   Juvenile survival was very low in both 2014 and 2016, which may be due to unusually high flows during spawning and/or incubation periods in each year. 
 
-#### 3.1.7 Estimates of Marine Survival
+### 3.8 Estimates of Marine Survival
 
   +   Marine survival of unfed fry released from the Quinsam hatchery range from 0.2% to 0.4% (yes, that is less than 1%) ([Ewart & Anderson 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf)). 
   
@@ -896,7 +916,7 @@ suppressWarnings(ggplotly(surv.plotly))
   +   Similar trends have been observed in other species. For example, [Price et al. 2021](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/1365-2664.13835) found a 69% reduction in wild Sockeye salmon returns (though overall returns are comparable to historic levels due to intensive enhancement); that population diversity has decreased by ~70%, and; that life history diversity has shifted with populations now migrating from freshwater earlier and remaining at sea for longer. 
 
 
-#### 3.1.8 Hatchery Influence and Population Status
+### 3.9 Hatchery Influence and Population Status
 
   +   [Ewart & Anderson 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf) report that 56% of the otoliths examined from 2012 spawners showed no signs of hatchery marking and are assumed wild. The remaining 44% are presumed to have originated from instream incubators (31%), seapen released smolts (4%) and Quinsam River released smolts (9%). 
   +   Assuming data presented by [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf) is representative of the overall Quinsam population, we can assume hatchery origin fish make up `r format((76/(76+46))*100, digits = 2)`% of Age-3 fish, `r format((225/(225+114)*100),digits = 2)`% of Age-4 fish, `r format((73/(73+40)*100), digits = 2)` of Age-5 fish and 50% of Age-6 fish. 
@@ -907,14 +927,17 @@ Interestingly, hatchery releases have never been higher
   +   [Nelson et al. 2019](https://esajournals.onlinelibrary.wiley.com/doi/full/10.1002/ecs2.2922) present evidence that hatchery practices have altered size and time that juveniles are released and have reduced diversity of life history traits (e.g. size, age and timing of smoltification). The authors argue that current enhancement practices may release fish at a time and size that is preferred by predators (e.g. all fish being released at same time and size and are easy pickings for large aggregations of predators).
     
 
-#### 3.1.9 Ocean Range
+### 3.10 Ocean Range
 
-+   Tagging studies have shown that maturing Chinook of BC origin are frequently located in Southeast Alaska, the west coast of Haida Gwaii and west and north coasts of Vancouver Island [Myers et al. 1996](https://npafc.org/wp-content/uploads/2017/08/192USA.pdf) or ![screenshot of map](images/BC.CN.oceanranges.jpg). 
++   Tagging studies have shown that maturing Chinook of BC origin are frequently located in Southeast Alaska, the west coast of Haida Gwaii and west and north coasts of Vancouver Island [Myers et al. 1996](https://npafc.org/wp-content/uploads/2017/08/192USA.pdf) (see screenshot of map from Myers et al. 1996, below). 
 
-#### 3.1.10 Exploitation Rates
+![screenshot of map](images/BC.CN.oceanranges.jpg). 
 
-  +   Approximately 20% of fish released by the Quinsam hatchery[Rosenberger et al.2022](https://www.mccpacific.org/wp-content/uploads/2022/01/10Jan2022-SEAK-Catch-of-BC-Salmon-Technical-Report-Part-3-Chinook-Salmon-V1.pdf) are intercepted in Southeast Alaska commercial net (4.99%) and troll fisheries (11.95%), as well as an additional 1.84% that are intercepted in sport fisheries. Interestingly, a [court ruling in May 2023](https://www.documentcloud.org/documents/23795630-jones-order) almost shut down the SE Alaska troll fishery this year. Unfortunately for those aspiring to join the Tyee Club (and Orcas), that decision was [reversed](https://www.documentcloud.org/documents/23855199-panel-decision) in late June, 2023 and the fishery occurred from July 1 to 12, 2023, not sure whether it will resume again at a later date. 
-  +   I have not found any data indicating exploitation rates of Campbell/Quinsam Chinook within BC commercial and sport fisheries, however, I am assuming there is interception in North Coast Vancouver Island fisheries given their ocean range and presumed migration routes. 
+### 3.11 Exploitation Rates
+
+  +   Approximately 17% of fish released by the Quinsam hatchery are intercepted in Southeast Alaska commercial net (4.99%) and troll fisheries (11.95%), as well as an additional 1.84% that are intercepted in Alaskan sport fisheries [Rosenberger et al.2022](https://www.mccpacific.org/wp-content/uploads/2022/01/10Jan2022-SEAK-Catch-of-BC-Salmon-Technical-Report-Part-3-Chinook-Salmon-V1.pdf).
+  +   A [court ruling in May 2023](https://www.documentcloud.org/documents/23795630-jones-order) almost shut down the 2023 SE Alaska troll fishery.  Unfortunately for those aspiring to join the Tyee Club (and Orcas), that decision was [reversed](https://www.documentcloud.org/documents/23855199-panel-decision) in late June, 2023 and the fishery occurred from July 1 to 12, 2023, not sure whether it will resume again at a later date. 
+  +   I have not found any data indicating exploitation rates of Campbell/Quinsam Chinook within BC commercial and sport fisheries, however, given locations where maturing BC Chinook salmon are typically encountered and presumed migration routes, I think its reasonable to assume there is interception in sport and commercial fisheries in North Coast Vancouver Island, Haida Gwaii and along the west and southwest coast of the Island.    
 
 
 ## 4. What could be affecting returns and catches?
@@ -972,6 +995,7 @@ fry.flow <- flow_data %>% filter(Year >= 1985) %>%
                                                       "10" = "Sensitive",        #Spawn
                                                       "11" = "Sensitive",        #Spawn
                                                       "12" = "Sensitive"),       #Incubation
+                                 flow.change = lag(Value),  
                                  incub.year = ifelse(Month <=3,Year-1,Year)) %>% # want previous year to continue into March of next year.
                           group_by(incub.year, life.period) %>%
                           summarize(max.flows = max(Value, na.rm = TRUE)) %>%
@@ -979,45 +1003,46 @@ fry.flow <- flow_data %>% filter(Year >= 1985) %>%
 
 ## Merge fry dataset with max flows dataset.
 fry.flow.dat <- fry.prod %>% inner_join(fry.flow, 
-                                        by = c('Year' = 'incub.year')) %>%  # merge 'Year' in fry.prod with 'incub.year' in fry.flow data
-                              mutate(reduced.fry = ifelse(max.flows >= 350, 0.1*total.fry, total.fry)) %>%
+                                        by = c('Year' = 'incub.year')) %>%  # merge 'Year' in fry.prod with       
+                                                                            # 'incub.year' in fry.flow data
+                              mutate(high.flow.reduced.fry = ifelse(max.flows >= 350, 0.1*total.fry,total.fry)) %>%
                               filter(Year >= 1991)
- 
-fry.flow.plot <- ggplot(fry.flow.dat) +
-                    geom_col(aes(x = Year, y = total.fry, fill = 'lightblue', alpha = 0.2)) +
-                    geom_col(aes(x = Year, y = reduced.fry, fill = "red")) +
-                    geom_line(aes(x = Year, y = (max.flows*1000), color = life.period)) +
-                    geom_hline(aes(yintercept = 375000, linetype = 'twodash'), color = "maroon") +
-                    labs(x = "", y = "Number of Fry") +
-                    scale_x_continuous(breaks = seq(1991,2021,2)) +
-                    scale_y_continuous(breaks = seq(0,650000, 100000),
-                                       labels = comma,
-                                       sec.axis = sec_axis(~./1000, name = "Discharge (cms)")) +
-                    scale_color_manual(values = c("blue", "red")) +
-                    scale_fill_manual(values = c("red", "lightblue")) +
-                    scale_linetype_manual(values = "twodash") +
-                    guides(fill = 'none',
-                           alpha = 'none',
-                           color = guide_legend(title = "Max. flow during spawn \nand incubation period", 
-                                                label = FALSE),
-                           linetype = guide_legend(title = "Flow \nthreshold", 
-                                                   label = FALSE)) +
-                    theme_bw() + 
-                    theme(legend.position = "bottom")
 
+## Plot of fry reduction from high flows 
+fry.high.flow.plot <- ggplot(fry.flow.dat) +
+                          geom_col(aes(x = Year, y = total.fry, fill = 'lightblue', alpha = 0.2)) +
+                          geom_col(aes(x = Year, y = high.flow.reduced.fry, fill = "red")) +
+                          geom_line(aes(x = Year, y = (max.flows*1000), color = life.period)) +
+                          geom_hline(aes(yintercept = 375000, linetype = 'twodash'), color = "maroon") +
+                          labs(x = "", y = "Number of Fry") +
+                          scale_x_continuous(breaks = seq(1991,2021,2)) +
+                          scale_y_continuous(breaks = seq(0,650000, 100000),
+                                             labels = comma,
+                                             sec.axis = sec_axis(~./1000, name = "Discharge (cms)")) +
+                          scale_color_manual(values = c("blue", "red")) +
+                          scale_fill_manual(values = c("red", "lightblue")) +
+                          scale_linetype_manual(values = "twodash") +
+                          guides(fill = 'none',
+                                 alpha = 'none',
+                                 color = guide_legend(title = "Max. flow during spawn \nand incubation period", 
+                                                      label = FALSE),
+                                 linetype = guide_legend(title = "Flow \nthreshold", 
+                                                         label = FALSE)) +
+                          theme_bw() + 
+                          theme(legend.position = "bottom")
 ```
 
-
-                   
 So under normal conditions we could expect to see annual fry production ranging from `r formatC(min(fry.flow.dat$total.fry), format = "d", big.mark = ",")` to `r formatC(max(fry.flow.dat$total.fry), format = "d", big.mark = ",")`, with a mean of `r formatC(mean(fry.flow.dat$total.fry), format = "d", big.mark = ",")` fry. 
 
 But abnormal is the new normal, so let's look at the extremes. High flows through the incubation period can greatly reduce survival by scouring away gravel and eggs. [Thornton et al. 2022](https://www.bchydro.com/content/dam/BCHydro/customer-portal/documents/corporate/environment-sustainability/water-use-planning/vancouver-island/jhtmon-15-Yr-7-2022-07-25.pdf) observed this in 2016 when very few Chinook (or other salmon) fry out migrated following a large spill event in November 2016 (and to a lesser extent in 2014).  
 
-If we assume that flows over 375 cms reduce fry out migration by 90% we see that fry production in years with high flow events is greatly reduced, which will have significant effects on future returns (*Note that I have no idea what flows are required to scour gravels in the Campbell or what associated mortality would be, this is purely speculative. AND, mortality rates are likely to vary relative to flow (e.g., 375 cms may result in 75% mortality, 500 cms produces 85% mortality and 600+ results in 90% mortality*). A major flow event that reduces egg-to-fry survival will reduce escapement, however, the age structure of Campbell River Chinook suggests the resulting reduction in escapement will not be catastrophic as it will be spread across multiple years. Arguably, this is a great example of bet-hedging. If all fish returned as Age-5 fish (which would be advantageous biologically since larger fish produce more eggs), then a high flow event could essentially wipe out a full cohort. Having a population returning at different ages ensures that fish return each year, even if something reduces survival of a single age-class or cohort. 
+If we assume that flows over 375 cms reduce fry out migration by 90% we see that fry production in years with high flow events is greatly reduced, which will have significant effects on future returns (*Note that I have no idea what flows are required to scour gravels in the Campbell or what associated mortality would be, this is purely speculative. AND, mortality rates are likely to vary relative to flow (e.g., 375 cms may result in 75% mortality, 500 cms produces 85% mortality and 600+ results in 90% mortality*). If we apply this assumption, we get the figure below, which shows how high flows may reduce juvenile recruitment. 
+
+Although major flow event that reduces egg-to-fry survival will reduce escapement, there is a silver lining. Given the age structure of Campbell River Chinook, the resulting reduction in escapement will be spread across multiple years. Arguably, this is a great example of bet-hedging. If all fish returned as Age-5 fish (which would be advantageous biologically since larger fish produce more eggs), then a high flow event could essentially wipe out a full cohort. Having a population returning at different ages ensures that fish return each year, even if something reduces survival of a single age-class or cohort. 
 
 
 ```{r, fry.flow.plot.plot, echo = FALSE}
-suppressWarnings(print(fry.flow.plot))
+suppressWarnings(print(fry.high.flow.plot))
 ```
 
 **`r fig_nums("fry.flow.plot", "Estimated annual Chinook Salmon fry production in the Campbell River, peak flows during incubation period and estimated impacts of high flow events throughout the incubation period.")`**
@@ -1176,9 +1201,9 @@ We can expand this to estimate the number of Tyee salmon that will return if we 
   
   +   For fun, let's assume all fish > 900 mm are Tyee Salmon (I know girth is important too, but I dont have girth data) and using the ([Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf)) data as a rough guide I will assume that `r 100*Tyee.Age4m.prop`% of Age-4 male adults are >900 mm, `r 100*Tyee.Age5mf.prop`% of Age-5 fish (males and females) are >900 mm and `r 100*Tyee.Age6mf.prop`% of Age-6 fish are >900 mm.
   
-If we run these numbers, each female will generate `r format(fecundity * egg.to.fry * marine.surv, digits = 2)` offspring, of which `r format((fecundity * egg.to.fry * marine.surv * Age3), digits = 2)` will be Age-3, `r format((fecundity * egg.to.fry * marine.surv * Age4), digits = 2)` will be Age-4, `r format((fecundity * egg.to.fry * marine.surv * Age5), digits = 2)` will be Age-5 and `r format((fecundity * egg.to.fry * marine.surv * Age6), digits = 2)` will be Age-6. Furthermore, each female will produce `r format(((fecundity * egg.to.fry * marine.surv * Age4 * perc.male * Tyee.Age4m.prop) + (fecundity * egg.to.fry * marine.surv * Age5 * Tyee.Age5mf.prop) + (fecundity * egg.to.fry * marine.surv * Age6 * Tyee.Age6mf.prop)),digits = 2)`  Tyee salmon. *Let's take a moment to remember that these assumptions are terrible. Larger fish are more likely to produce larger fish, so in reality some fish will produce a decent number of Tyee and others will produce none. But let's keep it simple for now and assume every fish is able to make an equal number of Tyees*
+If we run these numbers, each female will generate `r formatC(fecundity * egg.to.fry * marine.surv, digits = 2)` offspring, of which `r formatC((fecundity * egg.to.fry * marine.surv * Age3), digits = 2)` will be Age-3, `r formatC((fecundity * egg.to.fry * marine.surv * Age4), digits = 2)` will be Age-4, `r formatC((fecundity * egg.to.fry * marine.surv * Age5), digits = 2)` will be Age-5 and `r formatC((fecundity * egg.to.fry * marine.surv * Age6), digits = 2)` will be Age-6. Furthermore, each female will produce `r formatC(((fecundity * egg.to.fry * marine.surv * Age4 * perc.male * Tyee.Age4m.prop) + (fecundity * egg.to.fry * marine.surv * Age5 * Tyee.Age5mf.prop) + (fecundity * egg.to.fry * marine.surv * Age6 * Tyee.Age6mf.prop)),digits = 2)`  Tyee salmon. *Let's take a moment to remember that these assumptions are terrible. Larger fish are more likely to produce larger fish, so in reality some fish will produce a decent number of Tyee and others will produce none. But let's keep it simple for now and assume every fish is able to make an equal number of Tyees*
 
-Based on this, each female should produce `r format((fecundity* egg.to.fry * marine.surv), digits = 2)` offspring that return to spawn. Which is less than ideal. 
+Based on this, each female should produce `r formatC((fecundity* egg.to.fry * marine.surv), digits = 2)` offspring that return to spawn. Which is less than ideal. 
 
 
 ```{r original.predicted code.OLD.DO.NOT.USE, include = FALSE}
