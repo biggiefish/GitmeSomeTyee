@@ -344,8 +344,7 @@ There are lots of ways to look at this data. I am most curious about three thing
 
 3) Has fish size changed across seasons? Does fish size vary within seasons? 
 
-
-### 2.1 How catches vary among years.
+### 2.1 Total catches across years.
 ```{r plot1_prep_tyeecatch, include=FALSE}
 ## Prepare Plot
 catch.data.yearly <- catch_data %>% 
@@ -461,12 +460,70 @@ If we look at Escapement data (blue line) shown in `r fig_nums("plot2", display 
 3) It is also possible that years with high escapement and low Tyee numbers were due to an increased proportion of smaller fish returning to the Campbell. Without annual information on age structure I cannot tease this apart.
 
 Now, lets see when fish are most frequently captured throughout the season, and if there has been a change over time.
+### 2.2 Cumulative catches per year.
 
-### 2.2 When fish are most frequently captured.
+```{r cumulative catch plot, include = FALSE}
+library(gridExtra)
+
+
+cum.catch <- catch_data %>% group_by(Year) %>%
+                            mutate(cumulative.count = cumsum(catch_binary),
+                                   date = case_when(year(Date) >= 0 ~ 'year<-'(Date, 2021)),
+                                   year = as.factor(Year),
+                                   decade   = format(floor_date(Date, years(10)), '%Y'),
+                                   decade2 = recode(as.factor(decade),
+                                                      "2000"  = "twotho",   
+                                                      "2010"  = "twentyten",
+                                                      "2020"  = "twentytwenty"))
+
+str(cum.catch)
+colnames(cum.catch)
+
+
+
+
+## Prepare plot for each decade (so separate legend for each decade)
+xs <- split(cum.catch, f = cum.catch$decade2)
+
+## Plot for 2000's
+cum.p1 <- ggplot(xs$twotho,aes(x = date, y = cumulative.count, color = year)) + 
+                      geom_line() + 
+                      labs(x = "", y = "Total Number Tyee") +
+                      scale_x_date(date_minor_breaks = "1 day", 
+                                 date_breaks = '5 day', 
+                                 date_labels = '%b-%d', 
+                                 limits = c(as.Date("2021-07-25"), as.Date("2021-09-15"))) +
+                      facet_grid(~decade, scales = "free_y") +
+                      scale_y_continuous(breaks = seq(0,95,5)) +
+                      guides(color = guide_legend(title = "Year")) +
+                      theme_bw() 
+  
+## Plot for 2010's
+cum.p2 <- cum.p1 %+% xs$'twentyten'
+
+## Plot for 2020's
+cum.p3 <- cum.p1 %+% xs$'twentytwenty'
+
+## Join all decades into single plot
+cum.catch.plot <- grid.arrange(cum.p1, cum.p2, cum.p3) +
+                  scale_y_continuous(limits = ~ c(min(.x), ceiling(max(.x))),
+                                     breaks = ~.x[10],
+                                     expand = c(0, 0))
+
+```
+
+
+```{r, echo=FALSE, fig.width = 7, fig.height = 20}
+
+## plotly figure
+    suppressWarnings(grid.arrange(cum.p1, cum.p2, cum.p3))   
+```
+
+### 2.3 When fish are most frequently captured.
 
 The Tyee season runs from July 15 to September 15. I need to pick my battles with my wife and boss. Let's see which days I should be fighting for!? 
 
-#### 2.2.1 First Tyee of the Year
+#### 2.3.1 First Tyee of the Year
 ```{r, first.catch.prep, include = FALSE}
 colnames(catch_data)
 
@@ -508,7 +565,7 @@ Let's see when the first Tyee are most frequently captured each season. Alright,
  
  
 
-#### 2.2.2 When the most Tyee's are captured each year.
+#### 2.3.2 When the most Tyee's are captured each year.
 
 ```{r daily.decadal.tyee.prep, include = FALSE}
 colnames(catch_data)
@@ -557,7 +614,7 @@ This plot will become a lot more interesting once I can get my hands on some his
   
 OK, well now we know not to bother fishing until early August, that I should book the off the last 3 weeks of August and that odds are that 2023 is not going to set a new record for most Tyee's captured. But who knows. 
 
-### 2.3 Does fish size vary within or between seasons?
+### 2.4 Does fish size vary within or between seasons?
 ```{r fish.size.prep, include = FALSE}
 colnames(raw_catch.data)
 
@@ -659,7 +716,7 @@ suppressWarnings(ggplotly(wt.scatter))
 
 What a mess. Pretty hard to identify any relationships from that figure. 
 
-### 2.4 Daily catches per year.
+### 2.5 Daily catches per year.
 To round this out, let's just have a look at the total number of fish caught per day over the past 20 years. 
 
 ```{r, all.catches.preps, echo = FALSE}
@@ -935,9 +992,9 @@ Interestingly, hatchery releases have never been higher
 
 ### 3.11 Exploitation Rates
 
-  +   Approximately 17% of fish released by the Quinsam hatchery are intercepted in Southeast Alaska commercial net (4.99%) and troll fisheries (11.95%), as well as an additional 1.84% that are intercepted in Alaskan sport fisheries [Rosenberger et al.2022](https://www.mccpacific.org/wp-content/uploads/2022/01/10Jan2022-SEAK-Catch-of-BC-Salmon-Technical-Report-Part-3-Chinook-Salmon-V1.pdf).
+  +   Approximately 17% of fish released by the Quinsam hatchery are intercepted in Southeast Alaska commercial net (4.99%) and troll fisheries (11.95%) while an additional 1.84% that are intercepted in Alaskan sport fisheries [Rosenberger et al.2022](https://www.mccpacific.org/wp-content/uploads/2022/01/10Jan2022-SEAK-Catch-of-BC-Salmon-Technical-Report-Part-3-Chinook-Salmon-V1.pdf).
   +   A [court ruling in May 2023](https://www.documentcloud.org/documents/23795630-jones-order) almost shut down the 2023 SE Alaska troll fishery.  Unfortunately for those aspiring to join the Tyee Club (and Orcas), that decision was [reversed](https://www.documentcloud.org/documents/23855199-panel-decision) in late June, 2023 and the fishery occurred from July 1 to 12, 2023, not sure whether it will resume again at a later date. 
-  +   I have not found any data indicating exploitation rates of Campbell/Quinsam Chinook within BC commercial and sport fisheries, however, given locations where maturing BC Chinook salmon are typically encountered and presumed migration routes, I think its reasonable to assume there is interception in sport and commercial fisheries in North Coast Vancouver Island, Haida Gwaii and along the west and southwest coast of the Island.    
+  +   I have not found any data reporting exploitation rates of Campbell/Quinsam Chinook within BC commercial and sport fisheries, however, given locations where maturing BC Chinook salmon are typically encountered and presumed migration routes, I think its reasonable to assume that these fish are intercepted by sport and commercial fisheries in North Coast Vancouver Island, Haida Gwaii and along the west and southwest coast of the Island. Without data to     
 
 
 ## 4. What could be affecting returns and catches?
@@ -995,14 +1052,17 @@ fry.flow <- flow_data %>% filter(Year >= 1985) %>%
                                                       "10" = "Sensitive",        #Spawn
                                                       "11" = "Sensitive",        #Spawn
                                                       "12" = "Sensitive"),       #Incubation
-                                 flow.change = lag(Value),  
-                                 incub.year = ifelse(Month <=3,Year-1,Year)) %>% # want previous year to continue into March of next year.
+                                 flow.change = Value - lag(Value),
+                                 relative.flow.change = flow.change/Value,
+                                 incub.year = ifelse(Month <=3,Year-1,Year)) # want previous year to continue into March of next year.
+  
+fry.flow.dat <- fry.flow %>%
                           group_by(incub.year, life.period) %>%
-                          summarize(max.flows = max(Value, na.rm = TRUE)) %>%
+                          summarize(max.flows = max(Value, na.rm = TRUE))%>%
                           filter(life.period == "Sensitive")
 
 ## Merge fry dataset with max flows dataset.
-fry.flow.dat <- fry.prod %>% inner_join(fry.flow, 
+fry.flow.dat <- fry.prod %>% inner_join(fry.flow.dat, 
                                         by = c('Year' = 'incub.year')) %>%  # merge 'Year' in fry.prod with       
                                                                             # 'incub.year' in fry.flow data
                               mutate(high.flow.reduced.fry = ifelse(max.flows >= 350, 0.1*total.fry,total.fry)) %>%
