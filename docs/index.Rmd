@@ -118,7 +118,7 @@ list.of.packages <- c("tidyverse",
 ## Load Data ---- 
 
 ##* 1. Prep Blank Date Data ---- 
-    date_seq <- data.frame(Date = seq(ymd('2002-07-01'), ymd('2022-09-30'), by = 'days')) %>%
+    date_seq <- data.frame(Date = seq(ymd('2002-07-01'), ymd('2023-09-30'), by = 'days')) %>%
                 mutate(Month = strftime(Date, format = "%m"),
                        Month = as.numeric(Month)) %>%
                 filter(between(Month,7,9))
@@ -231,12 +231,7 @@ list.of.packages <- c("tidyverse",
                     select(Waterbody, Year, Area, TotalReturns, yr.total.esc, 
                            yr.mean.total.esc, yr.relative.prop, yr.Area.total.esc, yr.Area.prop.esc)
       
-      
-                           
-                                           
-                      
-        
-        
+
 ## * 4. Flow Data (Tyee Season) ----
       ## Daily flow Data from 1949 to 2021
       flow_data <- read_excel(q.dat) 
@@ -390,7 +385,7 @@ cr_esc2 <- cr_esc %>% filter(Year >=2002)
 ## Merge escapement data with tyee catch data
 cr_data <- left_join(catch_data, cr_esc2, by = "Year")
     
-cr_yearly <- cr_data %>% filter(Year <= 2022) %>%
+cr_yearly <- cr_data %>% filter(Year <= 2023) %>%
                          group_by(Year, tyee_cycle4) %>%
                          summarize(Total.Catch        = mean(catch_yr.total),
                                    Overall.Mean.Catch = mean(catch_yrs.mean.total),
@@ -411,7 +406,7 @@ plot2 <- ggplot(cr_data) +
                        color = guide_legend(title = "Mean Tyee Catch", label = FALSE)) +
                 scale_y_continuous(breaks = seq(0, 100, 5),
                                     sec.axis = sec_axis(~.*25, name = "Escapement")) +  #scale secondary access by x25
-                scale_x_continuous(breaks = seq(2002,2022,2)) +
+                scale_x_continuous(breaks = seq(2002,2023,2)) +
                 theme_bw() +
                 theme(legend.direction = "horizontal",
                       legend.position = "bottom")
@@ -460,12 +455,10 @@ If we look at Escapement data (blue line) shown in `r fig_nums("plot2", display 
 3) It is also possible that years with high escapement and low Tyee numbers were due to an increased proportion of smaller fish returning to the Campbell. Without annual information on age structure I cannot tease this apart.
 
 Now, lets see when fish are most frequently captured throughout the season, and if there has been a change over time.
+
 ### 2.2 Cumulative catches per year.
 
 ```{r cumulative catch plot, include = FALSE}
-library(gridExtra)
-
-
 cum.catch <- catch_data %>% group_by(Year) %>%
                             mutate(cumulative.count = cumsum(catch_binary),
                                    date = case_when(year(Date) >= 0 ~ 'year<-'(Date, 2021)),
@@ -474,7 +467,11 @@ cum.catch <- catch_data %>% group_by(Year) %>%
                                    decade2 = recode(as.factor(decade),
                                                       "2000"  = "twotho",   
                                                       "2010"  = "twentyten",
-                                                      "2020"  = "twentytwenty"))
+                                                      "2020"  = "twentytwenty")) %>%
+                            ungroup() %>%
+                            group_by(decade2, date) %>%
+                            mutate(decadal.mean = mean(cumulative.count))
+
 
 str(cum.catch)
 colnames(cum.catch)
@@ -486,17 +483,20 @@ colnames(cum.catch)
 xs <- split(cum.catch, f = cum.catch$decade2)
 
 ## Plot for 2000's
-cum.p1 <- ggplot(xs$twotho,aes(x = date, y = cumulative.count, color = year)) + 
-                      geom_line() + 
-                      labs(x = "", y = "Total Number Tyee") +
-                      scale_x_date(date_minor_breaks = "1 day", 
-                                 date_breaks = '5 day', 
-                                 date_labels = '%b-%d', 
-                                 limits = c(as.Date("2021-07-25"), as.Date("2021-09-15"))) +
-                      facet_grid(~decade, scales = "free_y") +
-                      scale_y_continuous(breaks = seq(0,95,5)) +
-                      guides(color = guide_legend(title = "Year")) +
-                      theme_bw() 
+cum.p1 <- ggplot(xs$twotho) + 
+          geom_line(aes(x = date, y = cumulative.count, color = year)) + 
+          geom_line(aes(x = date, y = decadal.mean, linetype = "Decadal Mean"), linewidth = 0.8)+
+          labs(x = "", y = "Total Number Tyee") +
+          scale_x_date(date_minor_breaks = "1 day", 
+                       date_breaks = '5 day', 
+                       date_labels = '%b-%d', 
+                       limits = c(as.Date("2021-07-25"), as.Date("2021-09-15"))) +
+          facet_grid(~decade, scales = "free_y") +
+          scale_y_continuous(breaks = seq(0,95,5)) +
+          scale_linetype_manual(values = "dotdash") +
+          guides(color = guide_legend(title = "Year"),
+                 linetype = guide_legend(title = NULL, label = TRUE)) +
+          theme_bw() 
   
 ## Plot for 2010's
 cum.p2 <- cum.p1 %+% xs$'twentyten'
@@ -518,6 +518,10 @@ cum.catch.plot <- grid.arrange(cum.p1, cum.p2, cum.p3) +
 ## plotly figure
     suppressWarnings(grid.arrange(cum.p1, cum.p2, cum.p3))   
 ```
+**`r fig_nums("grid.arrange(cum.p1, cum.p2, cum.p3)", "Cumulative tally of Tyee's captured by decade. Note that values for 2023 are incomplete and only current to August 15, 2023.")`**
+
+ 
+
 
 ### 2.3 When fish are most frequently captured.
 
@@ -715,6 +719,65 @@ suppressWarnings(ggplotly(wt.scatter))
 **`r fig_nums("wt.scatter", "Weight of Tyee salmon caught per day since 2002.")`**
 
 What a mess. Pretty hard to identify any relationships from that figure. 
+
+#### 2.5.1 Historic fish size trends.
+
+Historic catch record data is available back to 1923, but only for newly registered members. So any fish captured by existing members are excluded. Either way, the data set still includes over 2880 records and offers a peak into the historic size range of fish captured in the Tyee pool.
+
+```{r historic catch data, include = FALSE}
+hist.catch.data <- read_excel(catch.records) 
+
+colnames(hist.catch.data)
+str(hist.catch.data)
+
+## Calculate mean from all historic catch record data.
+hist.catch <- hist.catch.data %>%
+                  group_by(Year) %>%
+                  mutate(mean.wt = mean(Weight))
+
+hist.plot  <- ggplot(hist.catch, aes(x = Year, y = Weight)) +
+                   geom_point(alpha=0.2) +
+                   geom_smooth(formula = y ~ x, method = "loess", se = TRUE) +
+                   scale_x_continuous(breaks = seq(1920,2015, 5)) +
+                   theme_bw()
+
+
+### calculate mean from random sample of 10 fish per year.
+hist.catch.random <- hist.catch.data %>% 
+                     group_by(Year) %>%
+                     slice_sample(n = 10) %>%
+                     mutate(mean.wt = mean(Weight),)
+
+hist.plot.rand  <- ggplot(hist.catch.random, aes(x = Year, y = Weight)) +
+                   geom_point(alpha=0.2) +
+                   geom_smooth(formula = y ~ x, method = "loess", se = TRUE) +
+                   scale_x_continuous(breaks = seq(1920,2015, 5)) +
+                   theme_bw()
+
+```
+
+If we plot the mean weight for each year we get the figure below which shows a fairly strong decreasing trend in fish size since about 1950.
+
+```{r, hist.catch.all, echo=FALSE}
+
+suppressWarnings(print(hist.plot))
+
+```
+
+**`r fig_nums("hist.plot", "Mean annual weight and SE of all fish recorded in the record book since 1923.")`**
+
+Given the variability in the number of fish that were captured each year, lets try to standardize the process by selecting a random sample of 10 fish from each year (or all fish if less than 10 were registered in a year). This produces the figure below. Which also shows a strong decreasing trend in fish size since the late 1940's and early 1950's.
+
+
+```{r, hist.catch.rand, echo=FALSE}
+
+suppressWarnings(print(hist.plot.rand))
+
+```
+
+**`r fig_nums("hist.plot.rand", "Mean annual weight and SE of 10 randomly selected fish recorded in the record book since 1923.")`**
+
+
 
 ### 2.5 Daily catches per year.
 To round this out, let's just have a look at the total number of fish caught per day over the past 20 years. 
