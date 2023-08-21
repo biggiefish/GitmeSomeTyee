@@ -80,10 +80,14 @@ list.of.packages <- c("tidyverse",
 #setwd("C:/Users/evogt/R Analysis/EAV/Tyee/")
 
 ## Define Input Files
-    #1. Catch Data
+    #1. Tyee Catch Data
     catch.dat <- "Data/TyeeCatchData.xlsx"
     
     catch.records <- "Data/TyeeCatch_RecordBook.xlsx"
+    
+    catch_effort <- "Data/TyeeCatch_Undersize_and_Effort.xlsx"
+    
+    catch_annualtyee <- "Data/TyeeCatch_Annual1933-2019.xlsx"
     
     #2. Escapement Data
     esc.dat <- "Data/Area13Escapement.xlsx"
@@ -317,15 +321,16 @@ list.of.packages <- c("tidyverse",
 I have compiled the following datasets to use in this analysis. Whether they are all incorporated is yet to be seen.
 
 1) Annual catch records from the [Tyee Club](https://www.tyeeclub.org/catch-records/>). 
-2) Discharge data collected on the Campbell River by the [Water Survey of Canada](https://wateroffice.ec.gc.ca/index_e.html).
-3) Annual Chinook Salmon escapement data available in the [DFO NuSEDS database](https://open.canada.ca/data/en/dataset/c48669a3-045b-400d-b730-48aafe8c5ee6).
-4) Annual catch statistics from the [North Pacific Anadromous Fish Commission](https://npafc.org/statistics/).
-5) Area based commercial catch statistics from DFO are [available from 2001 to 2016](https://www.pac.dfo-mpo.gc.ca/stats/smon/index-eng.html) 
-6) Straight of Georgia herring [spawn](https://www.pac.dfo-mpo.gc.ca/science/species-especes/pelagic-pelagique/herring-hareng/herspawn/tabsfram-eng.html) and [catch](https://www.pac.dfo-mpo.gc.ca/science/species-especes/pelagic-pelagique/herring-hareng/herspawn/tabcfram-eng.html) data. 
-7) Southeast Alaska commercial catch data from [North Pacific Anadromous Fish Commission](https://npafc.org/statistics/).
-8) Hatchery release statistics from [North Pacific Anadromous Fish Commission](https://npafc.org/statistics/).
-9) [Known ocean ranges of Pacific Salmon and Steelhead stocks](https://npafc.org/wp-content/uploads/2017/08/192USA.pdf) 
-10) [Chinook survival data prepared by Welch et al. 2020](https://datadryad.org/stash/dataset/doi:10.5061/dryad.w6m905qmm)  
+2) Angling effort and undersize fish catches from Tyee Club yearbooks (2019 to 2022).
+3) Discharge data collected on the Campbell River by the [Water Survey of Canada](https://wateroffice.ec.gc.ca/index_e.html).
+4) Annual Chinook Salmon escapement data available in the [DFO NuSEDS database](https://open.canada.ca/data/en/dataset/c48669a3-045b-400d-b730-48aafe8c5ee6).
+5) Annual catch statistics from the [North Pacific Anadromous Fish Commission](https://npafc.org/statistics/).
+6) Area based commercial catch statistics from DFO are [available from 2001 to 2016](https://www.pac.dfo-mpo.gc.ca/stats/smon/index-eng.html) 
+7) Straight of Georgia herring [spawn](https://www.pac.dfo-mpo.gc.ca/science/species-especes/pelagic-pelagique/herring-hareng/herspawn/tabsfram-eng.html) and [catch](https://www.pac.dfo-mpo.gc.ca/science/species-especes/pelagic-pelagique/herring-hareng/herspawn/tabcfram-eng.html) data. 
+8) Southeast Alaska commercial catch data from [North Pacific Anadromous Fish Commission](https://npafc.org/statistics/).
+9) Hatchery release statistics from [North Pacific Anadromous Fish Commission](https://npafc.org/statistics/).
+10) [Known ocean ranges of Pacific Salmon and Steelhead stocks](https://npafc.org/wp-content/uploads/2017/08/192USA.pdf) 
+11) [Chinook survival data prepared by Welch et al. 2020](https://datadryad.org/stash/dataset/doi:10.5061/dryad.w6m905qmm)  
 
 
 This is certainly an interesting dataset, especially given it is the centenary of the Tyee Club,  but it has its limitations. For example, there is no accessible information on effort (# boats per day), biological data (e.g. size, girth and age of tyees) or numbers of non-tyee salmon captured in the pool. 
@@ -455,6 +460,36 @@ If we look at Escapement data (blue line) shown in `r fig_nums("plot2", display 
 3) It is also possible that years with high escapement and low Tyee numbers were due to an increased proportion of smaller fish returning to the Campbell. Without annual information on age structure I cannot tease this apart.
 
 Now, lets see when fish are most frequently captured throughout the season, and if there has been a change over time.
+
+
+```{r historic tyee catches across years, eval = FALSE}
+
+catch_annualTyee <- read_excel(catch_annualtyee)
+
+colnames(catch_annualTyee)
+
+annual.catch.data <- left_join(catch_annualTyee, cr_esc, by = "Year")
+
+annual.catch <- annual.catch.data %>% 
+                mutate(
+                       decade   = format(floor_date(Year, years(10)), '%Y'),) %>%
+                group_by(decade) %>%
+                mutate(Mean_Catch = mean('# Tyee'),
+                       Mean_Esc   = mean(esc_count))
+
+
+
+cr_yearly <- cr_data %>% filter(Year <= 2023) %>%
+                         group_by(Year, tyee_cycle4) %>%
+                         summarize(Total.Catch        = mean(catch_yr.total),
+                                   Overall.Mean.Catch = mean(catch_yrs.mean.total),
+                                   Escapement         = mean(Esc_Scaled)) %>%
+                         mutate(Year = as.numeric(Year),
+                                Data.Type = "Escapement") 
+
+
+
+```
 
 ### 2.2 Cumulative catches per year.
 
@@ -852,7 +887,7 @@ suppressWarnings(print(plot4))
 
 ```
 
-**`r fig_nums("daily.decadal.catch", "Total fish captured by date and decade")`**
+**`r fig_nums("daily.decadal.catch", "Total fish captured by date and ")`**
 
 
 Without additional data there is not much else to look at. So let's change gears and start poking around at what may be contributing to observed patterns in catches and size.
