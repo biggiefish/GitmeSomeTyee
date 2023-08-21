@@ -462,7 +462,7 @@ If we look at Escapement data (blue line) shown in `r fig_nums("plot2", display 
 Now, lets see when fish are most frequently captured throughout the season, and if there has been a change over time.
 
 
-```{r historic tyee catches across years, eval = FALSE}
+```{r historic tyee catches across years, include = FALSE, eval = FALSE}
 
 catch_annualTyee <- read_excel(catch_annualtyee)
 
