@@ -18,7 +18,14 @@ output:
 
 ```{r link to site, include = FALSE}
 "https://biggiefish.github.io/GitmeSomeTyee/"
+
+#  To do list:
+#  - estimate proportion of tyee's returning to campbell if they are in fact all Age-6 (section 5.2)
+#  - plot number of undersize relative to tyee. calculate mean proportion of undersize fish caught for each Tyee.
+
 ```
+
+
 
 ## 1. What is this?
 A high-level, very casual, and often self-deprecating look at trends in catches of Tyee salmon in Campbell River's legendary [Tyee Pool](https://goo.gl/maps/4Nb4etqRVjoSSfqSA). All data exploration is being completed for [fun](https://i.giphy.com/media/Cz6TlrRVVyv9S/giphy.webp) and to learn some new tools (namely [R Markdown](https://rmarkdown.rstudio.com/) and [plotly](https://plotly.com/r/)). 
@@ -316,7 +323,7 @@ list.of.packages <- c("tidyverse",
 ```
 
 
-###    1.1 The data
+###  1.1 The Data
 
 I have compiled the following datasets to use in this analysis. Whether they are all incorporated is yet to be seen.
 
@@ -557,8 +564,59 @@ cum.catch.plot <- grid.arrange(cum.p1, cum.p2, cum.p3) +
 
  
 
+### 2.3 Proportion of Tyee Salmon relative to undersive fish.
 
-### 2.3 When fish are most frequently captured.
+How many fish < 30 lbs are captured during each season?
+```{r, undersize fish, include = FALSE}
+
+## Prep undersize dataset
+    undersize <- read_excel(catch_effort) %>%
+                 mutate(Date = as.Date(Date))
+
+colnames(undersize)
+str(undersize)
+str(date_seq)
+
+## Prepare Date Sequence (only include 2019-2022)
+    date.seq.undersize <- date_seq %>% mutate(Year = strftime(Date, format = "%Y"),
+                                              Year = as.numeric(Year)) %>%
+                                       filter(Year >= 2019, Year <=2022)
+
+## Merge with date_sequence
+    daily.undersize <- left_join(date.seq.undersize, undersize, by = c("Year","Month", "Date")) %>%
+                       rename(undersize = UndersizeFish) %>%
+                       mutate(undersize = coalesce(undersize, 0),
+                              Boats.AM = coalesce(Boats.AM, 0),
+                              Boats.Noon = coalesce(Boats.Noon, 0),
+                              Boats.PM = coalesce(Boats.PM, 0))
+
+                       
+    prop.undersize <- left_join(daily.undersize, raw_catch, by = "Date") %>%
+                            rename(binary_tyee = catch_binary) %>%
+                            mutate(binary_tyee = coalesce(binary_tyee, 0),
+                                   cum.tyee.catch    = cumsum(binary_tyee))
+
+    annual.prop.undersize <- prop.undersize %>% 
+                             group_by(Year) %>%
+                             summarise(total.tyee      = sum(binary_tyee),
+                                       total.undersize = sum(undersize),
+                                       total.fish      = total.tyee + total.undersize,
+                                       prop.tyee       = 100*total.tyee/total.fish,
+                                       total.boats     = sum(Boats.AM, Boats.Noon, Boats.PM),
+                                       prop.boats      = 100*total.fish/total.boats)
+
+
+```
+
+```{r table1, echo = FALSE}
+knitr::kable(annual.prop.undersize, col.names = c("Year", "# Tyee", "# Undersize Fish", "Total Fish", 
+                                                  "% Tyee", "Total Boats", "% Boats Catching"),
+             digits = 1,  align=rep('c', 5),
+             caption = "Table 1. Summary of undersize catches and effort from 2019 to 2022")
+```
+
+
+### 2.4 When fish are most frequently captured.
 
 The Tyee season runs from July 15 to September 15. I need to pick my battles with my wife and boss. Let's see which days I should be fighting for!? 
 
@@ -736,6 +794,7 @@ colnames(raw_catch.data)
 str(raw_catch.data)
 min(raw_catch.data$DateStandard)
 max(raw_catch.data$DateStandard)
+
 raw_catch.data <- raw_catch.data %>% mutate(DateStandard = as.Date(DateStandard))
 
 wt.scatter <- ggplot(raw_catch.data) +
@@ -980,10 +1039,10 @@ age_table1 <- age_data %>% select(Waterbody, Age, n, bin_min, bin_max, meanFL, S
 ```
 
  
-```{r table1, echo = FALSE}
+```{r table2, echo = FALSE}
 knitr::kable(age_table1, col.names = c("Waterbody", "Age", "n", "% of Total", "Size Range <br>(mm)", "Mean Lenght <br>(mm)"),
              digits = 1,  align=rep('c', 5),
-             caption = "Table 1. Size at age of Chinook Salmon captured in Campbell River watershed from [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf)")
+             caption = "Table 2. Size at age of Chinook Salmon captured in Campbell River watershed from [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf)")
 ```
 
   
@@ -1278,18 +1337,19 @@ We can expand this to estimate the number of Tyee salmon that will return if we 
  
   
 
-## 5. So, what can we look at? 
+## 5. What explains the variability between years? 
 
 *Note, this is where shit is going to get weird.  At this point I am mostly just making shots in the dark and everything should be considered very skeptically.*
 
-Off the top of my head there are two ways we can approach this:
+Off the top of my head there are a couple ways we can approach this:
 
-1.) How many fish should come back based on past on escapement counts and available biological data.
+1.) How many fish should come back based on past on escapement counts and available biological data. Basically, this is just making a bunch of estimates about survival at different life stages and then comparing our predicted returns to what actually returned. It won't actually tell us anything, but is a fun exercise.  
 
 2.) We can look at what factors influenced how many fish were available for capture in the Tyee pool (i.e. how historic 
   conditions may have contributed to observed captures), and/or;
   
-3.) We can look at what factors influenced how returning fish were captured (i.e. conditions during the fishing season)
+3.) We can look at what factors influenced how returning fish were captured (i.e. conditions during the fishing season).
+
 
 ### 5.1 How many fish should come back?
 
@@ -1470,7 +1530,10 @@ Well that's interesting. There are periods when my predicted returns closely ali
   +   There are also years where something positive appears to have happened and far more fish than expected returned to the river (1999 to 2001, 2020).
 
 ### 5.2 How many tyee should be returning?
-Let's look at little closer at how many Tyee salmon may be returning in a given year.If all Tyee salmon were captured each year, we would be actively selecting against large fish, so we would expect to see a rapid and continuous decline in the total number of Tyees returning each year (which I suppose we are). But, I have had the opportunity to snorkel the Campbell River canyon a number of times and have seen spawning Tyee, and last year there were lots of Tyee captured in the river... though not sure what their fate was. Aynways, all this to say that its unlikely every Tyee is captured in the pool, and the actual number returning to the pool should be at least equal to or higher than the number captured. 
+Let's look at little closer at how many Tyee salmon may be returning in a given year.If all Tyee salmon were captured each year, we would be actively selecting against large fish, so we would expect to see a rapid and continuous decline in the total number of Tyees returning each year (which I suppose we are). But, I have had the opportunity to snorkel the Campbell River canyon a number of times and have seen spawning Tyee, and in 2022 there were lots of Tyee captured in the river... but that was likely due to higher than usual flows throughout the season. Anyways, all this to say that its unlikely every Tyee is captured in the pool, and the actual number returning to the pool should be at least equal to or higher than the number captured. 
+
+Among anglers who have been involved in the club for a long time it is generally believed that most Tyee are Age-6. And it would make sense that larger fish are larger because they spend an extra year in the ocean. If this is the case, then my assumptions below are totally out to lunch (quite likely) as [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf) data suggest that Age-6 fish represent less than 1% of the total return to the Campbell and Quinsam systems. 
+
 
 Reminder of key assumptions in the plot:
 
@@ -1812,7 +1875,8 @@ Is return age genetic? Or environmental?
 
 
 
-### Supplemental Tables and Figures
+## 6. Supplemental Tables and Figures
+
 ```{r table2prep, include = FALSE}
 # Table of size by age class and sex.
 age_table2 <- age_data %>% select(Waterbody, Sex, Age, n, Perc.Total.by.Sex, Perc.Total.by.Stream, bin_range, meanFL, SE)
