@@ -21,7 +21,9 @@ output:
 
 #  To do list:
 #  - estimate proportion of tyee's returning to campbell if they are in fact all Age-6 (section 5.2)
-#  - plot number of undersize relative to tyee. calculate mean proportion of undersize fish caught for each Tyee.
+#  - plot number of undersize relative to tyee. calculate mean proportion of undersize fish caught for each Tyee. Do this for each day,      then take mean for year.
+#  - calculate proportion of escapement that is captured in Tyee pool each year. compare to previous years.
+
 
 ```
 
@@ -560,13 +562,14 @@ cum.catch.plot <- grid.arrange(cum.p1, cum.p2, cum.p3) +
 ## plotly figure
     suppressWarnings(grid.arrange(cum.p1, cum.p2, cum.p3))   
 ```
-**`r fig_nums("grid.arrange(cum.p1, cum.p2, cum.p3)", "Cumulative tally of Tyee's captured by decade. Note that values for 2023 are incomplete and only current to August 15, 2023.")`**
+**`r fig_nums("grid.arrange(cum.p1, cum.p2, cum.p3)", "Cumulative tally of Tyee's captured by decade.")`**
 
  
 
-### 2.3 Proportion of Tyee Salmon relative to undersive fish.
+### 2.3 Effort and catches of undersize fish. 
 
-How many fish < 30 lbs are captured during each season?
+The Tyee club weighmaster has been recording the number of boats fishing morning, noon and evening tides, as well as the number of undersize fish captured throughout the season. This data has been recorded for ~8'ish years, however, data is only publicaly available from 2019 onwards.
+
 ```{r, undersize fish, include = FALSE}
 
 ## Prep undersize dataset
@@ -603,7 +606,8 @@ str(date_seq)
                                        total.fish      = total.tyee + total.undersize,
                                        prop.tyee       = 100*total.tyee/total.fish,
                                        total.boats     = sum(Boats.AM, Boats.Noon, Boats.PM),
-                                       prop.boats      = 100*total.fish/total.boats)
+                                       prop.boats      = 100*total.fish/total.boats) %>%
+                              mutate(Year = as.character(Year))
 
 
 ```
@@ -611,7 +615,9 @@ str(date_seq)
 ```{r table1, echo = FALSE}
 knitr::kable(annual.prop.undersize, col.names = c("Year", "# Tyee", "# Undersize Fish", "Total Fish", 
                                                   "% Tyee", "Total Boats", "% Boats Catching"),
-             digits = 1,  align=rep('c', 5),
+             format.args = list(big.mark = ","),
+             digits = 1,  
+             align=rep('c', 5),
              caption = "Table 1. Summary of undersize catches and effort from 2019 to 2022")
 ```
 
