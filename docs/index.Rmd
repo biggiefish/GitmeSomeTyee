@@ -83,6 +83,12 @@ list.of.packages <- c("tidyverse",
     library(gridExtra)
     library(plotly)
     library(htmlwidgets)
+    library(formattable)
+    library(devtools)
+    devtools::install_github("kupietz/kableExtra")
+
+    library(kableExtra)
+
 
 
 ## Define Working Directory ---
@@ -613,6 +619,7 @@ str(date_seq)
 ```
 
 ```{r table1, echo = FALSE}
+
 knitr::kable(annual.prop.undersize, col.names = c("Year", "# Tyee", "# Undersize Fish", "Total Fish", 
                                                   "% Tyee", "Total Boats", "% Boats Catching"),
              format.args = list(big.mark = ","),
@@ -621,6 +628,54 @@ knitr::kable(annual.prop.undersize, col.names = c("Year", "# Tyee", "# Undersize
              caption = "Table 1. Summary of undersize catches and effort from 2019 to 2022")
 ```
 
+
+
+```{r}
+plot.undersize <- prop.undersize %>%
+                  mutate(date.std =  case_when(year(Date) >= 0 ~ 'year<-'(Date, 2021))) %>%
+                  rename(Tyee = binary_tyee,
+                         Undersize = undersize)
+
+under.line <- plot.undersize %>% 
+                   group_by(Date) %>%
+                   mutate(total.fish = Tyee + Undersize,
+                          cum.tyee = cumsum(Tyee),
+                          cum.under = cumsum(Undersize),
+                          cum.total = cumsum(total.fish)) %>%
+              select(Year, Date, date.std, Undersize, Tyee, cum.tyee, cum.under, cum.total) %>%
+              pivot_longer(cols     = c(cum.tyee, cum.under, cum.total),
+                           names_to = "Catch.Type",
+                           values_to = "Cumulative.Catch",
+                           values_drop_na = TRUE) 
+
+
+under.col <- plot.undersize %>%
+                  select(Year, Date, date.std, Undersize, Tyee) %>%
+                  pivot_longer(cols     = c(Undersize, Tyee),
+                               names_to = "Catch.Type",
+                               values_to = "Total.Catch",
+                               values_drop_na = TRUE) 
+
+plot.under.column <- ggplot(under.col) +
+                        geom_col(aes(x = date.std, y = Total.Catch, fill = Catch.Type)) +
+                        labs(x = "Date", y = "Number of Fish") +
+                        scale_x_date(date_minor_breaks = "1 day", date_breaks = '1 week', 
+                                     date_labels = '%b-%d', 
+                                     limits = c(as.Date("2021-07-01"), as.Date("2021-09-15"))) +
+                        guides(fill = guide_legend(title = "Fish Size")) +
+                        facet_grid(Year~.) +
+                        theme_bw()
+
+plot.under.line <- ggplot(under.line) +
+                        geom_line(aes(x = date.std, y = Cumulative.Catch, color = Catch.Type)) +
+                        labs(x = "Date", y = "Number of Fish") +
+                        scale_x_date(date_minor_breaks = "1 day", date_breaks = '1 week', 
+                                     date_labels = '%b-%d', 
+                                     limits = c(as.Date("2021-07-01"), as.Date("2021-09-15"))) +
+                        guides(fill = guide_legend(title = "Fish Size")) +
+                        facet_grid(Year~.) +
+                        theme_bw()
+```
 
 ### 2.4 When fish are most frequently captured.
 
@@ -717,7 +772,7 @@ This plot will become a lot more interesting once I can get my hands on some his
   
 OK, well now we know not to bother fishing until early August, that I should book the off the last 3 weeks of August and that odds are that 2023 is not going to set a new record for most Tyee's captured. But who knows. 
 
-### 2.4 Does fish size vary within or between seasons?
+### 2.5 Does fish size vary within or between seasons?
 ```{r fish.size.prep, include = FALSE}
 colnames(raw_catch.data)
 
@@ -879,7 +934,7 @@ suppressWarnings(print(hist.plot.rand))
 
 
 
-### 2.5 Daily catches per year.
+### 2.6 Daily catches per year.
 To round this out, let's just have a look at the total number of fish caught per day over the past 20 years. 
 
 ```{r, all.catches.preps, echo = FALSE}
@@ -956,6 +1011,86 @@ suppressWarnings(print(plot4))
 
 
 Without additional data there is not much else to look at. So let's change gears and start poking around at what may be contributing to observed patterns in catches and size.
+
+### 2.7 Who is catching the most fish?
+
+
+```{r catches by rower and angler}
+colnames(raw_catch.data)
+str(raw_catch.data)
+
+catchers <- raw_catch.data %>% 
+            mutate(binary = 1,
+                   Date = as.Date(RawDate),
+                   Decade = format(floor_date(Date, years(10)), '%Y'))
+
+rowers.overall <-  catchers %>%
+                      group_by(Rower)  %>%
+                      summarize(Total.Fish = sum(binary))  
+
+rowers.per.decade <- catchers %>%
+                       group_by(Decade, Rower)  %>%
+                       summarize(Total.Fish = sum(binary)) %>%
+                       spread(Decade, Total.Fish) %>%
+                       replace(is.na(.),0) %>%
+                       mutate(Total.Fish = select(., 2:4) %>% rowSums(na.rm=TRUE)) %>%
+                       arrange(desc(Total.Fish))
+                       
+rowers.per.year <- catchers %>%
+                      group_by(Decade, Year, Rower)  %>%
+                      summarize(Total.Fish = sum(binary))
+
+
+Anglers.overall <-  catchers %>%
+                      group_by(Angler)  %>%
+                      summarize(Total.Fish = sum(binary))  
+
+Anglers.per.decade <- catchers %>%
+                       group_by(Decade, Angler)  %>%
+                       summarize(Total.Fish = sum(binary)) %>%
+                       spread(Decade, Total.Fish) %>%
+                       replace(is.na(.),0) %>%
+                       mutate(Total.Fish = select(., 2:4) %>% rowSums(na.rm=TRUE)) %>%
+                       arrange(desc(Total.Fish))
+
+Anglers.per.year <- catchers %>%
+                      group_by(Decade, Year, Angler)  %>%
+                      summarize(Total.Fish = sum(binary))
+
+```
+```{r, table2 rower table, echo = FALSE}
+kable(rowers.per.decade,
+      "html",
+      booktabs = T,
+      align = c("c"),
+      col.names = c("Rower", "2000", "2010", "2020", "Total"),
+      caption = "Table 2. Rowers registering the most fish since 2020.") %>%
+  kable_styling("striped", full_width =  FALSE,
+                position = "left", 
+                font_size = 12,
+                fixed_thead = TRUE) %>%
+  add_header_above(c(" " = 1, "Tyee Rowed" = 4))
+
+```
+
+```{r, table 3 anglers, echo = FALSE}   
+
+
+kable(Anglers.per.decade,
+      "html",
+      booktabs = T,
+      align = c("c"),
+      col.names = c("Angler", "2000", "2010", "2020", "Total"),
+      caption = "Table 3. Anglers registering the most fish since 2020.") %>%
+  kable_styling("striped", full_width =  FALSE,
+                position = "left", 
+                font_size = 12,
+                fixed_thead = TRUE) %>%
+  add_header_above(c(" " = 1, "Tyee Registered" = 4))
+```
+
+
+
 
 ## 3. What do we know about CR Chinook?
 
