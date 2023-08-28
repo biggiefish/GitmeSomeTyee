@@ -84,9 +84,8 @@ list.of.packages <- c("tidyverse",
     library(plotly)
     library(htmlwidgets)
     library(formattable)
-    library(devtools)
-    devtools::install_github("kupietz/kableExtra")
-
+    #library(devtools)
+    #devtools::install_github("kupietz/kableExtra")
     library(kableExtra)
 
 
@@ -1012,22 +1011,29 @@ suppressWarnings(print(plot4))
 
 Without additional data there is not much else to look at. So let's change gears and start poking around at what may be contributing to observed patterns in catches and size.
 
-### 2.7 Who is catching the most fish?
+### 2.7 Who's who in the zoo?
 
+Let's have a look at who has been catching the most fish! 
 
-```{r catches by rower and angler}
-colnames(raw_catch.data)
-str(raw_catch.data)
-
+```{r catches by rower and angler, echo = FALSE}
+## Prepare data showing who has caught what...
 catchers <- raw_catch.data %>% 
             mutate(binary = 1,
+                   #binary = if_else(Angler == Rower, 0.5,1),
                    Date = as.Date(RawDate),
                    Decade = format(floor_date(Date, years(10)), '%Y'))
 
-rowers.overall <-  catchers %>%
-                      group_by(Rower)  %>%
-                      summarize(Total.Fish = sum(binary))  
+                   
+                   
+                   
+## Create list of all people who are registered as an angler or rower
+people <- catchers %>% select("Rower","Angler") %>%
+                       pivot_longer(Rower:Angler) %>%
+                       select(value) %>%
+                       unique() %>%
+                       rename(Member = value)
 
+## Calculate number of fish each member has rowed
 rowers.per.decade <- catchers %>%
                        group_by(Decade, Rower)  %>%
                        summarize(Total.Fish = sum(binary)) %>%
@@ -1035,16 +1041,8 @@ rowers.per.decade <- catchers %>%
                        replace(is.na(.),0) %>%
                        mutate(Total.Fish = select(., 2:4) %>% rowSums(na.rm=TRUE)) %>%
                        arrange(desc(Total.Fish))
-                       
-rowers.per.year <- catchers %>%
-                      group_by(Decade, Year, Rower)  %>%
-                      summarize(Total.Fish = sum(binary))
 
-
-Anglers.overall <-  catchers %>%
-                      group_by(Angler)  %>%
-                      summarize(Total.Fish = sum(binary))  
-
+## Calculate number of fish each angler has caught
 Anglers.per.decade <- catchers %>%
                        group_by(Decade, Angler)  %>%
                        summarize(Total.Fish = sum(binary)) %>%
@@ -1053,44 +1051,69 @@ Anglers.per.decade <- catchers %>%
                        mutate(Total.Fish = select(., 2:4) %>% rowSums(na.rm=TRUE)) %>%
                        arrange(desc(Total.Fish))
 
-Anglers.per.year <- catchers %>%
-                      group_by(Decade, Year, Angler)  %>%
-                      summarize(Total.Fish = sum(binary))
+## Merge list of members with rowers summary.
+member.row.summary <- left_join(people, 
+                                rowers.per.decade, 
+                                by = c('Member' = 'Rower'))
 
+## Merge list of member rowers with angler summary
+member.summary <- left_join(member.row.summary, 
+                            Anglers.per.decade, 
+                            by = c('Member' = 'Angler')) %>%
+                  rename("2000_row" = "2000.x",
+                         "2010_row" = "2010.x",
+                         "2020_row" = "2020.x",
+                         "Total_row" = "Total.Fish.x",
+                         "2000_angled" = "2000.y",
+                         "2010_angled" = "2010.y",
+                         "2020_angled" = "2020.y",
+                         "Total_angled" = "Total.Fish.y") %>%
+                  replace(is.na(.),0) %>%
+                  mutate(Total.Tyee = rowSums(pick("Total_row","Total_angled"), na.rm = T),
+                         rank = rank(-Total.Tyee, ties.method = "min")) %>%
+                  arrange(desc(Total.Tyee), Member) %>%
+                  relocate(c(rank, Total.Tyee), .before = "2000_row")
+
+
+## Reduce list to show only members who have caught more than 5 tyee
+member.summary.top <- member.summary %>% filter(Total.Tyee >= 5)
+
+## Reduce list to show only members who have caught more than 5 tyee
+member.summary.bottom <- member.summary %>% filter(Total.Tyee < 5)
+                           
 ```
-```{r, table2 rower table, echo = FALSE}
-kable(rowers.per.decade,
+
+```{r, table2 member.summary table, echo = FALSE}
+kable(member.summary.top,
       "html",
       booktabs = T,
       align = c("c"),
-      col.names = c("Rower", "2000", "2010", "2020", "Total"),
-      caption = "Table 2. Rowers registering the most fish since 2020.") %>%
+      col.names = c("Member", "Rank","(Rowed + Angled)", "2000's", "2010's", "2020's", "Total", "2000's", "2010's", "2020's", "Total"),
+      caption = "Table 2. Number of fish captured and rowed by anglers and guides who have caught more than 5 Tyee, per decade since 2002.") %>%
+  column_spec(c(3,7,11), bold = TRUE) %>%
   kable_styling("striped", full_width =  FALSE,
                 position = "left", 
                 font_size = 12,
                 fixed_thead = TRUE) %>%
-  add_header_above(c(" " = 1, "Tyee Rowed" = 4))
+  add_header_above(c(" " = 2,"Total Tyee" =1, "Tyee Rowed" = 4, "Tyee Angled" = 4))
 
 ```
 
-```{r, table 3 anglers, echo = FALSE}   
-
-
-kable(Anglers.per.decade,
+```{r, table3 member.summary table.bottom, echo = FALSE}
+kable(member.summary.bottom,
       "html",
       booktabs = T,
       align = c("c"),
-      col.names = c("Angler", "2000", "2010", "2020", "Total"),
-      caption = "Table 3. Anglers registering the most fish since 2020.") %>%
+      col.names = c("Member", "Rank","(Rowed + Angled)", "2000's", "2010's", "2020's", "Total", "2000's", "2010's", "2020's", "Total"),
+      caption = "Table 2. Number of fish captured and rowed by anglers and guides who have caught less than 5 Tyee, per decade since 2002.") %>%
+  column_spec(c(3,7,11), bold = TRUE) %>%
   kable_styling("striped", full_width =  FALSE,
                 position = "left", 
                 font_size = 12,
                 fixed_thead = TRUE) %>%
-  add_header_above(c(" " = 1, "Tyee Registered" = 4))
+  add_header_above(c(" " = 2,"Total Tyee" =1, "Tyee Rowed" = 4, "Tyee Angled" = 4))
+
 ```
-
-
-
 
 ## 3. What do we know about CR Chinook?
 
