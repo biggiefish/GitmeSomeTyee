@@ -197,7 +197,7 @@ list.of.packages <- c("tidyverse",
         catch_dat <- left_join(catch_dat, catch_yrwk, by = c("Year", "Weeknum"))
         catch_data <- left_join(catch_dat, catch_wk, by = "Weeknum")
 
-        colnames(catch_data)                               
+                                 
  
 ## * 3. Escapement Data ----
         ## Load Data      
@@ -221,7 +221,6 @@ list.of.packages <- c("tidyverse",
         all_esc <- read_excel(all.esc.data)
         
         ## All escapement data for Quinsam and Campbell Rivers
-        colnames(all_esc)
         crQ_esc <-all_esc %>% filter(Waterbody == c("CAMPBELL RIVER","QUINSAM RIVER"),            # only show data for CR
                                  Year >=1990,
                                  Species == "Chinook") %>% # data from prior to tyee catch data so we can predict tyee returns.    
@@ -234,9 +233,7 @@ list.of.packages <- c("tidyverse",
                                     Esc_Mean =  mean(esc_count))
         
       ## All escapement.
-      colnames(all_esc)
-      
-      all.esc.prop <- all_esc %>% 
+     all.esc.prop <- all_esc %>% 
                 filter(Species == "Chinook") %>%
                 group_by(Year) %>%
                     mutate(yr.total.esc = sum(TotalReturns)) %>% # Total escapement per year.
@@ -325,7 +322,6 @@ list.of.packages <- c("tidyverse",
                                Species == "Chinook") %>%
                         group_by(Area, Prov.State, Year) %>%
                         mutate(Overall.Total.Catch = sum(Total.Catch))
-    colnames(comm.catch.dat)
     
     
 ## 7. Survival Data
@@ -484,8 +480,6 @@ Now, lets see when fish are most frequently captured throughout the season, and 
 
 catch_annualTyee <- read_excel(catch_annualtyee)
 
-colnames(catch_annualTyee)
-
 annual.catch.data <- left_join(catch_annualTyee, cr_esc, by = "Year")
 
 annual.catch <- annual.catch.data %>% 
@@ -527,12 +521,6 @@ cum.catch <- catch_data %>% group_by(Year) %>%
                             group_by(decade2, date) %>%
                             mutate(decadal.mean = mean(cumulative.count)) %>%
                             arrange(desc(decade2))
-
-
-str(cum.catch)
-colnames(cum.catch)
-
-
 
 
 ## Prepare plot for each decade (so separate legend for each decade)
@@ -588,10 +576,6 @@ The Tyee club weighmaster has been recording the number of boats fishing morning
 ## Prep undersize dataset
     undersize <- read_excel(catch_effort) %>%
                  mutate(Date = as.Date(Date))
-
-colnames(undersize)
-str(undersize)
-str(date_seq)
 
 ## Prepare Date Sequence (only include 2019-2022)
     date.seq.undersize <- date_seq %>% mutate(Year = strftime(Date, format = "%Y"),
@@ -690,7 +674,7 @@ The Tyee season runs from July 15 to September 15. I need to pick my battles wit
 
 #### 2.4.1 First Tyee of the Year
 ```{r, first.catch.prep, include = FALSE}
-colnames(catch_data)
+
 
 first.catch <- catch_data %>% mutate(date.std = case_when(year(Date) >= 0 ~ 'year<-'(Date, 2021))) %>%    #Set all dates to same year)
                               filter(catch_binary > 0) %>%
@@ -701,8 +685,6 @@ first.catch <- catch_data %>% mutate(date.std = case_when(year(Date) >= 0 ~ 'yea
                               mutate(total.catch = if_else(first.fish == Date, catch_binary,0),
                                      binary.catch = 1) %>%
                               filter(total.catch != 0)
-colnames(first.catch)
-
 
 first.catch.plot <- ggplot(first.catch) +
                           geom_bar(aes(x = date.std, y = total.catch, fill = Year), stat = "identity") +
@@ -733,8 +715,7 @@ Let's see when the first Tyee are most frequently captured each season. Alright,
 #### 2.4.2 When the most Tyee's are captured each year.
 
 ```{r daily.decadal.tyee.prep, include = FALSE}
-colnames(catch_data)
-str(catch_data)
+
 
 daily.decadal.catch <- catch_data %>% 
                             mutate(decade   = format(floor_date(Date, years(10)), '%Y'),             ## calculate decade
@@ -742,8 +723,6 @@ daily.decadal.catch <- catch_data %>%
                             group_by(decade, date.std) %>%
                             summarize(catch = sum(catch_binary))
 
-colnames(daily.decadal.catch)
-str(daily.decadal.catch)
 
 group.colors <- c(2000 == "lightblue", 2010 == "dodgerblue", 2020 =="blue1")
                           
@@ -781,9 +760,7 @@ OK, well now we know not to bother fishing until early August, that I should boo
 
 ### 2.5 Does fish size vary within or between seasons?
 ```{r fish.size.prep, include = FALSE}
-colnames(raw_catch.data)
 
-str(raw_catch.data)
 fish.size <- raw_catch.data %>% mutate(weight = as.numeric(Weight2),
                                        Date   = as.Date(RawDate),
                                        decade   = format(floor_date(Date, years(10)), '%Y'),  ) %>%
@@ -858,11 +835,6 @@ Well that is a bit better. The overall mean size of Tyee has stayed relatively s
 
 
 ```{r fish size by date, include = FALSE}
-colnames(raw_catch.data)
-str(raw_catch.data)
-min(raw_catch.data$DateStandard)
-max(raw_catch.data$DateStandard)
-
 raw_catch.data <- raw_catch.data %>% mutate(DateStandard = as.Date(DateStandard))
 
 wt.scatter <- ggplot(raw_catch.data) +
@@ -888,9 +860,6 @@ Historic catch record data is available back to 1923, but only for newly registe
 
 ```{r historic catch data, include = FALSE}
 hist.catch.data <- read_excel(catch.records) 
-
-colnames(hist.catch.data)
-str(hist.catch.data)
 
 ## Calculate mean from all historic catch record data.
 hist.catch <- hist.catch.data %>%
@@ -987,7 +956,7 @@ plot3 <-    ggplot(flow.catch.2022) +
                  theme_bw() +
                  theme(legend.position = "bottom") 
 
-#str(flow.catch.recent)
+
 # Plot of # Tyee per day relative to flow, from 2002 to 2022.
 plot4 <-    ggplot(flow.catch.recent) +
                  geom_bar(aes(x = date.std, y = catch_scaled, fill = PARAM), stat= "identity", color = "Navy") +
@@ -1146,8 +1115,8 @@ recent.summary <- left_join(recent.row.members,
                   filter(Member != 0, Total.Tyee > 0)
                            
 ```
-
- 
+ .
+ .
 ```{r, table2 recent.member.summary table, echo = FALSE}
 kable(recent.summary,
       "html",
@@ -1156,15 +1125,22 @@ kable(recent.summary,
       col.names = c("Member", "Rank","(Rowed + Angled)", "2018", "2019", "2020", "2021", "2022", "2023",  "Total", 
                     "2018", "2019", "2020", "2021", "2022", "2023", "Total"),
       caption = "Table 2. Number of fish captured and rowed by anglers and guides since 2018.") %>%
-  column_spec(c(3,10,17), bold = TRUE) %>%
+  column_spec(c(1, 3,10,17), bold = TRUE) %>%
   kable_styling("striped", full_width =  FALSE,
                 position = "left", 
                 font_size = 12,
                 fixed_thead = TRUE) %>%
   add_header_above(c(" " = 2,"Total Tyee" = 1, "Tyee Rowed" = 7, "Tyee Angled" = 7)) %>%
-  scroll_box(width = "800px", height = "400px")
+  scroll_box(width = "1000px", height = "400px")
 
 ```
+
+
+
+A total of `r stutz$all.fish[stutz$Decade == 2020]` fish have been registered since 2020, or which Mike Stutzel has captured `r stutz$stutz[stutz$Decade == 2020]*stutz$all.fish[stutz$Decade == 2020]` or `r label_percent()(stutz$stutz[stutz$Decade == 2020])`. In the current dataset, nobody has stats like that! Randy caught (rowed or angled) the most fish in the 2000's (n = 23 of 384 registered) and 2010's (n = 15 of 268 registered), but his fish represent `r label_percent()(23/384)` of the total catch in each decade. Mike, if you read this and feel like rowing around some deadweight give me a shout!
+
+Note though that this summary does not include Tyee that were recorded but not registered (e.g. fish captured or released by non-registered anglers).
+
 
  
 ```{r, table3 member.summary table, echo = FALSE}
@@ -1174,7 +1150,7 @@ kable(member.summary.top,
       align = c("c"),
       col.names = c("Member", "Rank","(Rowed + Angled)", "2000's", "2010's", "2020's", "Total", "2000's", "2010's", "2020's", "Total"),
       caption = "Table 3. Number of fish captured and rowed by anglers and guides who have caught more than 5 Tyee, per decade since 2002.") %>%
-  column_spec(c(3,7,11), bold = TRUE) %>%
+  column_spec(c(1, 3,7,11), bold = TRUE) %>%
   kable_styling("striped", full_width =  FALSE,
                 position = "left", 
                 font_size = 12,
@@ -1184,8 +1160,12 @@ kable(member.summary.top,
 
 ```
  
+
+
+Looks like I need to try to get on with Randy Killoran too! 
+
+So nobody feels left out, here is a summary of all fish registered since 2002.
  
-Looks like I need to try to get on Randy Killoran or Mike Stutzel's boats. If you guys see this, I would love to get out for a tide! A total of `r stutz$all.fish[stutz$Decade == 2020]` fish have been registered since 2020, or which Mike Stutzel has captured `r stutz$stutz[stutz$Decade == 2020]*stutz$all.fish[stutz$Decade == 2020]` or `r label_percent()(stutz$stutz[stutz$Decade == 2020])`. In the current dataset, nobody has stats like that! Randy caught (rowed or angled) the most fish in the 2000's (n = 23 of 384 registered) and 2010's (n = 15 of 268 registered), but his fish represent `r label_percent()(23/384)` of the total catch in each decade. 
  
 ```{r, table3 member.summary table.bottom, echo = FALSE}
 kable(member.summary.bottom,
@@ -1259,7 +1239,7 @@ suppressWarnings(ggplotly(crq_esc.plot))
   
 
   
-```{r}
+```{r catch dat, include = FALSE}
 catch_data %>% filter(Year >=2015, Year <=2018) %>% 
                group_by(Year) %>%
                summarize(total.catch = sum(catch_binary))          
@@ -1366,7 +1346,6 @@ surv.datas <- surv.data %>% filter(Region == "SOG",
                                    SmoltAge == 0)
 
 surv.quinsam <- surv.data %>% filter(Stock == "Quinsam")
-colnames(surv.datas)
 
   breaks = 10**(1:10)
   scale_y_log10(breaks = breaks, labels = comma(breaks))
@@ -1390,7 +1369,7 @@ surv.plotly <- ggplotly(surv.plot)
         surv.plotly$x$data[[i]]$name =  gsub("\\(","",str_split(surv.plotly$x$data[[i]]$name,",")[[1]][1])
     }
 }
-colnames(surv.quinsam)
+
 surv.quinsam %>% filter(SmoltYear >= 2000) %>%
                  summarize(mean = mean(SAR),
                            min  = min(SAR),
@@ -1570,7 +1549,6 @@ Tyee fishermen may be among the toughest of tough (*cough, cough*), but even so,
 For now, I have little interest in combing through historic weather data. But, I already have flow data. So let's see how river flows have varied between seasons.
   
 ```{r flow.catch.plot, include = FALSE}
-colnames(flow.catch.recent)
 
 flow.catch.dat2 <- flow.catch.recent %>% 
                       group_by(Year, tyee_cycle4) %>%
@@ -1586,7 +1564,7 @@ flow.catch.plt <- ggplot(flow.catch.dat2) +
                       
   
   mean(flow.catch.dat2$q.yr.mean)
-str(flow.catch.recent)
+#str(flow.catch.recent)
 
 # flow.catch.plot <-    ggplot(flow.catch.recent) +
 #                          geom_col(aes(x = Year, y = catch_yr.total, fill = tyee_cycle4)) +
@@ -1769,12 +1747,11 @@ pred.jnk6 <- catch_data %>% select(Year, catch_yr.total) %>%
                             group_by(Year) %>%
                             summarize(catch_yr.total = mean(catch_yr.total)) %>%
                             mutate(Year = as.numeric(Year))
-str(pred.jnk5$Year)
-str(pred.jnk6$Year)
+#str(pred.jnk5$Year)
+#str(pred.jnk6$Year)
 
 pred.plot.dat <- left_join(pred.jnk5, pred.jnk6, by = "Year") %>%
                           mutate(catch_yr.total = coalesce(catch_yr.total, 0))
-colnames(pred.plot.dat)
 
 # pred.long.dat <- pred.plot.dat %>% pivot_longer(-c(Year, returning.fish, returning.ageclass)) # THIS DOESNT WORK
 
@@ -1837,11 +1814,9 @@ total.pred.tyee2 <- left_join(pred.return.dat, cr_yearly, by = "Year") %>%
                     mutate(esc.scaled = esc_count/6,
                            mean.tyee.catch = mean(Total.Catch))                  
 ## need cr_data 
-str(total.pred.tyee2)
-max(total.pred.tyee2$esc_count)
-mean(total.pred.tyee2$Total.Catch)
-
-1045/33
+#str(total.pred.tyee2)
+#max(total.pred.tyee2$esc_count)
+#mean(total.pred.tyee2$Total.Catch)
 
 plot66 <- ggplot(total.pred.tyee2, aes(x = Year)) +
                  geom_bar(aes(y = Total.Catch, alpha = 0.3, fill = 'Total Tyee Catch'), 
@@ -1922,7 +1897,7 @@ esc.plot.dat <- esc_data %>% filter(GAZETTED_NAME %in% c("ARTLISH RIVER","BEDWEL
 
 
 
-str(esc.plot.dat)
+#str(esc.plot.dat)
 plot.esc <- ggplot(esc.plot.dat, aes(x= Year, y = Count))+
             geom_line(aes(color = Stream), linewidth = 0.4) +
             labs(x = "", y = "# Spawning Chinook") +
@@ -2135,9 +2110,6 @@ can.catch.cn2 <- can.catch %>% filter(Species   == "Chinook",
       
 
 can.catch.sk <- can.catch %>% filter(Species   == "Sockeye")
-
-colnames
-summary(can.catch.cn2)
 
 
 CN.catch.plot
