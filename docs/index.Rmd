@@ -15,6 +15,10 @@ output:
   
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
 
 ```{r link to site, include = FALSE}
 "https://biggiefish.github.io/GitmeSomeTyee/"
@@ -37,8 +41,8 @@ There are far more technical ways of examining this data, but they aren't as muc
 Normally this is where I would put pictures of all the beautiful Tyee I have captured, but that hasn't happened yet. So far, these are the best things I have managed to get in my boat![](images/IMG_2815.v2.jpg)  
 
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+
+```{r prep working environment, echo = FALSE}
 ## Prepare Working Environment ----
 ## Clear workspace ##
 rm(list = ls())  
@@ -507,6 +511,8 @@ cr_yearly <- cr_data %>% filter(Year <= 2023) %>%
 
 ### 2.2 Cumulative catches per year.
 
+Let's take a look at how cumulative catches compare within decades. 
+
 ```{r cumulative catch plot, include = FALSE}
 cum.catch <- catch_data %>% group_by(Year) %>%
                             mutate(cumulative.count = cumsum(catch_binary),
@@ -519,7 +525,8 @@ cum.catch <- catch_data %>% group_by(Year) %>%
                                                       "2020"  = "twentytwenty")) %>%
                             ungroup() %>%
                             group_by(decade2, date) %>%
-                            mutate(decadal.mean = mean(cumulative.count))
+                            mutate(decadal.mean = mean(cumulative.count)) %>%
+                            arrange(desc(decade2))
 
 
 str(cum.catch)
@@ -554,7 +561,7 @@ cum.p2 <- cum.p1 %+% xs$'twentyten'
 cum.p3 <- cum.p1 %+% xs$'twentytwenty'
 
 ## Join all decades into single plot
-cum.catch.plot <- grid.arrange(cum.p1, cum.p2, cum.p3) +
+cum.catch.plot <- grid.arrange(cum.p3, cum.p2, cum.p1) +
                   scale_y_continuous(limits = ~ c(min(.x), ceiling(max(.x))),
                                      breaks = ~.x[10],
                                      expand = c(0, 0))
@@ -565,17 +572,18 @@ cum.catch.plot <- grid.arrange(cum.p1, cum.p2, cum.p3) +
 ```{r, echo=FALSE, fig.width = 7, fig.height = 20}
 
 ## plotly figure
-    suppressWarnings(grid.arrange(cum.p1, cum.p2, cum.p3))   
+    suppressWarnings(grid.arrange(cum.p3, cum.p2, cum.p1))   
 ```
 **`r fig_nums("grid.arrange(cum.p1, cum.p2, cum.p3)", "Cumulative tally of Tyee's captured by decade.")`**
 
+Lots of variability in total catches per year across the decade, but overall mean catches per decade are decreasing steadily from ~47 in 2000's, to ~27 in 2010's and 19 in 2020's. 
  
 
 ### 2.3 Effort and catches of undersize fish. 
 
 The Tyee club weighmaster has been recording the number of boats fishing morning, noon and evening tides, as well as the number of undersize fish captured throughout the season. This data has been recorded for ~8'ish years, however, data is only publicaly available from 2019 onwards.
 
-```{r, undersize fish, include = FALSE}
+```{r, undersize fish, include = FALSE, echo = FALSE}
 
 ## Prep undersize dataset
     undersize <- read_excel(catch_effort) %>%
@@ -629,7 +637,7 @@ knitr::kable(annual.prop.undersize, col.names = c("Year", "# Tyee", "# Undersize
 
 
 
-```{r}
+```{r plot undersize, include = FALSE, echo = FALSE}
 plot.undersize <- prop.undersize %>%
                   mutate(date.std =  case_when(year(Date) >= 0 ~ 'year<-'(Date, 2021))) %>%
                   rename(Tyee = binary_tyee,
@@ -680,7 +688,7 @@ plot.under.line <- ggplot(under.line) +
 
 The Tyee season runs from July 15 to September 15. I need to pick my battles with my wife and boss. Let's see which days I should be fighting for!? 
 
-#### 2.3.1 First Tyee of the Year
+#### 2.4.1 First Tyee of the Year
 ```{r, first.catch.prep, include = FALSE}
 colnames(catch_data)
 
@@ -722,7 +730,7 @@ Let's see when the first Tyee are most frequently captured each season. Alright,
  
  
 
-#### 2.3.2 When the most Tyee's are captured each year.
+#### 2.4.2 When the most Tyee's are captured each year.
 
 ```{r daily.decadal.tyee.prep, include = FALSE}
 colnames(catch_data)
@@ -1013,7 +1021,7 @@ Without additional data there is not much else to look at. So let's change gears
 
 ### 2.7 Who's who in the zoo?
 
-Let's have a look at who has been catching the most fish! 
+Let's have a look at who has been catching the most fish! First we will look at who has caught the most fish in the past 5 years, then we will have a look at all the data.
 
 ```{r catches by rower and angler, echo = FALSE}
 ## Prepare data showing who has caught what...
@@ -1023,9 +1031,12 @@ catchers <- raw_catch.data %>%
                    Date = as.Date(RawDate),
                    Decade = format(floor_date(Date, years(10)), '%Y'))
 
-                   
-                   
-                   
+## How many fish has Stutzel caught.
+stutz <- catchers %>% 
+         group_by(Decade) %>%
+         summarize(all.fish = sum(binary),
+                   stutz    = 13/all.fish)         
+  
 ## Create list of all people who are registered as an angler or rower
 people <- catchers %>% select("Rower","Angler") %>%
                        pivot_longer(Rower:Angler) %>%
@@ -1045,7 +1056,7 @@ rowers.per.decade <- catchers %>%
 ## Calculate number of fish each angler has caught
 Anglers.per.decade <- catchers %>%
                        group_by(Decade, Angler)  %>%
-                       summarize(Total.Fish = sum(binary)) %>%
+                       summarise(Total.Fish = sum(binary)) %>%
                        spread(Decade, Total.Fish) %>%
                        replace(is.na(.),0) %>%
                        mutate(Total.Fish = select(., 2:4) %>% rowSums(na.rm=TRUE)) %>%
@@ -1055,6 +1066,8 @@ Anglers.per.decade <- catchers %>%
 member.row.summary <- left_join(people, 
                                 rowers.per.decade, 
                                 by = c('Member' = 'Rower'))
+
+
 
 ## Merge list of member rowers with angler summary
 member.summary <- left_join(member.row.summary, 
@@ -1072,46 +1085,123 @@ member.summary <- left_join(member.row.summary,
                   mutate(Total.Tyee = rowSums(pick("Total_row","Total_angled"), na.rm = T),
                          rank = rank(-Total.Tyee, ties.method = "min")) %>%
                   arrange(desc(Total.Tyee), Member) %>%
-                  relocate(c(rank, Total.Tyee), .before = "2000_row")
+                  relocate(c(rank, Total.Tyee), .before = "2000_row") %>%
+                  filter(Member != 0)
 
 
 ## Reduce list to show only members who have caught more than 5 tyee
-member.summary.top <- member.summary %>% filter(Total.Tyee >= 5)
+member.summary.top <- member.summary %>% filter(Total.Tyee >= 5) 
 
 ## Reduce list to show only members who have caught more than 5 tyee
 member.summary.bottom <- member.summary %>% filter(Total.Tyee < 5)
+
+
+## Who has caught the most fish over the past 5 years. 
+recent.rowers <- catchers %>%
+                       filter(Year >= 2018) %>%
+                       group_by(Year, Rower) %>%
+                       summarise(Total.Fish = sum(binary)) %>%
+                       spread(Year, Total.Fish) %>%
+                       replace(is.na(.),0) %>%
+                       mutate(Total.Fish = select(., 2:7) %>% rowSums(na.rm=TRUE)) %>%
+                       arrange(desc(Total.Fish))
+
+recent.anglers <- catchers %>%
+                       filter(Year >= 2018) %>%
+                       group_by(Year, Angler) %>%
+                       summarise(Total.Fish = sum(binary)) %>%
+                       spread(Year, Total.Fish) %>%
+                       replace(is.na(.),0) %>%
+                       mutate(Total.Fish = select(., 2:7) %>% rowSums(na.rm=TRUE)) %>%
+                       arrange(desc(Total.Fish))
+
+
+recent.row.members <- left_join(people, 
+                                recent.rowers, 
+                                by = c('Member' = 'Rower'))
+
+
+recent.summary <- left_join(recent.row.members, 
+                            recent.anglers, 
+                            by = c('Member' = 'Angler')) %>%
+                  rename("2018_row" = "2018.x",
+                         "2019_row" = "2019.x",
+                         "2020_row" = "2020.x",
+                         "2021_row" = "2021.x",
+                         "2022_row" = "2022.x",
+                         "2023_row" = "2023.x",
+                         "Total_rowed" = "Total.Fish.x",
+                         "2018_angled" = "2018.y",
+                         "2019_angled" = "2019.y",
+                         "2020_angled" = "2020.y",
+                         "2021_angled" = "2021.y",
+                         "2022_angled" = "2022.y",
+                         "2023_angled" = "2023.y",
+                         "Total_angled" = "Total.Fish.y") %>%
+                  replace(is.na(.),0) %>%
+                  mutate(Total.Tyee = rowSums(pick("Total_rowed","Total_angled"), na.rm = T),
+                         rank = rank(-Total.Tyee, ties.method = "min")) %>%
+                  arrange(desc(Total.Tyee), Member) %>%
+                  relocate(c(rank, Total.Tyee), .before = "2018_row") %>%
+                  filter(Member != 0, Total.Tyee > 0)
                            
 ```
 
-```{r, table2 member.summary table, echo = FALSE}
+ 
+```{r, table2 recent.member.summary table, echo = FALSE}
+kable(recent.summary,
+      "html",
+      booktabs = T,
+      align = c("c"),
+      col.names = c("Member", "Rank","(Rowed + Angled)", "2018", "2019", "2020", "2021", "2022", "2023",  "Total", 
+                    "2018", "2019", "2020", "2021", "2022", "2023", "Total"),
+      caption = "Table 2. Number of fish captured and rowed by anglers and guides since 2018.") %>%
+  column_spec(c(3,10,17), bold = TRUE) %>%
+  kable_styling("striped", full_width =  FALSE,
+                position = "left", 
+                font_size = 12,
+                fixed_thead = TRUE) %>%
+  add_header_above(c(" " = 2,"Total Tyee" = 1, "Tyee Rowed" = 7, "Tyee Angled" = 7)) %>%
+  scroll_box(width = "800px", height = "400px")
+
+```
+
+ 
+```{r, table3 member.summary table, echo = FALSE}
 kable(member.summary.top,
       "html",
       booktabs = T,
       align = c("c"),
       col.names = c("Member", "Rank","(Rowed + Angled)", "2000's", "2010's", "2020's", "Total", "2000's", "2010's", "2020's", "Total"),
-      caption = "Table 2. Number of fish captured and rowed by anglers and guides who have caught more than 5 Tyee, per decade since 2002.") %>%
+      caption = "Table 3. Number of fish captured and rowed by anglers and guides who have caught more than 5 Tyee, per decade since 2002.") %>%
   column_spec(c(3,7,11), bold = TRUE) %>%
   kable_styling("striped", full_width =  FALSE,
                 position = "left", 
                 font_size = 12,
                 fixed_thead = TRUE) %>%
-  add_header_above(c(" " = 2,"Total Tyee" =1, "Tyee Rowed" = 4, "Tyee Angled" = 4))
+  add_header_above(c(" " = 2,"Total Tyee" = 1, "Tyee Rowed" = 4, "Tyee Angled" = 4)) %>%
+  scroll_box(width = "800px", height = "400px")
 
 ```
-
+ 
+ 
+Looks like I need to try to get on Randy Killoran or Mike Stutzel's boats. If you guys see this, I would love to get out for a tide! A total of `r stutz$all.fish[stutz$Decade == 2020]` fish have been registered since 2020, or which Mike Stutzel has captured `r stutz$stutz[stutz$Decade == 2020]*stutz$all.fish[stutz$Decade == 2020]` or `r label_percent()(stutz$stutz[stutz$Decade == 2020])`. In the current dataset, nobody has stats like that! Randy caught (rowed or angled) the most fish in the 2000's (n = 23 of 384 registered) and 2010's (n = 15 of 268 registered), but his fish represent `r label_percent()(23/384)` of the total catch in each decade. 
+ 
 ```{r, table3 member.summary table.bottom, echo = FALSE}
 kable(member.summary.bottom,
       "html",
       booktabs = T,
       align = c("c"),
       col.names = c("Member", "Rank","(Rowed + Angled)", "2000's", "2010's", "2020's", "Total", "2000's", "2010's", "2020's", "Total"),
-      caption = "Table 2. Number of fish captured and rowed by anglers and guides who have caught less than 5 Tyee, per decade since 2002.") %>%
-  column_spec(c(3,7,11), bold = TRUE) %>%
+      caption = "Table 4. Number of fish captured and rowed by anglers and guides who have caught less than 5 Tyee, per decade since    
+                 2002.") %>%
+  column_spec(c(1, 3,7,11), bold = TRUE) %>%
   kable_styling("striped", full_width =  FALSE,
                 position = "left", 
                 font_size = 12,
                 fixed_thead = TRUE) %>%
-  add_header_above(c(" " = 2,"Total Tyee" =1, "Tyee Rowed" = 4, "Tyee Angled" = 4))
+  add_header_above(c(" " = 2,"Total Tyee" =1, "Tyee Rowed" = 4, "Tyee Angled" = 4)) %>%
+  scroll_box(width = "800px", height = "400px")
 
 ```
 
@@ -1204,9 +1294,19 @@ age_table1 <- age_data %>% select(Waterbody, Age, n, bin_min, bin_max, meanFL, S
 
  
 ```{r table2, echo = FALSE}
-knitr::kable(age_table1, col.names = c("Waterbody", "Age", "n", "% of Total", "Size Range <br>(mm)", "Mean Lenght <br>(mm)"),
-             digits = 1,  align=rep('c', 5),
-             caption = "Table 2. Size at age of Chinook Salmon captured in Campbell River watershed from [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf)")
+
+
+kable(age_table1,
+      "html",
+      booktabs = T,
+      align = c("c"),
+      col.names = c("Waterbody", "Age", "n", "% of Total", "Size Range <br>(mm)", "Mean Lenght <br>(mm)"),
+      caption = "Table 4. Size at age of Chinook Salmon captured in Campbell River watershed from Sturham et al. 1999") %>%
+      kable_styling("striped", full_width =  FALSE,
+                position = "left", 
+                font_size = 12,
+                fixed_thead = TRUE) %>%
+    scroll_box(width = "600px", height = "400px")
 ```
 
   
@@ -1217,6 +1317,27 @@ Interesting side notes on recent studies examining trends in size of Chinook sal
   +   [Oke et al. 2020](https://www.nature.com/articles/s41467-020-17726-z) state that relative to salmon maturing before 1990, adult Chinook salmon now produce 16% fewer eggs, transport 28% less nutrients and have lost 21% of their fisheries value. 
   +   [Malick et al. 2023](https://onlinelibrary.wiley.com/doi/abs/10.1111/faf.12738) reviewed 25 years of  broodstock data from 43 hatcheries and found evidence of a significant reduction in length (and fecundity).
 
+```{r table2prep, include = FALSE}
+# Table of size by age class and sex.
+age_table2 <- age_data %>% select(Waterbody, Sex, Age, n, Perc.Total.by.Sex, Perc.Total.by.Stream, bin_range, meanFL, SE)
+
+
+kable(age_table2,
+      "html",
+      booktabs = T,
+      align = c("c"),
+      col.names = c("Waterbody", "Sex", "Age", "n", "% of Total <br/>by Sex","% of Total <br/>by Stream", "Size Range <br/>(mm)", "Mean 
+                    Length<br/>(mm)", "Standard <br/>Error"),
+      caption = "Table 5. Size at age of male and female Chinook Salmon captured in Campbell River watershed from Sturham et al. 1999",
+      digits = 2,
+      escape = FALSE) %>%
+  kable_styling("striped", full_width =  FALSE,
+                position = "left", 
+                font_size = 12,
+                fixed_thead = TRUE) %>%
+  scroll_box(width = "800px", height = "400px")
+
+```
    
 ### 3.5 Fecundity
 
@@ -2041,20 +2162,6 @@ Is return age genetic? Or environmental?
 
 ## 6. Supplemental Tables and Figures
 
-```{r table2prep, include = FALSE}
-# Table of size by age class and sex.
-age_table2 <- age_data %>% select(Waterbody, Sex, Age, n, Perc.Total.by.Sex, Perc.Total.by.Stream, bin_range, meanFL, SE)
-
-
-table2 <- knitr::kable(age_table2, col.names = c("Waterbody","Sex", "Age", "n", "% of Total <br>(by Sex)", "% of Total <br>(by Stream)", "Size Range <br>(mm)", "Mean Lenght <br>(mm)", "Std. Error"),
-             digits = 2,  align=rep('c', 5),
-             caption = "Table 1. Size at age of male and female Chinook Salmon captured in Campbell River watershed")
-```
-
-
-```{r, echo = FALSE}
-table2
-```
 
 
 
