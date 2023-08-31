@@ -55,6 +55,7 @@ getOption("rstudio.help.showDataPreview")
 list.of.packages <- c("tidyverse",
                       "tidyr",
                       "dplyr",
+                      "scales",
                       "lubridate",
                       "reshape2",
                       "ggplot2",
@@ -588,35 +589,63 @@ The Tyee club weighmaster has been recording the number of boats fishing morning
                        mutate(undersize = coalesce(undersize, 0),
                               Boats.AM = coalesce(Boats.AM, 0),
                               Boats.Noon = coalesce(Boats.Noon, 0),
-                              Boats.PM = coalesce(Boats.PM, 0))
+                              Boats.PM = coalesce(Boats.PM, 0),
+                              Boats.Total = Boats.AM + Boats.Noon + Boats.PM)
 
                        
     prop.undersize <- left_join(daily.undersize, raw_catch, by = "Date") %>%
-                            rename(binary_tyee = catch_binary) %>%
-                            mutate(binary_tyee = coalesce(binary_tyee, 0),
-                                   cum.tyee.catch    = cumsum(binary_tyee))
+                            rename(daily_tyee = catch_binary) %>%
+                            group_by(Date) %>%
+                            mutate(daily_tyee = coalesce(daily_tyee, 0),
+                                   daily_total = undersize + daily_tyee,
+                                   cum.tyee.catch    = cumsum(daily_tyee),
+                                   daily.prop.undersize = coalesce(undersize/daily_total, 0),
+                                   daily.prop.undersize = coalesce(daily.prop.undersize, 0),
+                                   daily.prop.tyee      = coalesce(daily_tyee/daily_total, 0),
+                                   prob.tyee         = coalesce(daily_tyee/Boats.Total, 0),
+                                   prob.undersize    = coalesce(undersize/Boats.Total, 0),
+                                   prob.capture      = coalesce(daily_total/Boats.Total,0))
 
     annual.prop.undersize <- prop.undersize %>% 
                              group_by(Year) %>%
-                             summarise(total.tyee      = sum(binary_tyee),
-                                       total.undersize = sum(undersize),
-                                       total.fish      = total.tyee + total.undersize,
-                                       prop.tyee       = 100*total.tyee/total.fish,
-                                       total.boats     = sum(Boats.AM, Boats.Noon, Boats.PM),
-                                       prop.boats      = 100*total.fish/total.boats) %>%
+                             summarise(total.tyee       = sum(daily_tyee),
+                                       total.undersize  = sum(undersize),
+                                       total.fish       = total.tyee + total.undersize,
+                                       total.boats      = sum(Boats.Total),
+                                       prob.tyee        = mean(prob.tyee),
+                                       prob.undersize   = mean(prob.undersize),
+                                       prob.capture     = mean(prob.capture),
+                                       prop.undersize   = total.undersize/total.fish,
+                                       prop.tyee        = total.tyee/total.fish) %>%
                               mutate(Year = as.character(Year))
+    
+    annual.prop.table <- annual.prop.undersize %>% 
+                            select("Year", "total.tyee", "total.undersize", "total.fish", 
+                                   "total.boats", "prob.tyee", "prob.undersize", "prob.capture") %>%
+                            mutate(prob.tyee = label_percent()(prob.tyee),
+                                   prob.undersize = label_percent()(prob.undersize),
+                                   prob.capture = label_percent()(prob.capture))
+    
+
 
 
 ```
 
 ```{r table1, echo = FALSE}
 
-knitr::kable(annual.prop.undersize, col.names = c("Year", "# Tyee", "# Undersize Fish", "Total Fish", 
-                                                  "% Tyee", "Total Boats", "% Boats Catching"),
-             format.args = list(big.mark = ","),
-             digits = 1,  
-             align=rep('c', 5),
-             caption = "Table 1. Summary of undersize catches and effort from 2019 to 2022")
+kable(annual.prop.table,
+      "html",
+      booktabs = T,
+      align = c("c"),
+      col.names = c("Year", "Tyee", "Undersize", "Total", "Total Boats", "Tyee", "Undersize", "Overall"),
+      caption = "Table 1. Summary of undersize catches and effort from 2019 to 2022.") %>%
+  #column_spec(c(1, 3,10,17), bold = TRUE) %>%
+  kable_styling("striped", full_width =  FALSE,
+                position = "left", 
+                font_size = 12,
+                fixed_thead = TRUE) %>%
+  add_header_above(c(" " = 1,"# Fish Captured" = 3, " " = 1, "Mean Capture Probability" = 3)) %>%
+  scroll_box(width = "1000px", height = "400px")
 ```
 
 
@@ -624,7 +653,7 @@ knitr::kable(annual.prop.undersize, col.names = c("Year", "# Tyee", "# Undersize
 ```{r plot undersize, include = FALSE, echo = FALSE}
 plot.undersize <- prop.undersize %>%
                   mutate(date.std =  case_when(year(Date) >= 0 ~ 'year<-'(Date, 2021))) %>%
-                  rename(Tyee = binary_tyee,
+                  rename(Tyee = daily_tyee,
                          Undersize = undersize)
 
 under.line <- plot.undersize %>% 
@@ -1393,8 +1422,39 @@ suppressWarnings(ggplotly(surv.plotly))
   
   +   Similar trends have been observed in other species. For example, [Price et al. 2021](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/1365-2664.13835) found a 69% reduction in wild Sockeye salmon returns (though overall returns are comparable to historic levels due to intensive enhancement); that population diversity has decreased by ~70%, and; that life history diversity has shifted with populations now migrating from freshwater earlier and remaining at sea for longer. 
 
+### 3.9 Catch and Release Mortality
 
-### 3.9 Hatchery Influence and Population Status
+When a fish is hooked, it undergoes stress and physiological responses which vary by species, sex and even fish size (see [Patterson et al. 2017]<https://www.fecpl.ca/wp-content/uploads/2017/05/CSAS-FRIM-RESDOC-A-2017_010-eng.pdf>) for a fantastic review of exactly what happens to a fish when it is being captured and how different factors such as species, sex, condition, water quality, predators etc. may influence mortality rates). While working with David Patterson, Steve Cooke and Scott Hinch's teams on this study I developed an analogy to try to convey what a fish experiences when it is captured. It's intentionally dramatic and usually goes something like this: 
+  
+  +   Consider a situation where you are walking down the street, you see a street vendor with a sign that says free donuts. The donuts look kinda funny but you are hungry and really like donuts, so you decide to take one. As you take your first bite you feel a shooting pain through your face and your mouth fills with blood. You have been hooked by the donut vendor and he is trying to pull you into a dark grungy alley. You obviously freak out, you yell and scream and try to sprint away as fast as you can. But you can't break free, you are able to pull some rope out of the vendors hands but he eventually pulls it back in. You fight and fight to get away. Your whole body starts to burn because of the lactic acid that has built up from trying to get away. Eventually it is too much. You are exhausted, your muscles stop working and you can no longer fight to get away. You collapse and all you can do is gasp for air. The vendor eagerly drags your exhausted body into the filthy alleyway where he is waiting. He grabs you by the throat and pushes your face into a bucket of water. He holds it there for 0.5 to 3 minutes while he takes pictures he thinks will impress his friends on Facebook. The vendor uses pliers to cut and pull the hook out of your face - being careful not to damage his precious hook or donut. He may decide to put you out of your misery by hitting you in the head with a baseball bat, or he may just take your head out of the bucket and leave you on the ground so he can go entice someone else with his fake donut. 
+  
+I personally don't think I would survive this scenario. If I did, survive I would likely not leave my couch for days while I recovered and would be terrified to eat anything. I would also likely eat fewer apple fritters from Steiner's. Fortunately, fish seem to be stronger and more resilient than me (and there aren't (m)any donut vendors luring perpetually hungry sugar addicts into dark alleys). 
+  
+Trying to get an estimate of capture and release mortality is extremely difficult and results from a single study are unlikely to be representative of all areas, fisheries, or seasons. [Cox-Rogers et al. 1999]<https://psf.ca/wp-content/uploads/2021/10/Download-PDF436-1.pdf>  completed a review of studies looking at mortality rates of marine captured and released Coho and Chinook in BC, WA, OR and CA. They report:
+
+  +   Mortality rates range from ~5% to over 30% and vary by gear type/angling method, fight duration, species, size and age, season and a myriad of other factors and recommend that the estimate of 15% mortality for captured and released Chinook applied across BC is not appropriate as it is not representative of all fisheries, does not include drop-off or long-term mortality. In addition, they state:
+  
+  +   The authors state that active fisheries (E.g. trolling) are likely to have lower mortality rates than passive fisheries (E.g., mooching).
+    
+  +   In BC, net pens were used to hold Chinook captured in  recreational troll fisheries (using hootchies and flashers on downriggers) for 72 hrs to assess post-release mortality (Gjernes 1990, in Cox-Rogers et al. 1999). They report an overall mortality rates of 9.9%, but showed that mortality was size dependent: with mean mortality of 8.2% for 45-62 cm fish and 13.6% for fish >62 cm. Hooking location appeared to be a major predictor of survival, with lower survival among fish that sustained injuries to major blood vessels associated with gills and heart. 
+    
+Take-away from this is that post-release mortality rates are likely higher for:
+
+  +   Larger fish than smaller fish; 
+  +   Fish that fight to a point of complete exhaustion (vs fish that are captured and released quickly); 
+  +   Fish that spend more time out of water prior to release;
+  +   Fish that are deep hooked or hooked in the gills.
+  +   Plus many other factors (season, water temperature, water quality, predator abundance, etc.)
+  
+When considered in the context of the Tyee pool, I would expect mortality to be higher than average given the size of fish and light tackle. However, even if mortality is 30%, that is still 70% less than mortality rates for fish that are kept - as Yari says, "100% of bonked fish are dead." If all Tyee captured to date in the pool had been released it is very likely that there would be more large fish returning to the pool each year. However, switching to a strictly catch and release fishery would require larger conversations about the ethics of harming an animal purely for sport.    
+
+```{r catch and release estimate, include = FALSE, echo = FALSE}
+#add estimate of number of chinook returning if all Tyee had been released? 
+```
+
+  
+  
+### 3.10 Hatchery Influence and Population Status
 
   +   [Ewart & Anderson 2013](http://www.crsalmonfoundation.ca/wp-content/uploads/2021/01/CRSF12BYchinreportfinal.pdf) report that 56% of the otoliths examined from 2012 spawners showed no signs of hatchery marking and are assumed wild. The remaining 44% are presumed to have originated from instream incubators (31%), seapen released smolts (4%) and Quinsam River released smolts (9%). 
   +   Assuming data presented by [Sturham et al. 1999](https://publications.gc.ca/collections/collection_2014/mpo-dfo/Fs97-4-2477-eng.pdf) is representative of the overall Quinsam population, we can assume hatchery origin fish make up `r format((76/(76+46))*100, digits = 2)`% of Age-3 fish, `r format((225/(225+114)*100),digits = 2)`% of Age-4 fish, `r format((73/(73+40)*100), digits = 2)` of Age-5 fish and 50% of Age-6 fish. 
@@ -1405,13 +1465,13 @@ Interestingly, hatchery releases have never been higher
   +   [Nelson et al. 2019](https://esajournals.onlinelibrary.wiley.com/doi/full/10.1002/ecs2.2922) present evidence that hatchery practices have altered size and time that juveniles are released and have reduced diversity of life history traits (e.g. size, age and timing of smoltification). The authors argue that current enhancement practices may release fish at a time and size that is preferred by predators (e.g. all fish being released at same time and size and are easy pickings for large aggregations of predators).
     
 
-### 3.10 Ocean Range
+### 3.11 Ocean Range
 
 +   Tagging studies have shown that maturing Chinook of BC origin are frequently located in Southeast Alaska, the west coast of Haida Gwaii and west and north coasts of Vancouver Island [Myers et al. 1996](https://npafc.org/wp-content/uploads/2017/08/192USA.pdf) (see screenshot of map from Myers et al. 1996, below). 
 
 ![screenshot of map](images/BC.CN.oceanranges.jpg). 
 
-### 3.11 Exploitation Rates
+### 3.12 Exploitation Rates
 
   +   Approximately 17% of fish released by the Quinsam hatchery are intercepted in Southeast Alaska commercial net (4.99%) and troll fisheries (11.95%) while an additional 1.84% that are intercepted in Alaskan sport fisheries [Rosenberger et al.2022](https://www.mccpacific.org/wp-content/uploads/2022/01/10Jan2022-SEAK-Catch-of-BC-Salmon-Technical-Report-Part-3-Chinook-Salmon-V1.pdf).
   +   A [court ruling in May 2023](https://www.documentcloud.org/documents/23795630-jones-order) almost shut down the 2023 SE Alaska troll fishery.  Unfortunately for those aspiring to join the Tyee Club (and Orcas), that decision was [reversed](https://www.documentcloud.org/documents/23855199-panel-decision) in late June, 2023 and the fishery occurred from July 1 to 12, 2023, not sure whether it will resume again at a later date. 
@@ -1803,6 +1863,7 @@ Reminder of key assumptions in the plot:
   +   `r 100*Tyee.Age5mf.prop`% of Age-5 fish will return as Tyee.
   +   `r 100*Tyee.Age6mf.prop`% of Age-6 fish will return as Tyee.
 
+`r knitr::knit_exit()`
 
 ```{r predicted.returns.plot.prep, include = FALSE}
 
@@ -2128,11 +2189,6 @@ Plot peak flows 4 to 5 years previous (e.g. impact of peak flows on recruitment)
 - Is Quinsam flow regulated? Ask Mary. 
 
 Is return age genetic? Or environmental? 
-
-
-
-
-## 6. Supplemental Tables and Figures
 
 
 
