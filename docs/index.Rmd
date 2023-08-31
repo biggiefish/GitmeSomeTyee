@@ -1863,7 +1863,7 @@ Reminder of key assumptions in the plot:
   +   `r 100*Tyee.Age5mf.prop`% of Age-5 fish will return as Tyee.
   +   `r 100*Tyee.Age6mf.prop`% of Age-6 fish will return as Tyee.
 
-`r knitr::knit_exit()`
+
 
 ```{r predicted.returns.plot.prep, include = FALSE}
 
@@ -1986,9 +1986,16 @@ Well, that figure sucks. But it shows how variable escapement is between years. 
 
 Relative to 2013, abundance in all plotted west coast streams was slightly reduced in 2014. There was a major crash in the Burnam River, but this is exaggerated by unusually high returns in 2013, 2015 and 2016. 
 
-### EVERYTHING FROM HERE ON DOWN IS JUST SCRIBBLES. Everything above is too. But this is even worse!
+  
+  
+`r knitr::knit_exit()`
 
-### 5.2 How Historic Conditions Influenced Captures
+
+
+
+
+
+
 ```{r scribbles, include = FALSE}
 ### MAYBE RERUN ESCAPEMENT PLOT USING ALL ESCPAEMENT DATA!? FACET BY AREA?
 
