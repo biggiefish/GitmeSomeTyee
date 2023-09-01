@@ -632,7 +632,6 @@ The Tyee club weighmaster has been recording the number of boats fishing morning
 ```
 
 ```{r table1, echo = FALSE}
-
 kable(annual.prop.table,
       "html",
       booktabs = T,
@@ -646,6 +645,8 @@ kable(annual.prop.table,
                 fixed_thead = TRUE) %>%
   add_header_above(c(" " = 1,"# Fish Captured" = 3, " " = 1, "Mean Capture Probability" = 3)) %>%
   scroll_box(width = "1000px", height = "400px")
+  
+  
 ```
 
 
