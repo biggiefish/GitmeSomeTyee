@@ -1044,12 +1044,14 @@ people <- catchers %>% select("Rower","Angler") %>%
                        rename(Member = value)
 
 ## Calculate number of fish each member has rowed
+
 rowers.per.decade <- catchers %>%
                        group_by(Decade, Rower)  %>%
                        summarize(Total.Fish = sum(binary)) %>%
                        spread(Decade, Total.Fish) %>%
-                       replace(is.na(.),0) %>%
+                       mutate_if(is.numeric, ~replace_na(.,0)) %>%
                        mutate(Total.Fish = select(., 2:4) %>% rowSums(na.rm=TRUE)) %>%
+                       #mutate_at(vars(2:5), as.numeric(.)) %>% 
                        arrange(desc(Total.Fish))
 
 ## Calculate number of fish each angler has caught
@@ -1057,9 +1059,10 @@ Anglers.per.decade <- catchers %>%
                        group_by(Decade, Angler)  %>%
                        summarise(Total.Fish = sum(binary)) %>%
                        spread(Decade, Total.Fish) %>%
-                       replace(is.na(.),0) %>%
-                       mutate(Total.Fish = select(., 2:4) %>% rowSums(na.rm=TRUE)) %>%
-                       arrange(desc(Total.Fish))
+                       mutate_if(is.numeric, ~replace_na(.,0)) %>%
+                       #replace(is.na(.),0) %>%
+                       mutate(Total.Fish = select(., 2:4) %>% rowSums(na.rm=TRUE))
+                       
 
 ## Merge list of members with rowers summary.
 member.row.summary <- left_join(people, 
@@ -1080,7 +1083,8 @@ member.summary <- left_join(member.row.summary,
                          "2010_angled" = "2010.y",
                          "2020_angled" = "2020.y",
                          "Total_angled" = "Total.Fish.y") %>%
-                  replace(is.na(.),0) %>%
+                  mutate_if(is.numeric, ~replace_na(.,0)) %>%
+                 #replace(is.na(.),0) %>%
                   mutate(Total.Tyee = rowSums(pick("Total_row","Total_angled"), na.rm = T),
                          rank = rank(-Total.Tyee, ties.method = "min")) %>%
                   arrange(desc(Total.Tyee), Member) %>%
@@ -1101,7 +1105,7 @@ recent.rowers <- catchers %>%
                        group_by(Year, Rower) %>%
                        summarise(Total.Fish = sum(binary)) %>%
                        spread(Year, Total.Fish) %>%
-                       replace(is.na(.),0) %>%
+                       mutate_if(is.numeric, ~replace_na(.,0)) %>%
                        mutate(Total.Fish = select(., 2:7) %>% rowSums(na.rm=TRUE)) %>%
                        arrange(desc(Total.Fish))
 
@@ -1110,7 +1114,7 @@ recent.anglers <- catchers %>%
                        group_by(Year, Angler) %>%
                        summarise(Total.Fish = sum(binary)) %>%
                        spread(Year, Total.Fish) %>%
-                       replace(is.na(.),0) %>%
+                       mutate_if(is.numeric, ~replace_na(.,0)) %>%
                        mutate(Total.Fish = select(., 2:7) %>% rowSums(na.rm=TRUE)) %>%
                        arrange(desc(Total.Fish))
 
@@ -1137,7 +1141,7 @@ recent.summary <- left_join(recent.row.members,
                          "2022_angled" = "2022.y",
                          "2023_angled" = "2023.y",
                          "Total_angled" = "Total.Fish.y") %>%
-                  replace(is.na(.),0) %>%
+                  mutate_if(is.numeric, ~replace_na(.,0)) %>%
                   mutate(Total.Tyee = rowSums(pick("Total_rowed","Total_angled"), na.rm = T),
                          rank = rank(-Total.Tyee, ties.method = "min")) %>%
                   arrange(desc(Total.Tyee), Member) %>%
@@ -1145,8 +1149,8 @@ recent.summary <- left_join(recent.row.members,
                   filter(Member != 0, Total.Tyee > 0)
                            
 ```
- .
- .
+   
+   
 ```{r, table2 recent.member.summary table, echo = FALSE}
 kable(recent.summary,
       "html",
