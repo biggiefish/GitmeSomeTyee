@@ -17,6 +17,7 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+xfun::pkg_load2(c("htmltools", "mime"))
 ```
 
 
@@ -89,6 +90,7 @@ list.of.packages <- c("tidyverse",
     library(plotly)
     library(htmlwidgets)
     library(formattable)
+    library(xfun)
     #library(devtools)
     #devtools::install_github("kupietz/kableExtra")
     library(kableExtra)
@@ -347,8 +349,25 @@ I have compiled the following datasets to use in this analysis. Whether they are
 10) [Known ocean ranges of Pacific Salmon and Steelhead stocks](https://npafc.org/wp-content/uploads/2017/08/192USA.pdf) 
 11) [Chinook survival data prepared by Welch et al. 2020](https://datadryad.org/stash/dataset/doi:10.5061/dryad.w6m905qmm)  
 
-
 This is certainly an interesting dataset, especially given it is the centenary of the Tyee Club,  but it has its limitations. For example, there is no accessible information on effort (# boats per day), biological data (e.g. size, girth and age of tyees) or numbers of non-tyee salmon captured in the pool. 
+
+
+```{r download data, echo = FALSE}
+
+xfun::embed_files(c("Data/TyeeCatchData.xlsx",
+                    "Data/TyeeCatch_Annual1933-2019.xlsx",          
+                    "Data/TyeeCatch_Undersize_and_Effort.xlsx",
+                    "Data/TyeeCatch_RecordBook.xlsx",
+                    "Data/TyeeClubHeads.pdf",
+                    "Data/TyeeClub_Age.Location.Data.xlsx" ,
+                    "Data/CR_Discharge_1949-2023.xlsx",
+                    "Data/Escapement_AllAreas.xlsx",
+                    "Data/NPAFC_CommercialCatch_21June2022.xlsx",
+                    "Data/herring.spawn.data.xlsx",
+                    "Data/HatcheryReleases.xlsx",
+                    "Data/Alaska.Commercial.Catch.Data.xlsx"))
+```
+
 
 ## 2. Let's look at the Tyee catch data!
 There are lots of ways to look at this data. I am most curious about three things:
