@@ -4,6 +4,7 @@ author: "Eric"
 date: "`r Sys.Date()`"
 theme: cerulean
 output: 
+  
   html_document:
     fig_caption: true
     code_folding: "show"
@@ -12,7 +13,7 @@ output:
   flexdashboard::flex_dashboard:
     orientation: columns
     vertical_layout: scroll  
-  
+runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
@@ -23,6 +24,8 @@ xfun::pkg_load2(c("htmltools", "mime"))
 
 ```{r link to site, include = FALSE}
 "https://biggiefish.github.io/GitmeSomeTyee/"
+
+# Active directory: C:\Users\evogt\R Analysis\EAV\GitHubMarkdown\R-Markdown-GitHub-Page\docs
 
 #  To do list:
 #  - estimate proportion of tyee's returning to campbell if they are in fact all Age-6 (section 5.2)
@@ -67,7 +70,8 @@ list.of.packages <- c("tidyverse",
                       "zoo",
                       "gridExtra",
                       "plotly",
-                      "htmlwidgets")
+                      "htmlwidgets",
+                      "shiny")
 
   ## Load any missing packags.
     new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
@@ -94,21 +98,30 @@ list.of.packages <- c("tidyverse",
     #library(devtools)
     #devtools::install_github("kupietz/kableExtra")
     library(kableExtra)
+    library(shiny)
 
-
+## Set functions ----
+    floor_decade    = function(value){ return(value - value %% 10) }
 
 ## Define Working Directory ---
-#setwd("C:/Users/evogt/R Analysis/EAV/Tyee/")
+#   setwd("C:/Users/evogt/R Analysis/EAV/Tyee/")
 
 ## Define Input Files
     #1. Tyee Catch Data
+    #1.1  Catch data (2002 to 2023) 
     catch.dat <- "Data/TyeeCatchData.xlsx"
     
+    #1.2 Catch records (1924 to 2013) - only new members and largest fish.   
     catch.records <- "Data/TyeeCatch_RecordBook.xlsx"
     
+    #1.3 Effort and Undersize Fish (2019-2022) 
     catch_effort <- "Data/TyeeCatch_Undersize_and_Effort.xlsx"
     
+    #1.4 Number of tyee captured per year
     catch_annualtyee <- "Data/TyeeCatch_Annual1933-2019.xlsx"
+    
+    #1.5 Catch roster (1924 to 2013) and catch data (2002 to 2023).
+    catch_roster    <- "Data/TyeeCatchData.w.Roster.xlsx"
     
     #2. Escapement Data
     esc.dat <- "Data/Area13Escapement.xlsx"
@@ -199,9 +212,13 @@ list.of.packages <- c("tidyverse",
         catch_dat <- left_join(catch_daily, catch_yearly, by = "Year")
         catch_dat <- left_join(catch_dat, catch_yrwk, by = c("Year", "Weeknum"))
         catch_data <- left_join(catch_dat, catch_wk, by = "Weeknum")
+        
+        
+## * 2.1 Catch Roster
+        raw_catch.roster  <- read_excel(catch_roster) # Date, time and size of capture
 
-                                 
- 
+
+
 ## * 3. Escapement Data ----
         ## Load Data      
         esc_data <- read_excel(esc.dat)
@@ -574,6 +591,7 @@ cum.catch.plot <- grid.arrange(cum.p3, cum.p2, cum.p1) +
                                      breaks = ~.x[10],
                                      expand = c(0, 0))
 
+gridplot <- grid.arrange(cum.p3, cum.p2, cum.p1)
 ```
 
 
@@ -582,7 +600,9 @@ cum.catch.plot <- grid.arrange(cum.p3, cum.p2, cum.p1) +
 ## plotly figure
     suppressWarnings(grid.arrange(cum.p3, cum.p2, cum.p1))   
 ```
-**`r fig_nums("grid.arrange(cum.p1, cum.p2, cum.p3)", "Cumulative tally of Tyee's captured by decade.")`**
+
+**`r fig_nums("gridplot", "Cumulative tally of Tyee's captured by decade.")`**
+
 
 Lots of variability in total catches per year across the decade, but overall mean catches per decade are decreasing steadily from ~47 in 2000's, to ~27 in 2010's and 19 in 2020's. 
  
@@ -808,6 +828,138 @@ This plot will become a lot more interesting once I can get my hands on some his
 OK, well now we know not to bother fishing until early August, that I should book the off the last 3 weeks of August and that odds are that 2023 is not going to set a new record for most Tyee's captured. But who knows. 
 
 ### 2.5 Does fish size vary within or between seasons?
+```{r shiny.decade.plot, include = FALSE, echo = FALSE}
+
+        ## Format Catch Data Dates ##
+        raw_catch_max <- raw_catch.roster %>% group_by(Year) %>%
+                                                 summarize(max.weight = max(Weight2)) %>%
+                                                 mutate(decade = as.factor(floor_decade(as.numeric(Year))),
+                                                        year   = as.factor(Year)) %>%
+                                                 select(decade, year, max.weight)
+
+            
+## Build Application  ----                    
+    # define the user interface object with the appearance of the app
+          ui <- fluidPage(
+            fluidRow(
+              column(4,
+                ## Create First Input Name
+                selectInput(
+                  inputId = "DecadeSelect1",
+                  label = "Select First Decade",
+                  choices = unique(raw_catch_max$decade),
+                  multiple = FALSE)
+                  ),
+              
+              ## Create second input name
+              column(4,
+              selectInput(
+                inputId = "DecadeSelect2",
+                label = "Select Second Decade",
+                choices = unique(raw_catch_max$decade),
+                multiple = FALSE)
+                ),
+          ), 
+           fluidRow(
+             column(9,  plotOutput(outputId = "densityplot.decade")),
+             column(3,
+                    verbatimTextOutput("ttest")),
+            
+
+          ),
+          
+
+           fluidRow(
+                     tabPanel("Data Summary",
+                     column(width = 4, tableOutput("x1summary")),
+                     column(width = 4, tableOutput("x2summary")))
+          ),
+          
+          fluidRow(
+                   tabPanel("Raw Data",
+                   column(width = 4, tableOutput("datatableX1")),
+                   column(width = 4, tableOutput("datatableX2"))))
+)
+    # define the server function with instructions to build the
+    # objects displayed in the ui
+            server <- function(input, output) {
+              observeEvent(eventExpr = {
+                input$DecadeSelect1
+                input$DecadeSelect2
+              },
+              handlerExpr = {
+                output$densityplot.decade <- renderPlot({
+
+                  filter(raw_catch_max,
+                         decade %in% c(input$DecadeSelect1, input$DecadeSelect2)) %>%
+         
+                    ggplot(aes(x = max.weight, colour = decade)) +
+                        geom_density() +
+                        labs(x = "Weight (lb)", y = "Density") +
+                        scale_x_continuous(limits = c(30, 70), breaks = seq(30, 70, 2)) +
+                        theme_bw() 
+                      
+                  
+                })
+
+                ## Define variables for T-test
+                   x1 <- filter(raw_catch_max, 
+                                decade %in% input$DecadeSelect1)  %>% 
+                         select(decade, year, max.weight)
+
+                          
+                              
+                              
+                    x2 <- filter(raw_catch_max, 
+                                 decade %in% input$DecadeSelect2) %>% 
+                          select(decade, year, max.weight)
+                    
+                
+                ## Print T-test
+                    output$ttest <- renderText({
+                      t_test(x1$max.weight, x2$max.weight)
+                      })
+                
+                ## Summary tables    
+                    ## Prep Data
+                    x1summary <- raw_catch_max %>% filter(decade %in% input$DecadeSelect1) %>%
+                                                   summarise(n    = length(max.weight), 
+                                                             Mean = mean(max.weight),
+                                                             SD = sd(max.weight)) 
+                    
+                    x2summary <- raw_catch_max %>% filter(decade %in% input$DecadeSelect2) %>%
+                                                   summarise(n    = length(max.weight), 
+                                                             Mean = mean(max.weight),
+                                                             SD = sd(max.weight)) 
+                    
+                ## Print
+                      # Summary Tables
+                    output$x1summary <- renderTable(x1summary)
+                    
+                    output$x2summary <- renderTable(x2summary)
+                                              
+                ## Print raw data
+                    output$datatableX1 <- renderTable(x1)
+                    
+                    output$datatableX2 <- renderTable(x2)
+              
+              })
+            }
+          
+# call shinyApp() which returns the Shiny app object
+        shinyApp(ui = ui, server = server)
+
+
+# shinyAppDir(
+#   system.file("C:/Users/evogt/R Analysis/EAV/GitHubMarkdown/R-Markdown-GitHub-Page/docs/Apps/decade.density/", package="shiny"),
+#   options = list(width = "100%", height = 700)
+#   )
+
+
+```
+
+
+
 ```{r fish.size.prep, include = FALSE}
 
 fish.size <- raw_catch.data %>% mutate(weight = as.numeric(Weight2),
