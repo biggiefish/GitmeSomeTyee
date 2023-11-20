@@ -100,8 +100,7 @@ list.of.packages <- c("tidyverse",
     library(kableExtra)
     library(shiny)
 
-## Set functions ----
-    floor_decade    = function(value){ return(value - value %% 10) }
+
 
 ## Define Working Directory ---
 #   setwd("C:/Users/evogt/R Analysis/EAV/Tyee/")
@@ -828,7 +827,10 @@ This plot will become a lot more interesting once I can get my hands on some his
 OK, well now we know not to bother fishing until early August, that I should book the off the last 3 weeks of August and that odds are that 2023 is not going to set a new record for most Tyee's captured. But who knows. 
 
 ### 2.5 Does fish size vary within or between seasons?
-```{r shiny.decade.plot, include = FALSE, echo = FALSE}
+```{r shiny.decade.plot, echo = FALSE}
+library(shiny)
+## Set functions ----
+    floor_decade    = function(value){ return(value - value %% 10) }
 
         ## Format Catch Data Dates ##
         raw_catch_max <- raw_catch.roster %>% group_by(Year) %>%
@@ -840,6 +842,7 @@ OK, well now we know not to bother fishing until early August, that I should boo
             
 ## Build Application  ----                    
     # define the user interface object with the appearance of the app
+shinyApp(        
           ui <- fluidPage(
             fluidRow(
               column(4,
@@ -878,11 +881,14 @@ OK, well now we know not to bother fishing until early August, that I should boo
           fluidRow(
                    tabPanel("Raw Data",
                    column(width = 4, tableOutput("datatableX1")),
-                   column(width = 4, tableOutput("datatableX2"))))
+                   column(width = 4, tableOutput("datatableX2")))
+                   ),
 )
+
     # define the server function with instructions to build the
     # objects displayed in the ui
-            server <- function(input, output) {
+
+server <- function(input, output) {
               observeEvent(eventExpr = {
                 input$DecadeSelect1
                 input$DecadeSelect2
@@ -906,8 +912,6 @@ OK, well now we know not to bother fishing until early August, that I should boo
                    x1 <- filter(raw_catch_max, 
                                 decade %in% input$DecadeSelect1)  %>% 
                          select(decade, year, max.weight)
-
-                          
                               
                               
                     x2 <- filter(raw_catch_max, 
@@ -944,11 +948,12 @@ OK, well now we know not to bother fishing until early August, that I should boo
                     output$datatableX2 <- renderTable(x2)
               
               })
-            }
-          
+            },
+)
+        
 # call shinyApp() which returns the Shiny app object
-        shinyApp(ui = ui, server = server)
-
+#shinyApp(ui = ui, server = server)
+#)
 
 # shinyAppDir(
 #   system.file("C:/Users/evogt/R Analysis/EAV/GitHubMarkdown/R-Markdown-GitHub-Page/docs/Apps/decade.density/", package="shiny"),
